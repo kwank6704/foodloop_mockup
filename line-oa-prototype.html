@@ -290,10 +290,31 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
   .grid2{grid-template-columns:1fr}
 }
 @media (max-width:600px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} }
-@media (max-width:440px){
-  .phone{height:730px;border-radius:40px;padding:8px}
-  .screen{border-radius:33px}
-  .seg button{padding:7px 10px;font-size:13px}
+.sm{display:none}
+/* phone portrait: the page itself becomes the LINE app, no fake device around it */
+@media (max-width:600px){
+  body{padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  .lg{display:none}.sm{display:inline}
+  .top{flex-wrap:nowrap;gap:10px;padding-block:10px 8px}
+  .brand{gap:8px;min-width:0}
+  .brand svg{width:30px;height:30px}
+  .brand b{font-size:16px;white-space:nowrap}
+  .brand small{display:none}
+  .top .seg{flex-wrap:nowrap;flex:none}
+  .top .seg button{padding:7px 10px;font-size:13px;gap:5px}
+  .center{gap:8px}
+  .center .seg,.shot .seg{display:grid;grid-template-columns:repeat(4,1fr);width:100%;border-radius:16px;padding:3px}
+  .center .seg button,.shot .seg button{flex-direction:column;gap:2px;padding:6px 2px;border-radius:13px;font-size:12px;justify-content:center}
+  .center .seg .badge,.shot .seg .badge{position:absolute;top:2px;right:calc(50% - 22px);min-width:16px;height:16px;line-height:16px;font-size:10px}
+  .phone{width:100%;height:calc(100svh - 128px);min-height:540px;max-height:860px;border-radius:22px;padding:0;background:none;box-shadow:0 12px 32px -14px rgba(10,30,20,.45),0 0 0 1px rgba(10,30,20,.08)}
+  .screen{border-radius:22px}
+  .island,.status{display:none}
+  .chathead{padding-top:10px}
+  .bar{padding-bottom:8px}
+  .rich.open{max-height:260px}
+  .fx{width:min(264px,calc(100vw - 120px))}
+  .bubble{max-width:min(232px,calc(100vw - 130px))}
+  .shot .cap{font-size:12.5px;text-align:center}
 }
 @media print{
   .top,.notice .np,.dhead .sp{display:none!important}
@@ -1247,11 +1268,11 @@ function App() {
   const view = v => d(x => ({ ...x, view: v }));
   return html`<${React.Fragment}>
     <header className="top"><div className="brand"><${Logo} s=${38} /><div><b>${BRAND.th} · ${BRAND.name}</b><small>ต้นแบบ LINE OA + LIFF + Dashboard · ข้อมูลตัวอย่าง</small></div></div>
-      <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /> หน้างาน (LINE)</button>
-        <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')}><${Icon} n="frame" s=${16} /> แคปจอใส่สไลด์</button>
-        <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')}><${Icon} n="chart" s=${16} /> Dashboard</button></div></header>
+      <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
+        <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')} aria-label="แคปจอใส่สไลด์"><${Icon} n="frame" s=${16} /><span className="lg">แคปจอใส่สไลด์</span></button>
+        <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')} aria-label="Dashboard"><${Icon} n="chart" s=${16} /><span className="lg">Dashboard</span></button></div></header>
     ${s.view === 'phone' ? html`<main className="stage"><${Guide} s=${s} /><div className="center">${roleTabs}<${Phone} s=${s} /></div><${Log} s=${s} /></main>`
-      : s.view === 'shot' ? html`<main className="shot">${roleTabs}<${Phone} s=${s} /><div className="cap">${SHOT_CAP[s.role]} · ใช้ Win+Shift+S ครอบเฉพาะตัวเครื่อง</div></main>`
+      : s.view === 'shot' ? html`<main className="shot">${roleTabs}<${Phone} s=${s} /><div className="cap">${SHOT_CAP[s.role]}<span className="lg"> · ใช้ Win+Shift+S ครอบเฉพาะตัวเครื่อง</span></div></main>`
       : html`<${Dashboard} s=${s} />`}
     ${s.toast && html`<div className="toast" role="status">${s.toast}</div>`}<//>`;
 }
