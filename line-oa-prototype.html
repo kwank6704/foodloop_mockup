@@ -293,7 +293,9 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
 .sm{display:none}
 /* phone portrait: the page itself becomes the LINE app, no fake device around it */
 @media (max-width:600px){
-  body{padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  body{padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));touch-action:manipulation;-webkit-text-size-adjust:100%}
+  /* iOS Safari zooms the page when a focused field is under 16px */
+  .field input,.assume input{font-size:16px}
   .lg{display:none}.sm{display:inline}
   .top{flex-wrap:nowrap;gap:10px;padding-block:10px 8px}
   .brand{gap:8px;min-width:0}
