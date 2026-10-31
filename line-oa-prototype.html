@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>อิ่มต่อ FoodLoop Prototype</title>
+<title>อิ่มต่อ LoopLard Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap">
@@ -13,25 +13,25 @@
   --bg:#edf2ee; --surface:#ffffff; --surface-2:#f5f8f5; --ink:#13241a; --muted:#5b6d61; --line:#d6e1d8;
   --accent:#06c755; --accent-ink:#047a35; --accent-soft:#dff5e7;
   --warn:#d98a00; --warn-soft:#fff2d9; --bad:#d8434a; --cold:#2a83c9; --cold-soft:#e3f0fb;
-  --s-sold:#1f9d55; --s-disc:#e0a00a; --s-proc:#7a68d4; --s-don:#d9607a; --s-bio:#2c8fb0;
+  --s-a:#1f9d55; --s-b:#e0a00a; --s-c:#9aa59e; --s-fert:#c07a2c; --s-gas:#b6532f;
   --f-display:"Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;
   --f-body:"IBM Plex Sans Thai","Noto Sans Thai",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,monospace;
   --f-line:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Thonburi","Noto Sans Thai",sans-serif;
   /* phone stays in LINE's own light look in both themes */
-  --l-green:#06c755; --l-chat:#8cabd9; --l-me:#8de055; --l-ink:#111; --l-sub:#8a8f98; --l-bar:#ffffff; --l-link:#42659a;
+  --l-green:#06c755; --l-chat:#8cabd9; --l-me:#8de055; --l-ink:#111; --l-bar:#ffffff; --l-link:#42659a;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#0c1410; --surface:#141f19; --surface-2:#1a271f; --ink:#e4eee7; --muted:#93a79a; --line:#26372d;
   --accent:#2bd36f; --accent-ink:#5be393; --accent-soft:#163a25; --warn:#f0b13a; --warn-soft:#3a2c10;
   --bad:#f0686e; --cold:#5aa9e6; --cold-soft:#12293b;
-  --s-sold:#3cc177; --s-disc:#eeb534; --s-proc:#9a8bec; --s-don:#ef8aa0; --s-bio:#4fb2d3; color-scheme:dark }}
+  --s-a:#3cc177; --s-b:#eeb534; --s-c:#6f7d74; --s-fert:#e09a4e; --s-gas:#e07c58; color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0c1410; --surface:#141f19; --surface-2:#1a271f; --ink:#e4eee7; --muted:#93a79a; --line:#26372d;
   --accent:#2bd36f; --accent-ink:#5be393; --accent-soft:#163a25; --warn:#f0b13a; --warn-soft:#3a2c10;
   --bad:#f0686e; --cold:#5aa9e6; --cold-soft:#12293b;
-  --s-sold:#3cc177; --s-disc:#eeb534; --s-proc:#9a8bec; --s-don:#ef8aa0; --s-bio:#4fb2d3; color-scheme:dark }
+  --s-a:#3cc177; --s-b:#eeb534; --s-c:#6f7d74; --s-fert:#e09a4e; --s-gas:#e07c58; color-scheme:dark }
 
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -40,6 +40,7 @@ body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.sm{display:none}
 
 /* top bar */
 .top{max-width:1240px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;padding-block:18px 14px}
@@ -71,13 +72,20 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 .steps p{margin:0;font-size:13.5px;line-height:1.5}
 .steps p em{font-style:normal;color:var(--muted);font-size:12.5px;display:block}
 .steps .try{margin-top:6px;border:0;background:none;padding:0;color:var(--accent-ink);font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:4px}
-.rule{display:flex;gap:10px;font-size:13px;color:var(--muted);padding:6px 0}
-.rule b{color:var(--ink);font-weight:600}
 details.panel summary{cursor:pointer;font:600 14px/1.3 var(--f-display);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
 details.panel summary::-webkit-details-marker{display:none}
 details.panel pre{font:11.5px/1.5 var(--f-mono);max-height:300px;overflow:auto;background:var(--surface-2);border:1px solid var(--line);padding:10px;border-radius:10px;margin:12px 0 0;white-space:pre;color:var(--ink)}
 
-.log{display:flex;flex-direction:column;max-height:640px;overflow:auto;margin:0 -6px;padding:0 6px}
+/* loop strip: the Loop lard diagram, lit by what just happened */
+.loop{display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px}
+.loop .n{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);font-size:13px;transition:background .4s,border-color .4s}
+.loop .n.on{background:var(--accent-soft);border-color:var(--accent)}
+.loop .n.off{opacity:.45}
+.loop .n b{font-weight:600}
+.loop .n small{display:block;color:var(--muted);font-size:11.5px}
+.loop .n .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;color:#fff}
+
+.log{display:flex;flex-direction:column;max-height:520px;overflow:auto;margin:0 -6px;padding:0 6px}
 .log .e{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:12.8px;animation:fadein .4s ease;min-width:0}
 .log .e>span{min-width:0;overflow-wrap:anywhere}
 .log .e:first-child{border-top:0}
@@ -85,7 +93,6 @@ details.panel pre{font:11.5px/1.5 var(--f-mono);max-height:300px;overflow:auto;b
 .log .tag{display:inline-block;font:600 10.5px/1 var(--f-mono);padding:3px 6px;border-radius:5px;margin-right:6px;vertical-align:1px;background:var(--surface-2);color:var(--muted)}
 .log .ok .tag{background:var(--accent-soft);color:var(--accent-ink)}
 .log .warn .tag{background:var(--warn-soft);color:var(--warn)}
-.log .cascade .tag{background:color-mix(in srgb,var(--s-proc) 18%,transparent);color:var(--s-proc)}
 .log .cold .tag{background:var(--cold-soft);color:var(--cold)}
 .log .api .tag{background:var(--ink);color:var(--bg)}
 .log .api{color:var(--muted)}
@@ -123,48 +130,35 @@ details.panel pre{font:11.5px/1.5 var(--f-mono);max-height:300px;overflow:auto;b
 .typing{display:flex;gap:4px;padding:13px 14px}
 .typing i{width:7px;height:7px;border-radius:50%;background:#a3abb6;animation:dot 1.1s infinite}
 .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
-.photo{width:190px;height:150px;border-radius:14px;overflow:hidden;position:relative;display:grid;place-items:center}
 
-/* Flex Message: bubble size "kilo/mega", link buttons default to #42659a */
+/* Flex Message */
 .fx{width:264px;background:#fff;border-radius:17px;overflow:hidden}
-.fx .hero{height:118px;position:relative;display:grid;place-items:center;overflow:hidden}
-.fx .hero .tag{position:absolute;left:10px;top:10px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.9);color:#1d3b27}
-.fx .hero .ringpos{position:absolute;right:10px;bottom:10px}
 .fx .bd{padding:14px 16px 8px;display:flex;flex-direction:column;gap:6px}
 .fx .ttl{font-weight:700;font-size:17px;line-height:1.25}
 .fx .kv{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:#666}
 .fx .kv b{color:#111;font-weight:600;text-align:right}
-.fx .price{font-size:24px;font-weight:700;color:#111;line-height:1.1}
-.fx .price s{font-size:14px;color:#aaa;font-weight:400;margin-left:6px}
+.fx .big{font-size:30px;font-weight:700;line-height:1.1;color:#111}
 .fx .note{font-size:12.5px;color:#666;background:#f5f6f7;border-radius:8px;padding:7px 9px;line-height:1.45}
-.fx .sep{height:1px;background:#eee;margin:2px 0}
+.fx .note.warn{background:#fff4e0;color:#8a5a00}
 .fx .ft{padding:4px 10px 10px;display:flex;flex-direction:column;gap:6px}
+.fx .hd{padding:12px 16px;color:#fff;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px}
+.fx .hero{height:104px;position:relative;display:grid;place-items:center;overflow:hidden}
 .fbtn{border:0;border-radius:8px;height:42px;padding:0 10px;font-weight:500;font-size:15px;background:transparent;color:var(--l-link);display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,transform .1s}
 .fbtn:hover{background:#f4f6f9}
 .fbtn:active{transform:scale(.98)}
 .fbtn.p{background:var(--l-green);color:#fff;font-weight:600}
-.fbtn.w{background:#ff9f0a;color:#fff;font-weight:600}
 .fbtn.c{background:#2a83c9;color:#fff;font-weight:600}
-.fbtn.s{background:#dcdfe5;color:#111}
+.fbtn.o{background:#c07a2c;color:#fff;font-weight:600}
 .fbtn[disabled]{opacity:.35;cursor:default}
 .fbtn.chosen{opacity:1;background:#eef9f2;color:#0a7d39;font-weight:600}
-.fx .hd{padding:12px 16px;color:#fff;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px}
-.steps4{display:flex;align-items:flex-start;margin:6px 0 2px}
-.steps4 .s{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:#9aa0a6;text-align:center;position:relative}
-.steps4 .s::before{content:"";position:absolute;top:8px;left:-50%;width:100%;height:2px;background:#e3e6ea;z-index:0}
-.steps4 .s:first-child::before{display:none}
-.steps4 .s.on::before,.steps4 .s.past::before{background:#06c755}
-.steps4 .dot{width:18px;height:18px;border-radius:50%;background:#e3e6ea;z-index:1;display:grid;place-items:center;color:#fff}
-.steps4 .past .dot{background:#06c755}
-.steps4 .on .dot{background:#fff;border:4px solid #06c755}
-.steps4 .on{color:#0a7d39;font-weight:700}
-.steps4 .past{color:#4b5563}
-.code{font:700 30px/1 var(--f-mono);letter-spacing:.12em;text-align:center;color:#111}
+.code{font:700 28px/1 var(--f-mono);letter-spacing:.12em;text-align:center;color:#111}
 .mini{display:flex;flex-direction:column}
 .mini .it{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #eef0f2;font-size:13px}
 .mini .it:first-child{border-top:0}
 .chip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;white-space:nowrap}
-.chip.g{background:#e3f8ea;color:#0a7d39}.chip.o{background:#fff1dc;color:#b86e00}.chip.v{background:#ece8ff;color:#5a46c4}.chip.b{background:#e3f0fb;color:#1f6fae}.chip.x{background:#f1f3f5;color:#6b7280}.chip.r{background:#ffe9ec;color:#c2334a}
+.gchip{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font:700 13px var(--f-mono);flex:none}
+.meter{height:8px;border-radius:4px;background:#eceff2;overflow:hidden}
+.meter i{display:block;height:100%;border-radius:4px}
 
 /* quick reply */
 .qr{flex:none;display:flex;gap:8px;overflow-x:auto;padding:6px 10px 8px;scrollbar-width:none}
@@ -172,7 +166,7 @@ details.panel pre{font:11.5px/1.5 var(--f-mono);max-height:300px;overflow:auto;b
 .qr button{flex:none;border:0;background:#fff;color:#111;border-radius:999px;padding:7px 14px;font:500 14px var(--f-line);display:flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,.2);animation:pop .3s ease}
 .qr button svg{color:#06c755}
 
-/* bottom bar: rich-menu chat bar / input bar */
+/* bottom bar */
 .bar{flex:none;background:#fff;display:flex;align-items:center;gap:2px;padding:6px 6px calc(6px + 16px);border-top:1px solid #e6e6e6}
 .bar .ib{border:0;background:none;width:36px;height:36px;padding:0;color:#2b2b2b;display:grid;place-items:center;border-radius:8px;flex:none}
 .bar .ib:hover{background:#f2f3f5}
@@ -204,30 +198,29 @@ details.panel pre{font:11.5px/1.5 var(--f-mono);max-height:300px;overflow:auto;b
 .sheet .sb::-webkit-scrollbar{width:0}
 .card{background:#fff;border-radius:14px;padding:14px}
 .lbl{font-size:12px;color:#6b7280;font-weight:500}
-.big{font-size:28px;font-weight:700;line-height:1.1}
-.stepper{display:flex;align-items:center;gap:12px}
-.stepper button{width:38px;height:38px;border-radius:12px;border:0;background:#eef0f3;font-size:20px;font-weight:600}
-.stepper .v{min-width:44px;text-align:center;font:700 22px var(--f-mono)}
+.bign{font-size:28px;font-weight:700;line-height:1.1}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:34px;height:34px;border-radius:10px;border:0;background:#eef0f3;font-size:19px;font-weight:600}
+.stepper .v{min-width:30px;text-align:center;font:700 19px var(--f-mono)}
 .cta{border:0;border-radius:12px;padding:14px;background:var(--l-green);color:#fff;font-weight:700;font-size:16px;width:100%}
 .cta[disabled]{background:#c5cad1}
-.cta.c{background:#2a83c9}
 .pills{display:flex;gap:6px;flex-wrap:wrap}
 .pills button{border:1.5px solid #dfe3e8;background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:#374151}
 .pills button[aria-pressed="true"]{border-color:#06c755;background:#eafaf0;color:#0a7d39}
-.gauge{height:10px;border-radius:5px;background:#e8ebef;overflow:hidden}
-.gauge i{display:block;height:100%;border-radius:5px;transition:width .6s ease}
+.ritem{display:grid;grid-template-columns:48px 1fr;gap:12px;background:#fff;border-radius:14px;padding:12px;align-items:start}
+.ritem .ri{width:48px;height:48px;border-radius:12px;display:grid;place-items:center}
+.ritem.off{opacity:.5}
+.ritem .row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
 .viewfinder{aspect-ratio:1/1;max-width:100%;border-radius:20px;background:radial-gradient(circle at 50% 40%,#3a4a3f,#141a16);position:relative;overflow:hidden;display:grid;place-items:center}
 .viewfinder .corner{position:absolute;width:40px;height:40px;border:4px solid #06c755}
 .viewfinder .scanline{position:absolute;left:12%;right:12%;height:3px;background:linear-gradient(90deg,transparent,#5cff9d,transparent);box-shadow:0 0 18px #5cff9d;animation:scan 1.6s ease-in-out infinite alternate}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.keypad button{border:0;background:#fff;border-radius:14px;padding:13px 0;font:600 21px var(--f-mono)}
+.keypad button{border:0;background:#fff;border-radius:14px;padding:12px 0;font:600 21px var(--f-mono)}
 .keypad button:active{background:#e6f9ee}
 .grade{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;border:2px solid #e5e8ec;background:#fff;border-radius:16px;padding:12px;text-align:left;width:100%}
 .grade[aria-pressed="true"]{border-color:#06c755;background:#f0fcf4}
 .grade .g{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font:700 26px var(--f-mono);color:#fff}
 .burst{animation:burst .7s cubic-bezier(.2,1.4,.4,1)}
-.listing{display:grid;grid-template-columns:62px 1fr auto;gap:12px;align-items:center;background:#fff;border-radius:14px;padding:10px}
-.listing .th{width:62px;height:62px;border-radius:12px;display:grid;place-items:center}
 
 /* ---------- dashboard ---------- */
 .dash{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
@@ -236,9 +229,16 @@ details.panel pre{font:11.5px/1.5 var(--f-mono);max-height:300px;overflow:auto;b
 .dhead p{margin:4px 0 0;color:var(--muted)}
 .dhead .sp{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .notice{font-size:13px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:9px 14px}
+.mods{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.mod{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:600}
+.mod[aria-pressed="false"]{opacity:.55}
+.mod .sw{width:34px;height:20px;border-radius:10px;background:var(--line);position:relative;transition:background .2s;flex:none}
+.mod .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.mod[aria-pressed="true"] .sw{background:var(--accent)}
+.mod[aria-pressed="true"] .sw::after{transform:translateX(14px)}
 .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:4px;min-width:0}
-.kpi .v{font:600 30px/1.1 var(--f-mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .v{font:600 28px/1.1 var(--f-mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .kpi .v small{font:500 14px var(--f-body);color:var(--muted);margin-left:4px;letter-spacing:0}
 .kpi .l{font-size:13px;font-weight:600}
 .kpi .d{font-size:12.5px;color:var(--muted)}
@@ -258,14 +258,12 @@ td{padding:10px;border-bottom:1px solid var(--line)}
 td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .bar-in{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;min-width:60px}
 .bar-in i{display:block;height:100%;background:var(--accent)}
-.assume{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
-.assume label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
-.assume input{width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:9px;padding:7px 10px;font:500 14px var(--f-mono)}
-.calc .it{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
-.calc .it:first-child{border-top:0}
-.calc .it span{flex:1;color:var(--muted)}
-.calc .tot{font-weight:600}
-.calc .tot span{color:var(--ink)}
+.co2 .r{display:grid;grid-template-columns:minmax(0,1fr) 150px 52px;gap:10px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid var(--line)}
+.co2 .r:first-child{border-top:0}
+.co2 .r.off{opacity:.4}
+.co2 .track{height:12px;position:relative}
+.co2 .track i{position:absolute;top:0;height:100%;border-radius:3px}
+.co2 .tot{font-weight:600}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:14px;z-index:99;animation:pop .3s ease}
 
@@ -275,7 +273,6 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
 @keyframes dot{0%,60%,100%{transform:none;opacity:.5}30%{transform:translateY(-4px);opacity:1}}
 @keyframes scan{from{top:18%}to{top:80%}}
 @keyframes burst{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 @media (max-width:1180px){
@@ -289,16 +286,15 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
   .stage .center{order:-1;min-width:0;width:100%}
   .grid2{grid-template-columns:1fr}
 }
-@media (max-width:600px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} }
-.sm{display:none}
 /* phone portrait: the page itself becomes the LINE app, no fake device around it */
 @media (max-width:600px){
   body{padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));touch-action:manipulation;-webkit-text-size-adjust:100%}
   /* iOS Safari zooms the page when a focused field is under 16px */
-  .field input,.assume input{font-size:16px}
+  .field input{font-size:16px}
   .lg{display:none}.sm{display:inline}
   .bar .ib{width:32px}
   .shot{width:100%}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .top{flex-wrap:nowrap;gap:10px;padding-block:10px 8px}
   .brand{gap:8px;min-width:0}
   .brand svg{width:30px;height:30px}
@@ -319,11 +315,9 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
   .fx{width:min(264px,calc(100vw - 120px))}
   .bubble{max-width:min(232px,calc(100vw - 130px))}
   .shot .cap{font-size:12.5px;text-align:center}
+  .co2 .r{grid-template-columns:minmax(0,1fr) 90px 46px}
 }
-@media print{
-  .top,.notice .np,.dhead .sp{display:none!important}
-  body{background:#fff}
-}
+@media print{ .top,.dhead .sp{display:none!important} body{background:#fff} }
 </style>
 </head>
 <body>
@@ -336,53 +330,40 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
 const { useState, useEffect, useRef, useReducer } = React;
 const html = htm.bind(React.createElement);
 
-/* ======================= config & helpers ======================= */
-// ชื่อแบรนด์ / ตลาด / ตัวละครในเดโม
-const BRAND = { name: 'FoodLoop', th: 'อิ่มต่อ', market: 'ตลาดสดเทศบาล', tagline: 'ส่งต่อวัตถุดิบส่วนเกิน ทันก่อนหมดเวลา' };
-const ME = { vendor: { name: 'ป้าแดง', stall: 'B12' }, porter: { name: 'พี่เอก' }, buyer: { name: 'ครัวป้าศรี' }, processor: { name: 'น้ำพริกแม่บุญ' } };
+/* ======================= config (ตัวเลขตัวอย่าง ปรับตามผล pilot) ======================= */
+const BRAND = { name: 'LoopLard', th: 'อิ่มต่อ', market: 'ตลาดสดเทศบาล', tagline: 'แยกเศษ แลกบริการ' };
+const ME = { vendor: { name: 'ป้าแดง', stall: 'B12' }, porter: { name: 'พี่เอก' }, farmer: { name: 'ลุงมี', farm: 'ไร่ลุงมี' }, resto: { name: 'ข้าวแกงป้าศรี', stall: 'F03' } };
 const MIN = 60000;
+// แต้มต่อ กก. ตามเกรด · เกรด C ไม่ได้แต้ม ทั้งแม่ค้าและคนขน
+const GRADES = {
+  A: { name: 'สะอาด คัดแล้ว', desc: 'เศษผักผลไม้ล้วน ไม่มีถุง เข้าบ่อหมักได้ทันที', pts: 10, porter: 1, col: '#06c755' },
+  B: { name: 'ปนเล็กน้อย', desc: 'มีก้านแข็ง เศษดิน ต้องคัดซ้ำก่อนเข้าเครื่องสับ', pts: 5, porter: 1, col: '#ff9f0a' },
+  C: { name: 'ปนขยะอื่น', desc: 'มีถุงพลาสติกหรือโฟม ไม่ได้แต้ม', pts: 0, porter: 0, col: '#8a8f98' },
+};
+const BIO = { yield: 0.1, gasShare: 0.5, kwhPerM3: 1.7, fertPerKg: 0.15, coldNeed: 34 }; // m³/กก, ส่วนแบ่งไปหุงต้ม, kWh/m³, กก.ปุ๋ย/กก.เศษ, kWh/วัน ห้องเย็น
+const PRICE = { fert: 5, fertChem: 20, gas: 8, lpgEq: 11.7, coldFee: 20 };   // บาท
+const CO2 = [ // kgCO₂e ต่อ kg เศษ จากสไลด์ Low Carbon
+  { k: 'base', t: 'ก่อน · ฝังกลบเศษอาหาร (EF อบก.)', v: 2.53 },
+  { k: 'leak', t: 'หลัง · บ่อหมัก/ทำปุ๋ย (มีเทน + CO₂ รั่ว)', v: 0.26 },
+  { k: 'gas', t: 'เครดิต · ไบโอแก๊สแทน LPG ร้านอาหาร', v: -0.28 },
+  { k: 'cold', t: 'เครดิต · ไฟไบโอแก๊สเดินห้องเย็น', v: -0.22 },
+  { k: 'fert', t: 'เครดิต · ปุ๋ยจากกากแทนปุ๋ยเคมี', v: -0.08 },
+];
+const co2PerKg = mods => 2.53 - 0.26 + (mods.gas ? 0.28 : 0) + (mods.cold ? 0.22 : 0) + (mods.fert ? 0.08 : 0);
+const MODS = { cold: { n: 'Module 1 · ห้องเย็นรวม', s: 'ไฟจากไบโอแก๊สเดินห้องเย็น', i: 'snow', c: '#2a83c9' }, fert: { n: 'Module 2 · ปุ๋ยจากกาก', s: 'แม่ค้าแลกด้วยแต้ม / เกษตรกรซื้อ', i: 'leaf', c: '#c07a2c' }, gas: { n: 'Module 3 · แก๊สหุงต้ม', s: 'ต่อแก๊สให้ร้านอาหารแทน LPG', i: 'flame', c: '#b6532f' } };
+// แต้มแลกเป็นเงินไม่ได้ ใช้แลกบริการของลูปเท่านั้น (ผ่านเว็บ/LIFF)
+const REDEEM = [
+  { id: 'free', mod: 'cold', t: 'ฝากของสดฟรี 1 ลัง/คืน', d: 'ห้องเย็นรวม 4°C · ปกติ ฿20/ลัง/คืน', cost: 50, unit: 'ลัง-คืน', i: 'snow', step: true },
+  { id: 'disc', mod: 'cold', t: 'ส่วนลดค่าฝากของสด 50%', d: 'ใช้กับการฝากครั้งถัดไป สูงสุด 5 ลัง', cost: 20, unit: 'ครั้ง', i: 'tag' },
+  { id: 'space', mod: 'cold', t: 'เพิ่มพื้นที่ห้องเย็น +1 ลัง', d: 'ขยายโควตาประจำแผงจาก 2 → 3 ลัง นาน 7 วัน', cost: 200, unit: 'สิทธิ์', i: 'box' },
+  { id: 'fert', mod: 'fert', t: 'ปุ๋ยจากกาก 5 กก.', d: 'รับที่จุดปุ๋ยหลังตลาด', cost: 25, unit: 'ถุง', i: 'leaf', step: true },
+  { id: 'gas', mod: 'gas', t: 'แก๊สหุงต้ม ถังเล็ก', d: 'เติมจากบ่อไบโอแก๊สของตลาด', cost: 150, unit: 'ถัง', i: 'flame' },
+];
+
 let _id = 0; const uid = () => 'm' + (++_id) + Math.random().toString(36).slice(2, 6);
 const code4 = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
 const hm = t => { const d = new Date(t); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
 const nf = (n, d = 0) => Number(n).toLocaleString('th-TH', { maximumFractionDigits: d, minimumFractionDigits: d });
-const fmtRem = ms => { if (ms <= 0) return 'หมดเวลา'; const m = Math.floor(ms / MIN), s = Math.floor(ms / 1000) % 60;
-  if (m >= 60) return `${Math.floor(m / 60)} ชม. ${m % 60} น.`; return `${m}:${String(s).padStart(2, '0')}`; };
-function shade(hex, amt) { const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255;
-  const t = amt < 0 ? 0 : 255, p = Math.abs(amt); r = Math.round(r + (t - r) * p); g = Math.round(g + (t - g) * p); b = Math.round(b + (t - b) * p);
-  return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1); }
-
-const PRODUCTS = [
-  { key: 'คะน้า', alias: ['คะน้า', 'คะนา'], kind: 'leaf', color: '#3f9a3a', base: 40, ttl: 180 },
-  { key: 'ผักบุ้ง', alias: ['ผักบุ้ง', 'บุ้ง'], kind: 'leaf', color: '#4fae3b', base: 30, ttl: 150 },
-  { key: 'ผักกาด', alias: ['ผักกาด', 'กวางตุ้ง'], kind: 'leaf', color: '#6cb84a', base: 35, ttl: 180 },
-  { key: 'กะหล่ำปลี', alias: ['กะหล่ำปลี', 'กะหล่ำ'], kind: 'cabbage', color: '#9fd27a', base: 25, ttl: 480 },
-  { key: 'มะเขือเทศ', alias: ['มะเขือเทศ'], kind: 'round', color: '#e2463a', base: 35, ttl: 360 },
-  { key: 'มะนาว', alias: ['มะนาว'], kind: 'round', color: '#8cc63f', base: 60, ttl: 720 },
-  { key: 'พริก', alias: ['พริก'], kind: 'chili', color: '#d93425', base: 80, ttl: 480 },
-  { key: 'กล้วยน้ำว้า', alias: ['กล้วยน้ำว้า', 'กล้วย'], kind: 'banana', color: '#f0c22e', base: 20, ttl: 600 },
-  { key: 'แตงกวา', alias: ['แตงกวา', 'แตง'], kind: 'long', color: '#5aa845', base: 25, ttl: 360 },
-];
-const UNIT = { 'กก': 'กก', 'กก.': 'กก', 'กิโล': 'กก', 'กิโลกรัม': 'กก', 'kg': 'กก', 'โล': 'กก', 'มัด': 'มัด', 'กำ': 'กำ', 'ถุง': 'ถุง', 'ลัง': 'ลัง', 'หวี': 'หวี' };
-const kgOf = l => l.unit === 'กก' ? l.qty : l.unit === 'หวี' ? l.qty * 1.2 : l.unit === 'ลัง' ? l.qty * 8 : l.qty * 0.5;
-
-// parser: "คะน้า 3 กก 40" -> ชื่อ / จำนวน / หน่วย / ราคา (ราคาเหมาทั้งกอง)
-function parseListing(text) {
-  const t = text.trim().replace(/\s+/g, ' ');
-  let prod = null, alias = '';
-  for (const p of PRODUCTS) for (const a of p.alias) if (t.includes(a) && a.length > alias.length) { prod = p; alias = a; }
-  let qty = null, unit = null, price = null; const loose = [];
-  const re = /(฿\s*)?(\d+(?:\.\d+)?)\s*(กิโลกรัม|กิโล|กก\.?|kg|โล|มัด|กำ|ถุง|ลัง|หวี|บาท)?/gi; let m;
-  while ((m = re.exec(t))) { const n = parseFloat(m[2]); const u = (m[3] || '').toLowerCase();
-    if (m[1] || u === 'บาท') price = n; else if (u) { qty = n; unit = UNIT[u] || u; } else loose.push(n); }
-  if (qty == null && loose.length) qty = loose.shift();
-  if (price == null && loose.length) price = loose.shift();
-  const name = prod ? prod.key : t.replace(/[฿\d].*$/, '').trim();
-  if (!name || qty == null || name.length > 24) return null;
-  const p = prod || { kind: 'leaf', color: '#58a64a', base: 30, ttl: 240 };
-  const suggested = price == null;
-  if (suggested) price = Math.max(10, Math.round(qty * p.base * 0.5 / 5) * 5);
-  return { name, kind: p.kind, color: p.color, qty, unit: unit || 'กก', price, suggested, ttl: p.ttl, base: p.base, known: !!prod };
-}
 
 /* ======================= SVG pieces ======================= */
 const ICONS = {
@@ -398,16 +379,17 @@ const ICONS = {
   star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z', pin: 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 7a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z',
   bag: 'M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2', bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0',
   check: 'M5 12.5l4.5 4.5L19 7', clock: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM12 7v5l3 2', close: 'M6 6l12 12M18 6L6 18',
-  chevD: 'M6 9l6 6 6-6', chevU: 'M6 15l6-6 6 6', chevR: 'M9 6l6 6-6 6', truck: 'M3 6h11v10H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.01M17 19a2 2 0 1 0 0-.01',
+  chevD: 'M6 9l6 6 6-6', chevR: 'M9 6l6 6-6 6', truck: 'M3 6h11v10H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.01M17 19a2 2 0 1 0 0-.01',
   bolt: 'M13 3L5 13h6l-1 8 8-10h-6z', phone: 'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z',
-  fast: 'M4 6l8 6-8 6zM12 6l8 6-8 6z', reset: 'M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4', doc: 'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5',
+  reset: 'M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4', doc: 'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5', moon: 'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z',
   store: 'M4 9l1.5-5h13L20 9M4 9h16v11H4zM4 9c0 2 3.5 2 4 0 .5 2 3.5 2 4 0 .5 2 3.5 2 4 0 .5 2 4 2 4 0M10 20v-5h4v5', chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
-  pot: 'M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 10h20M9 7c0-1.2 1-1.3 1-2.6M14 7c0-1.2 1-1.3 1-2.6', heart: 'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z',
-  dots: 'M6 12h.01M12 12h.01M18 12h.01', grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z', settings: 'M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6',
-  frame: 'M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4',
+  flame: 'M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5.5.8 1.3 1.6 1.8 2 2 .3-2.5-.5-4.5 1-6.5z', bin: 'M5 7h14l-1.2 13H6.2zM3 7h18M9 7V4h6v3M10 11v6M14 11v6',
+  scale: 'M5 20h14M12 4v16M5 8h14M5 8l-2.5 6a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0z', gauge: 'M4 17a8 8 0 1 1 16 0M12 17l4-5',
+  tag: 'M3 12V4h8l10 10-8 8zM7.5 7.5h.01', box: 'M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8', tank: 'M5 9h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM8 9V5h8v4M5 13h14',
+  dots: 'M6 12h.01M12 12h.01M18 12h.01', grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z', frame: 'M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4',
+  tractor: 'M4 16a3 3 0 1 0 6 0 3 3 0 0 0-6 0M15 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M7 13V7h6l2 6M13 13h7v4M5 7h2',
 };
 const Icon = ({ n, s = 22, w = 1.8, c = 'currentColor' }) => html`<svg viewBox="0 0 24 24" width=${s} height=${s} fill="none" stroke=${c} strokeWidth=${w} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d=${ICONS[n]} /></svg>`;
-
 const Logo = ({ s = 34 }) => html`<svg viewBox="0 0 40 40" width=${s} height=${s} aria-hidden="true">
   <rect width="40" height="40" rx="20" fill="#06c755"/>
   <path d="M12 27c-2-8 4-15 16-15 0 10-6 16-14 15z" fill="#fff"/>
@@ -415,25 +397,6 @@ const Logo = ({ s = 34 }) => html`<svg viewBox="0 0 40 40" width=${s} height=${s
   <path d="M29.5 22a9.5 9.5 0 0 1-16.5 6.4" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round"/>
   <path d="M11 25.5l2 3.2 3.4-1.6" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>`;
 const Verified = () => html`<svg viewBox="0 0 16 16" width="17" height="17" aria-label="บัญชีที่ได้รับการรับรอง"><path d="M8 1l5.5 2v4.3c0 3.6-2.4 6.3-5.5 7.7C4.9 13.6 2.5 10.9 2.5 7.3V3z" fill="#06c755"/><path d="M5.2 8.1l1.9 1.9 3.8-3.8" stroke="#fff" strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>`;
-
-function Veg({ kind = 'leaf', color = '#3f9a3a', size = 56 }) {
-  const c = color, d = shade(c, -0.28), l = shade(c, 0.45), stem = '#3b8a2e';
-  let g;
-  if (kind === 'leaf') g = html`${[-30, -10, 10, 30].map((r, i) => html`<g key=${i} transform=${`translate(32 58) rotate(${r})`}>
-      <path d="M0 0 C-12 -14 -11 -35 0 -47 C11 -35 12 -14 0 0Z" fill=${i % 2 ? c : shade(c, 0.14)} />
-      <path d="M0 -3 L0 -41" stroke=${l} strokeWidth="1.6" strokeLinecap="round" /></g>`)}
-      <rect x="26" y="51" width="12" height="8" rx="2.5" fill="#c48a4c" />`;
-  else if (kind === 'cabbage') g = html`<circle cx="32" cy="35" r="23" fill=${c} /><path d="M12 38C18 21 46 21 52 38" stroke=${d} strokeWidth="2.2" fill="none" />
-      <path d="M18 48C24 33 40 33 46 48" stroke=${d} strokeWidth="2.2" fill="none" /><path d="M32 13V57" stroke=${l} strokeWidth="2" /><ellipse cx="23" cy="24" rx="6" ry="3.5" fill="#fff" opacity=".3" />`;
-  else if (kind === 'round') g = html`<circle cx="32" cy="36" r="21" fill=${c} /><ellipse cx="24" cy="28" rx="6" ry="3.5" fill="#fff" opacity=".35" />
-      <path d="M32 17l3-6 1 6 6-2-4 5 5 3-7 0-4 4-4-4-7 0 5-3-4-5 6 2 1-6z" fill=${stem} />`;
-  else if (kind === 'chili') g = html`<path d="M20 18C24 33 32 47 52 54C40 58 20 50 14 24Z" fill=${c} /><path d="M20 19C17 12 21 7 26 9" stroke=${stem} strokeWidth="3.4" fill="none" strokeLinecap="round" />
-      <path d="M20 26C24 37 31 45 42 50" stroke="#fff" strokeWidth="2" opacity=".35" fill="none" strokeLinecap="round" />`;
-  else if (kind === 'banana') g = html`${[0, 7].map(o => html`<g key=${o} transform=${`translate(${o} ${-o})`}><path d="M12 22C14 45 34 56 54 46C50 44 47 44 45 42C31 46 21 37 19 22Z" fill=${o ? c : shade(c, -0.08)} />
-      <path d="M12 22L14 14" stroke="#7a5523" strokeWidth="4" strokeLinecap="round" /></g>`)}`;
-  else g = html`<g transform="rotate(-22 32 34)"><rect x="9" y="26" width="46" height="16" rx="8" fill=${c} />${[18, 27, 36, 45].map(x => html`<circle key=${x} cx=${x} cy=${31 + (x % 2) * 5} r="1.3" fill=${l} />`)}</g>`;
-  return html`<svg viewBox="0 0 64 64" width=${size} height=${size} aria-hidden="true">${g}</svg>`;
-}
 
 function QR({ seed = 'A', size = 104 }) {
   const n = 25; let h = 2166136261; for (const ch of seed) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
@@ -444,118 +407,68 @@ function QR({ seed = 'A', size = 104 }) {
   let d = ''; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const f = fin(x, y); if (f === 1 || (f === -1 && rnd() > 0.52)) d += `M${x} ${y}h1v1h-1z`; }
   return html`<svg viewBox=${`-2 -2 ${n + 4} ${n + 4}`} width=${size} height=${size} style=${{ background: '#fff', borderRadius: 8 }} aria-label="QR code"><path d=${d} fill="#111" /></svg>`;
 }
-
-function Ring({ rem, total, size = 48 }) {
-  const f = Math.max(0, Math.min(1, rem / total)), r = size / 2 - 4, C = 2 * Math.PI * r;
-  const col = rem <= 10 * MIN ? '#e5484d' : rem <= 30 * MIN ? '#ff9f0a' : '#06c755';
-  const m = Math.max(0, Math.ceil(rem / MIN));
-  return html`<svg width=${size} height=${size} viewBox=${`0 0 ${size} ${size}`} aria-label=${'เหลือ ' + m + ' นาที'}>
-    <circle cx=${size / 2} cy=${size / 2} r=${r + 3} fill="#fff" />
-    <circle cx=${size / 2} cy=${size / 2} r=${r} fill="none" stroke="#eceff2" strokeWidth="4" />
-    <circle cx=${size / 2} cy=${size / 2} r=${r} fill="none" stroke=${col} strokeWidth="4" strokeLinecap="round" strokeDasharray=${C} strokeDashoffset=${C * (1 - f)} transform=${`rotate(-90 ${size / 2} ${size / 2})`} style=${{ transition: 'stroke-dashoffset 1s linear' }} />
-    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" fontSize=${m >= 100 ? 11 : 13} fontWeight="700" fill="#111" fontFamily="IBM Plex Mono, monospace">${m >= 60 ? Math.floor(m / 60) + 'h' : m}</text></svg>`;
-}
-
-const Hero = ({ kind, color, h = 118, children }) => html`<div className="hero" style=${{ height: h, background: `radial-gradient(circle at 30% 20%, ${shade(color, 0.78)}, ${shade(color, 0.5)})` }}>
-  <div style=${{ position: 'absolute', inset: 0, background: `repeating-linear-gradient(135deg, transparent 0 14px, ${shade(color, 0.7)} 14px 15px)`, opacity: .5 }}></div>
-  <div style=${{ position: 'relative', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,.15))' }}><${Veg} kind=${kind} color=${color} size=${h * 0.72} /></div>${children}</div>`;
-
-// Auto-Cascade ตามสไลด์: ผู้ซื้อ → แปรรูป → บริจาค → ไบโอแก๊ส/ปุ๋ย
-const STAGES = ['ผู้ซื้อ', 'แปรรูป', 'บริจาค', 'ไบโอแก๊ส'];
-const STAGE_I = { sell: 0, discount: 0, process: 1, donate: 2, organic: 3 };
-const STAGE_WIN = { process: 120 * MIN, donate: 60 * MIN };
-const winOf = l => STAGE_WIN[l.stage] || l.ttl;
-const Steps4 = ({ i }) => html`<div className="steps4">${STAGES.map((t, k) => html`<div key=${k} className=${'s ' + (k < i ? 'past' : k === i ? 'on' : '')}>
-  <span className="dot">${k < i ? html`<${Icon} n="check" s=${11} w=${3} />` : ''}</span>${t}</div>`)}</div>`;
+// ถังเขียวประจำร้าน พร้อมสติกเกอร์ QR
+const Bin = ({ stall = 'B12', s = 120, fill = 0.7 }) => html`<svg viewBox="0 0 120 130" width=${s} height=${s * 130 / 120} aria-label=${'ถังเขียว ' + stall}>
+  <rect x="14" y="14" width="92" height="14" rx="5" fill="#0a9a47" />
+  <path d="M20 30h80l-7 92a6 6 0 0 1-6 5H33a6 6 0 0 1-6-5z" fill="#13b85a" />
+  <path d="M24 ${30 + (1 - fill) * 90}h72l-${3 + fill * 4} ${fill * 90}H${27 + fill * 4}z" fill="#0d9549" opacity=".35" />
+  <rect x="38" y="52" width="44" height="44" rx="6" fill="#fff" />
+  <g transform="translate(41 55) scale(1.52)"><${QRPath} seed=${stall} /></g>
+  <text x="60" y="113" textAnchor="middle" fontSize="11" fontWeight="700" fill="#fff" fontFamily="IBM Plex Mono, monospace">${stall}</text></svg>`;
+const QRPath = ({ seed }) => { const n = 25; let h = 99991; for (const ch of seed) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  const rnd = () => { h ^= h << 13; h >>>= 0; h ^= h >> 17; h ^= h << 5; h >>>= 0; return h / 4294967296; };
+  let d = ''; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const c = (x < 7 && y < 7) || (x > 17 && y < 7) || (x < 7 && y > 17);
+    const ring = c && ((x % 18 === 0 || x % 18 === 6 || y % 18 === 0 || y % 18 === 6) || ((x % 18) >= 2 && (x % 18) <= 4 && (y % 18) >= 2 && (y % 18) <= 4));
+    if (c ? ring : rnd() > .5) d += `M${x} ${y}h1v1h-1z`; } return html`<path d=${d} fill="#111" />`; };
 
 /* ======================= state ======================= */
 function initState() {
   const d0 = new Date(); d0.setHours(15, 40, 0, 0); const t = d0.getTime(); const offset = t - Date.now();
-  const L = [
-    { id: 'L1', name: 'ผักบุ้ง', kind: 'leaf', color: '#4fae3b', qty: 2, unit: 'กก', price: 30, base: 30, created: t - 108 * MIN, ttl: 150 * MIN, deadline: t + 42 * MIN, stage: 'sell', status: 'active', shop: 'ป้าแดง', stall: 'B12', mine: true, pushed: false },
-    { id: 'L2', name: 'มะเขือเทศ', kind: 'round', color: '#e2463a', qty: 4, unit: 'กก', price: 50, base: 50, created: t - 70 * MIN, ttl: 180 * MIN, deadline: t + 110 * MIN, stage: 'sell', status: 'active', shop: 'ลุงชัย', stall: 'C03', mine: false, pushed: false },
-    { id: 'L3', name: 'กล้วยน้ำว้า', kind: 'banana', color: '#f0c22e', qty: 3, unit: 'หวี', price: 45, base: 45, created: t - 40 * MIN, ttl: 300 * MIN, deadline: t + 260 * MIN, stage: 'sell', status: 'active', shop: 'เจ๊หมวย', stall: 'A07', mine: false, pushed: false },
-    { id: 'L5', name: 'แตงกวา', kind: 'long', color: '#5aa845', qty: 5, unit: 'กก', price: 15, base: 50, created: t - 400 * MIN, ttl: 360 * MIN, deadline: t + 72 * MIN, stage: 'process', status: 'active', shop: 'พี่นก', stall: 'B04', mine: false, pushed: true },
-    { id: 'L4', name: 'คะน้า', kind: 'leaf', color: '#3f9a3a', qty: 3, unit: 'กก', price: 40, base: 40, created: t - 200 * MIN, ttl: 180 * MIN, deadline: t - 20 * MIN, stage: 'sell', status: 'claimed', shop: 'ป้าแดง', stall: 'B12', mine: true, pushed: true, code: 'K7Q2', buyer: 'ร้านส้มตำเจ๊นี' },
-  ];
   const at = mins => t - mins * MIN;
   return {
-    offset, role: 'vendor', view: 'phone', sheet: null, toast: null, draftStart: null,
+    offset, role: 'vendor', view: 'phone', sheet: null, toast: null, misses: 0, flash: null,
+    modules: { cold: true, fert: true, gas: true },
+    points: { vendor: 420, porter: 186 },
+    pointLog: [{ t: at(320), text: 'ส่งเศษเกรด A 6.5 กก.', v: 65 }, { t: at(1500), text: 'แลกฝากของสดฟรี 1 ลัง', v: -50 }, { t: at(1700), text: 'ส่งเศษเกรด B 4 กก.', v: 20 }],
+    jobs: [{ id: 'J1', shop: 'ลุงชัย', stall: 'C03', est: 9, status: 'open', note: 'ถังเขียวเต็ม · แจ้งเมื่อ 15:28' }],
+    pickups: [{ t: at(320), shop: 'ป้าแดง', stall: 'B12', kg: 6.5, grade: 'A', pts: 65 }, { t: at(200), shop: 'เจ๊หมวย', stall: 'A07', kg: 8, grade: 'A', pts: 80 }, { t: at(150), shop: 'พี่นก', stall: 'B04', kg: 5, grade: 'B', pts: 25 }],
+    cold: { cap: 24, used: 15, temp: 4, quota: 2 }, fertStock: 340, orders: [], vouchers: [],
+    gasToday: 2.1,
+    demo: { kg: 0, grade: { A: 0, B: 0, C: 0 }, fertSold: 0, gasSold: 0, revenue: 0, ptsIssued: 0, ptsRedeemed: 0 },
     chats: {
       vendor: [
         { id: uid(), from: 'date', text: 'วันนี้' },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'vendor' }, t: at(240) },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'live', lid: 'L1' }, t: at(108) },
-        { id: uid(), from: 'bot', kind: 'text', t: at(108), text: `ลงขายผักบุ้ง 2 กก แล้วค่ะ ผู้ซื้อในตลาดเห็นแล้ว\nจะเตือนป้าก่อนหมดเวลา 30 นาทีนะคะ`, quick: [{ label: 'คะน้า 3 กก 40', act: 'say' }, { label: 'ส่งรูปผัก', act: 'photo-open', icon: 'camera' }, { label: 'ฝากห้องเย็น', act: 'open-cold', icon: 'snow' }] },
-      ],
-      buyer: [
-        { id: uid(), from: 'date', text: 'วันนี้' },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'buyer' }, t: at(180) },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'newitem', lid: 'L2', reason: 'new' }, t: at(70) },
-      ],
-      processor: [
-        { id: uid(), from: 'date', text: 'วันนี้' },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'processor' }, t: at(300) },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'newitem', lid: 'L5', reason: 'process' }, t: at(48) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'vendor' }, t: at(400) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'pickup', kg: 6.5, grade: 'A', pts: 65 }, t: at(320) },
+        { id: uid(), from: 'bot', kind: 'text', t: at(320), text: 'ถังของป้ารับไปแล้วค่ะ ถ้าถังเต็มอีก กดเรียกคนขนได้เลยนะคะ', quick: [{ label: 'ถังเต็ม เรียกคนขน', act: 'call-porter', icon: 'truck' }, { label: 'แต้มของฉัน', act: 'points', icon: 'star' }, { label: 'แลกแต้ม', act: 'redeem-open', icon: 'tag' }] },
       ],
       porter: [
         { id: uid(), from: 'date', text: 'วันนี้' },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'porter' }, t: at(300) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'porter' }, t: at(420) },
         { id: uid(), from: 'bot', kind: 'flex', card: { type: 'job', jid: 'J1' }, t: at(12) },
       ],
+      farmer: [
+        { id: uid(), from: 'date', text: 'วันนี้' },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'farmer' }, t: at(600) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'price' }, t: at(300) },
+      ],
+      resto: [
+        { id: uid(), from: 'date', text: 'วันนี้' },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'resto' }, t: at(600) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'meter' }, t: at(60) },
+      ],
     },
-    unread: { vendor: 0, buyer: 1, processor: 1, porter: 1 }, typing: { vendor: false, buyer: false, processor: false, porter: false },
-    listings: L,
-    jobs: [{ id: 'J1', shop: 'ลุงชัย', stall: 'C03', est: 8, status: 'open', note: 'เศษผักใบ 1 ถังเขียว' }],
-    credits: 3, creditLog: [{ t: at(1440), text: 'คัดเศษเกรด A 18 กก', v: +1.8 }, { t: at(2900), text: 'จองห้องเย็น 2 ลัง × 1 คืน', v: -2 }],
-    cold: { cap: 24, used: 17, temp: 4 }, bookings: [],
-    points: 126, pickups: [], claims: [], alerts: [], misses: 0,
-    demo: { sold: 0, disc: 0, proc: 0, don: 0, bio: 0, grade: { A: 0, B: 0, C: 0 }, listTimes: [], listed: 0, onTime: 0, closed: 0, creditUsed: 0 },
-    log: [{ id: uid(), t: at(1), text: 'เริ่มเดโม: ตลาดเปิด แผงที่ใช้ระบบ 34 ร้าน', tone: '' }],
+    unread: { vendor: 0, porter: 1, farmer: 1, resto: 1 }, typing: { vendor: false, porter: false, farmer: false, resto: false },
+    log: [{ id: uid(), t: at(1), text: 'เริ่มเดโม: โซน B ใช้ระบบ 34 แผง · บ่อหมักเดินปกติ', tone: '' }],
   };
 }
 const simNow = s => Date.now() + s.offset;
 const addMsg = (s, role, m) => { const msg = { id: uid(), t: simNow(s), ...m }; const unread = m.from !== 'me' && role !== s.role ? { ...s.unread, [role]: s.unread[role] + 1 } : s.unread;
   return { ...s, chats: { ...s.chats, [role]: [...s.chats[role], msg] }, unread }; };
 const patchMsg = (s, role, id, f) => ({ ...s, chats: { ...s.chats, [role]: s.chats[role].map(m => m.id === id ? f(m) : m) } });
-const patchL = (s, id, f) => ({ ...s, listings: s.listings.map(l => l.id === id ? { ...l, ...f(l) } : l) });
 const addLog = (s, text, tone = '') => ({ ...s, log: [{ id: uid(), t: simNow(s), text, tone }, ...s.log].slice(0, 60) });
 const setTyping = (s, role, v) => ({ ...s, typing: { ...s.typing, [role]: v } });
-const routeKey = st => ({ sell: 'sold', discount: 'disc', process: 'proc', donate: 'don' }[st] || 'sold');
-const procPrice = l => Math.max(5, Math.round(l.base * 0.35 / 5) * 5);
-
-function tick(s) {
-  const now = simNow(s); let x = s;
-  for (const l of s.listings) {
-    if (l.status !== 'active') continue;
-    const rem = l.deadline - now;
-    if (l.stage === 'sell' && !l.pushed && rem <= 30 * MIN && rem > 0) {
-      x = patchL(x, l.id, () => ({ pushed: true }));
-      if (l.mine) x = addMsg(x, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'ttl', lid: l.id } });
-      x = addLog(x, `${l.name} (${l.stall}) เหลือ 30 นาที → push ถามแม่ค้าว่าจะลดราคาไหม`, 'warn');
-    } else if (rem <= 0) {
-      if (l.stage === 'sell' || l.stage === 'discount') {
-        const np = procPrice(l);
-        x = patchL(x, l.id, () => ({ stage: 'process', deadline: now + STAGE_WIN.process, price: np }));
-        if (l.mine) x = addMsg(x, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'cascade', lid: l.id, stage: 1 } });
-        x = addMsg(x, 'processor', { from: 'bot', kind: 'flex', card: { type: 'newitem', lid: l.id, reason: 'process' } });
-        x = addLog(x, `Auto-Cascade: ${l.name} (${l.stall}) ขายไม่ทัน → push ร้านแปรรูป ฿${np}`, 'cascade');
-      } else if (l.stage === 'process') {
-        x = patchL(x, l.id, () => ({ stage: 'donate', deadline: now + STAGE_WIN.donate, price: 0 }));
-        if (l.mine) x = addMsg(x, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'cascade', lid: l.id, stage: 2 } });
-        x = addLog(x, `Auto-Cascade: ${l.name} (${l.stall}) ไม่มีร้านแปรรูปรับ → แจ้งโรงทาน/มูลนิธิรับฟรี`, 'cascade');
-      } else if (l.stage === 'donate') {
-        const job = { id: uid(), shop: l.shop, stall: l.stall, est: Math.max(1, Math.round(kgOf(l))), status: 'open', note: `${l.name} ที่ไม่มีคนรับ` };
-        x = patchL(x, l.id, () => ({ stage: 'organic', status: 'organic' }));
-        x = { ...x, jobs: [job, ...x.jobs], demo: { ...x.demo, closed: x.demo.closed + 1 } };
-        if (l.mine) x = addMsg(x, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'cascade', lid: l.id, stage: 3 } });
-        x = addMsg(x, 'porter', { from: 'bot', kind: 'flex', card: { type: 'job', jid: job.id } });
-        x = addLog(x, `Auto-Cascade: ${l.name} → เศษอินทรีย์ แจ้งคนขนไปรับที่ ${l.stall}`, 'cascade');
-      }
-    }
-  }
-  return x === s ? { ...s } : x;
-}
+const flash = (s, step) => ({ ...s, flash: { step, at: Date.now() } });
 
 /* ======================= actions ======================= */
 let D = null, GET = null;
@@ -569,196 +482,157 @@ const hook = text => D(s => addLog(s, text, 'api'));
 const toast = text => { D(s => ({ ...s, toast: text })); setTimeout(() => D(s => s.toast === text ? { ...s, toast: null } : s), 2600); };
 const openSheet = (role, type, data) => D(s => ({ ...s, sheet: { role, type, data } }));
 const closeSheet = () => D(s => ({ ...s, sheet: null }));
-const markStart = () => D(s => s.draftStart ? s : { ...s, draftStart: Date.now() });
+const setRole = r => D(x => ({ ...x, role: r, view: x.view === 'dash' ? 'phone' : x.view, unread: { ...x.unread, [r]: 0 } }));
+const modOff = (s, m) => !s.modules[m];
 
-const HOWTO = `ลงของได้ 2 แบบค่ะ\n1) พิมพ์บรรทัดเดียว เช่น "คะน้า 3 กก 40"\n2) กดกล้องแล้วส่งรูปผัก บอทเดาชื่อกับน้ำหนักให้\n\nของที่ขายไม่ทันจะถูกส่งต่ออัตโนมัติ\nผู้ซื้อ → แปรรูป → บริจาค → ไบโอแก๊ส\nเศษที่คัดดีได้เครดิตฝากห้องเย็นฟรี`;
-const QV = [{ label: 'คะน้า 3 กก 40', act: 'say' }, { label: 'ส่งรูปผัก', act: 'photo-open', icon: 'camera' }, { label: 'คุยกับเจ้าหน้าที่', act: 'contact', icon: 'headset' }];
+const QV = [{ label: 'ถังเต็ม เรียกคนขน', act: 'call-porter', icon: 'truck' }, { label: 'แต้มของฉัน', act: 'points', icon: 'star' }, { label: 'คุยกับเจ้าหน้าที่', act: 'contact', icon: 'headset' }];
 
-function vendorText(text, fromMenu) {
-  if (!fromMenu) { me('vendor', text); hook(`webhook · message "${text}"`); }
-  const s = GET(); const tl = text.toLowerCase();
-  if (/ห้องเย็น|ฝาก/.test(text)) { say('vendor', [{ kind: 'text', text: 'เปิดหน้าจองห้องเย็นให้นะคะ' }], 500); setTimeout(() => openSheet('vendor', 'cold'), 1100); return; }
-  if (/เครดิต/.test(text)) return act('vendor', 'credit');
-  if (/สวัสดี|hello|hi/.test(tl)) return say('vendor', [{ kind: 'text', text: `สวัสดีค่ะ${ME.vendor.name} วันนี้มีของเหลือไหมคะ`, quick: QV }]);
-  if (/วิธี|help/.test(tl)) return act('vendor', 'howto');
-  const p = parseListing(text);
-  if (p) {
-    D(x => ({ ...x, misses: 0 }));
-    return say('vendor', [{ kind: 'text', text: p.suggested ? `แยกให้แล้วค่ะ ป้าไม่ได้ใส่ราคา บอทแนะนำ ฿${p.price} ตามราคาตลาดวันนี้นะคะ` : 'แยกให้แล้วค่ะ เช็กแล้วกดยืนยันได้เลย' }, { kind: 'flex', card: { type: 'draft', draft: p } }], 900);
-  }
-  const misses = s.misses + 1; D(x => ({ ...x, misses }));
-  if (misses >= 2) { D(x => ({ ...x, misses: 0 })); return handoff(); }
-  say('vendor', [{ kind: 'text', text: 'ขอโทษค่ะ บอทยังไม่เข้าใจ ลองพิมพ์แบบนี้ได้ไหมคะ\n"ชื่อผัก จำนวน ราคา" เช่น "ผักบุ้ง 2 กก 30"', quick: QV }]);
+function handoff(role) {
+  say(role, [{ kind: 'text', text: 'บอทส่งเรื่องต่อให้เจ้าหน้าที่ตลาดแล้วค่ะ รอสักครู่นะคะ' }, { kind: 'flex', card: { type: 'handoff' } }], 700);
+  D(s => addLog(s, 'บอทไม่เข้าใจ 2 ครั้ง → เปิด chat mode ให้ จนท.ตลาด (คุณสมชาย) ตอบเอง', 'warn'));
+  setTimeout(() => D(s => addMsg(s, role, { from: 'staff', kind: 'text', text: '[จนท.สมชาย] สวัสดีครับ เดี๋ยวผมเดินไปดูให้ภายใน 5 นาทีนะครับ' })), 3200);
 }
 
-function handoff() {
-  say('vendor', [{ kind: 'text', text: 'บอทส่งเรื่องต่อให้เจ้าหน้าที่ตลาดแล้วค่ะ รอสักครู่นะคะ' }, { kind: 'flex', card: { type: 'handoff' } }], 700);
-  D(s => addLog(s, 'บอทไม่เข้าใจ 2 ครั้ง → เปิด chat mode ให้ จนท.ตลาด (คุณสมชาย) ตอบเอง', 'warn'));
-  setTimeout(() => D(s => addMsg(s, 'vendor', { from: 'staff', kind: 'text', text: `[จนท.สมชาย] สวัสดีครับ${ME.vendor.name} เดี๋ยวผมเดินไปที่แผง ${ME.vendor.stall} ภายใน 5 นาทีนะครับ` })), 3200);
+function onText(role, text) {
+  me(role, text); hook(`webhook · message "${text}"`);
+  const s = GET(); const t = text.toLowerCase();
+  const go = a => act(role, a);
+  if (/สวัสดี|hello|hi/.test(t)) return say(role, [{ kind: 'text', text: 'สวัสดีค่ะ มีอะไรให้ช่วยไหมคะ', quick: role === 'vendor' ? QV : undefined }]);
+  if (role === 'vendor') {
+    if (/ถัง|เต็ม|เรียก|มารับ/.test(t)) return go('call-porter');
+    if (/แลก|ห้องเย็น|ฝาก|ส่วนลด|พื้นที่/.test(t)) return go('redeem-open');
+    if (/แต้ม|เครดิต/.test(t)) return go('points');
+    if (/วิธี|แยก|เกรด/.test(t)) return go('howto');
+    if (/qr|คิวอาร์/.test(t)) return go('bin-qr');
+    if (/ประวัติ/.test(t)) return go('history');
+  } else if (role === 'porter') {
+    if (/สแกน|รับ/.test(t)) return go('scan-open');
+    if (/งาน/.test(t)) return go('jobs');
+    if (/แต้ม|สรุป/.test(t)) return go('porter-sum');
+  } else if (role === 'farmer') {
+    if (/สั่ง|ซื้อ/.test(t)) return go('fert-open');
+    if (/ราคา|ปุ๋ย/.test(t)) return go('price');
+  } else if (role === 'resto') {
+    if (/บิล|จ่าย/.test(t)) return go('bill');
+    if (/แก๊ส|มิเตอร์/.test(t)) return go('meter');
+  }
+  const misses = s.misses + 1; D(x => ({ ...x, misses }));
+  if (misses >= 2) { D(x => ({ ...x, misses: 0 })); return handoff(role); }
+  say(role, [{ kind: 'text', text: 'ขอโทษค่ะ บอทยังไม่เข้าใจ ลองกดเมนูด้านล่างได้เลยค่ะ' }]);
 }
 
 function act(role, a, arg, msg) {
   const s = GET();
   switch (a) {
-    case 'say': return role === 'vendor' ? vendorText(arg) : otherText(role, arg);
-    case 'list-start': markStart(); return say('vendor', [{ kind: 'text', text: 'ส่งรูป หรือพิมพ์บรรทัดเดียวก็ได้ค่ะ\nเช่น "คะน้า 3 กก 40"', quick: [{ label: 'คะน้า 3 กก 40', act: 'say' }, { label: 'มะเขือเทศ 5 กิโล', act: 'say' }, { label: 'ส่งรูปผัก', act: 'photo-open', icon: 'camera' }] }], 500);
-    case 'photo-open': markStart(); return openSheet('vendor', 'photo');
-    case 'photo-send': {
-      closeSheet(); D(x => addMsg(x, 'vendor', { from: 'me', kind: 'image', img: arg })); hook('webhook · message (image) → วิเคราะห์รูป');
-      say('vendor', [{ kind: 'text', text: 'กำลังดูรูป...' }], 600);
-      return setTimeout(() => { const p = parseListing(`${arg.name} ${arg.qty} ${arg.unit}`); say('vendor', [{ kind: 'text', text: `ดูจากรูปน่าจะเป็น "${arg.name}" ประมาณ ${arg.qty} ${arg.unit} ค่ะ ถ้าไม่ใช่กดแก้ได้` }, { kind: 'flex', card: { type: 'draft', draft: p } }], 900); }, 900);
+    case 'say': return onText(role, arg);
+    case 'contact': return handoff(role);
+    /* ---- แม่ค้า ---- */
+    case 'call-porter': {
+      if (s.jobs.some(j => j.stall === ME.vendor.stall && j.status === 'open')) return say('vendor', [{ kind: 'text', text: 'เรียกคนขนไปแล้วค่ะ พี่เอกกำลังมา ปิดฝาถังไว้ก่อนนะคะ' }], 500);
+      const job = { id: uid(), shop: ME.vendor.name, stall: ME.vendor.stall, est: 7, status: 'open', note: 'ถังเขียวเต็ม · แจ้งผ่าน LINE' };
+      D(x => { let y = { ...x, jobs: [job, ...x.jobs] }; y = flash(y, 0); y = addLog(y, `${ME.vendor.name} (${ME.vendor.stall}) แจ้งถังเต็ม → push งานให้คนขน`, 'ok');
+        return addMsg(y, 'porter', { from: 'bot', kind: 'flex', card: { type: 'job', jid: job.id } }); });
+      return say('vendor', [{ kind: 'text', text: `แจ้งคนขนแล้วค่ะ พี่เอกจะมาภายใน 15 นาที\nคัดถุงพลาสติกออกก่อน จะได้เกรด A (10 แต้ม/กก.) นะคะ`, quick: [{ label: 'ดูวิธีแยกเศษ', act: 'howto', icon: 'help' }] }], 600);
     }
-    case 'draft-confirm': {
-      const dr = msg.card.draft, lid = uid();
-      D(x => { const now = simNow(x); const l = { id: lid, name: dr.name, kind: dr.kind, color: dr.color, qty: dr.qty, unit: dr.unit, price: dr.price, base: dr.price, created: now, ttl: dr.ttl * MIN, deadline: now + dr.ttl * MIN, stage: 'sell', status: 'active', shop: ME.vendor.name, stall: ME.vendor.stall, mine: true, pushed: false };
-        let y = { ...x, listings: [l, ...x.listings] };
-        const secs = x.draftStart ? Math.max(3, Math.round((Date.now() - x.draftStart) / 1000)) : null;
-        y = { ...y, draftStart: null, demo: { ...y.demo, listed: y.demo.listed + 1, listTimes: secs ? [...y.demo.listTimes, secs] : y.demo.listTimes } };
-        y = addLog(y, `ลงของใหม่ ${l.name} ${l.qty} ${l.unit} ฿${l.price} (${l.stall})${secs ? ` · ใช้เวลา ${secs} วิ` : ''}`, 'ok');
-        y = addLog(y, `multicast Flex "ของใหม่ใกล้คุณ" → ผู้ซื้อ 23 รายที่ตั้งแจ้งเตือน`, 'api');
-        return addMsg(y, 'buyer', { from: 'bot', kind: 'flex', card: { type: 'newitem', lid, reason: 'new' } }); });
-      return say('vendor', [{ kind: 'flex', card: { type: 'live', lid } }, { kind: 'text', text: `ลงขายแล้วค่ะ ผู้ซื้อในตลาดเห็นแล้ว\nจะเตือนป้าก่อนหมดเวลา 30 นาทีนะคะ`, quick: [{ label: 'ลงของอีก', act: 'list-start', icon: 'plus' }, { label: 'ดูของที่ขาย', act: 'sold', icon: 'list' }] }]);
-    }
-    case 'draft-price': {
-      const p = msg.card.draft.price;
-      return say('vendor', [{ kind: 'text', text: 'เลือกราคาใหม่ได้เลยค่ะ', quick: [Math.round(p * 0.6), Math.round(p * 0.8), Math.round(p * 1.2)].map(v => Math.max(5, Math.round(v / 5) * 5)).map(v => ({ label: `฿${v}`, act: 'set-price', arg: { mid: msg.id, price: v } })) }], 400);
-    }
-    case 'set-price': D(x => patchMsg(x, 'vendor', arg.mid, m => ({ ...m, done: null, card: { ...m.card, draft: { ...m.card.draft, price: arg.price, suggested: false } } })));
-      return say('vendor', [{ kind: 'text', text: `แก้เป็น ฿${arg.price} แล้วค่ะ กด "ยืนยันลงขาย" บนการ์ดด้านบนได้เลย` }], 450);
-    case 'draft-cancel': return say('vendor', [{ kind: 'text', text: 'ยกเลิกแล้วค่ะ', quick: QV }], 400);
-    case 'ttl-discount': {
-      const l = s.listings.find(z => z.id === arg); if (!l || l.status !== 'active') return say('vendor', [{ kind: 'text', text: 'รายการนี้ปิดไปแล้วค่ะ' }], 400);
-      const np = Math.max(5, Math.round(l.price * 0.6 / 5) * 5);
-      D(x => { let y = patchL(x, l.id, () => ({ stage: 'discount', price: np })); y = addLog(y, `${l.name} ลดราคา ฿${l.price} → ฿${np} · push แจ้งผู้ซื้ออีกรอบ`, 'ok');
-        return addMsg(y, 'buyer', { from: 'bot', kind: 'flex', card: { type: 'newitem', lid: l.id, reason: 'discount' } }); });
-      return say('vendor', [{ kind: 'text', text: `ลดเหลือ ฿${np} แล้วค่ะ แจ้งผู้ซื้อให้แล้ว\nถ้ายังไม่มีคนรับ บอทจะส่งต่อให้ร้านแปรรูปเองตอนหมดเวลา` }], 600);
-    }
-    case 'ttl-process': {
-      const l = s.listings.find(z => z.id === arg); if (!l || l.status !== 'active') return;
-      D(x => { const now = simNow(x); let y = patchL(x, l.id, () => ({ stage: 'process', deadline: now + STAGE_WIN.process, price: procPrice(l) }));
-        y = addLog(y, `แม่ค้าเลือกส่ง ${l.name} ให้ร้านแปรรูปทันที (ข้ามขั้นลดราคา)`, 'cascade');
-        return addMsg(y, 'processor', { from: 'bot', kind: 'flex', card: { type: 'newitem', lid: l.id, reason: 'process' } }); });
-      return say('vendor', [{ kind: 'flex', card: { type: 'cascade', lid: l.id, stage: 1 } }], 600);
-    }
-    case 'ttl-keep': return say('vendor', [{ kind: 'text', text: 'ได้ค่ะ ขายราคาเดิมต่อ ถ้าหมดเวลาแล้วยังไม่มีคนรับ บอทจะส่งต่อให้เองนะคะ' }], 500);
-    case 'open-cold': return openSheet('vendor', 'cold');
-    case 'cold-book': {
-      const { crates, nights, slot } = arg; const cost = crates * nights; const c = 'CR-' + code4();
-      closeSheet();
-      D(x => { let y = { ...x, credits: +(x.credits - cost).toFixed(1), cold: { ...x.cold, used: x.cold.used + crates }, bookings: [{ code: c, crates, nights, slot, t: simNow(x) }, ...x.bookings], creditLog: [{ t: simNow(x), text: `จองห้องเย็น ${crates} ลัง × ${nights} คืน`, v: -cost }, ...x.creditLog], demo: { ...x.demo, creditUsed: x.demo.creditUsed + cost } };
-        y = addLog(y, `LIFF → liff.sendMessages() · ห้องเย็น ${crates} ลัง × ${nights} คืน · ใช้แล้ว ${y.cold.used}/${y.cold.cap} ลัง`, 'cold');
-        return addMsg(y, 'vendor', { from: 'me', kind: 'text', text: `จองห้องเย็น ${crates} ลัง ${nights} คืน` }); });
-      return say('vendor', [{ kind: 'flex', card: { type: 'booking', code: c, crates, nights, slot } }], 800);
-    }
-    case 'credit': return say('vendor', [{ kind: 'flex', card: { type: 'credit' } }], 500);
-    case 'sold': return say('vendor', [{ kind: 'flex', card: { type: 'sold' } }], 500);
-    case 'contact': return handoff();
-    case 'howto': return say('vendor', [{ kind: 'text', text: HOWTO, quick: QV }], 500);
-    // porter
-    case 'scan-open': return openSheet('porter', 'scan', arg);
-    case 'scan-submit': {
-      const { shop, stall, jobId, kg, grade } = arg; const g = GRADES[grade]; const pts = Math.round(kg * g.pts); const cr = +(kg * g.credit).toFixed(1);
-      closeSheet();
-      D(x => { let y = { ...x, points: x.points + pts, pickups: [{ shop, stall, kg, grade, pts, t: simNow(x) }, ...x.pickups], jobs: x.jobs.map(j => j.id === jobId ? { ...j, status: 'done' } : j),
-          demo: { ...x.demo, bio: x.demo.bio + kg, grade: { ...x.demo.grade, [grade]: x.demo.grade[grade] + kg } } };
-        y = addLog(y, `คนขนสแกน ${shop} (${stall}) ${kg} กก เกรด ${grade} → +${pts} แต้ม`, 'ok');
-        if (stall === ME.vendor.stall && cr > 0) {
-          y = { ...y, credits: +(y.credits + cr).toFixed(1), creditLog: [{ t: simNow(y), text: `คัดเศษเกรด ${grade} ${kg} กก`, v: cr }, ...y.creditLog] };
-          y = addMsg(y, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'creditgain', kg, grade, cr } });
-          y = addLog(y, `push → ${ME.vendor.name} ได้เครดิตห้องเย็น +${cr} ลัง-คืน`, 'cold');
-        } else if (cr > 0) y = addLog(y, `${shop} ได้เครดิตห้องเย็น +${cr} ลัง-คืน`, 'cold');
-        return addMsg(y, 'porter', { from: 'me', kind: 'text', text: `รับเศษ ${shop} ${kg} กก เกรด ${grade}` }); });
-      return say('porter', [{ kind: 'flex', card: { type: 'receipt', shop, stall, kg, grade, pts } }], 700);
-    }
-    case 'jobs': return say('porter', [{ kind: 'flex', card: { type: 'jobs' } }], 450);
-    case 'points': return say('porter', [{ kind: 'flex', card: { type: 'points' } }], 450);
+    case 'points': return say(role, [{ kind: 'flex', card: { type: 'points' } }], 500);
+    case 'history': return say('vendor', [{ kind: 'flex', card: { type: 'history' } }], 500);
+    case 'bin-qr': return say('vendor', [{ kind: 'flex', card: { type: 'binqr' } }], 500);
+    case 'howto': return say('vendor', [{ kind: 'flex', card: { type: 'howto' } }], 500);
     case 'redeem-open': return openSheet(role, 'redeem');
     case 'redeem': {
-      const r = REWARDS[role]; if (balOf(s, role) < arg.cost) { toast(`${r.unit}ไม่พอ`); return; }
-      const c = 'RW-' + code4(); closeSheet();
-      D(x => { let y = role === 'porter' ? { ...x, points: x.points - arg.cost }
-          : { ...x, credits: +(x.credits - arg.cost).toFixed(1), creditLog: [{ t: simNow(x), text: `แลก ${arg.t}`, v: -arg.cost }, ...x.creditLog] };
-        y = addLog(y, `${ME[role].name} แลก "${arg.t}" ใช้ ${arg.cost} ${r.unit} · รหัส ${c}`, 'ok');
-        return addMsg(y, role, { from: 'me', kind: 'text', text: `แลก ${arg.t}` }); });
-      return say(role, [{ kind: 'flex', card: { type: 'voucher', item: arg, code: c } }], 700);
+      const { item, qty } = arg; const cost = item.cost * qty;
+      if (modOff(s, item.mod)) { toast('ตลาดนี้ยังไม่เปิด module นี้'); return; }
+      if (s.points[role] < cost) { toast('แต้มไม่พอ'); return; }
+      const c = 'LL-' + code4(); closeSheet();
+      D(x => { let y = { ...x, points: { ...x.points, [role]: x.points[role] - cost }, demo: { ...x.demo, ptsRedeemed: x.demo.ptsRedeemed + cost } };
+        if (role === 'vendor') y = { ...y, pointLog: [{ t: simNow(y), text: `แลก ${item.t}${qty > 1 ? ' × ' + qty : ''}`, v: -cost }, ...y.pointLog] };
+        if (item.id === 'free') y = { ...y, cold: { ...y.cold, used: y.cold.used + qty } };
+        if (item.id === 'space') y = { ...y, cold: { ...y.cold, quota: y.cold.quota + 1 } };
+        if (item.id === 'fert') y = { ...y, fertStock: y.fertStock - 5 * qty };
+        y = flash(y, item.mod === 'cold' ? 4 : item.mod === 'fert' ? 5 : 6);
+        y = addLog(y, `แลกแต้มผ่านเว็บ: ${ME[role].name} · ${item.t}${qty > 1 ? ' × ' + qty : ''} · −${cost} แต้ม`, item.mod === 'cold' ? 'cold' : 'ok');
+        return addMsg(y, role, { from: 'me', kind: 'text', text: `แลก ${item.t}${qty > 1 ? ' × ' + qty : ''}` }); });
+      return say(role, [{ kind: 'flex', card: { type: 'voucher', item, qty, code: c, cost } }], 700);
     }
-    // buyer / processor
-    case 'near-open': return openSheet(role, 'near');
-    case 'claim': {
-      const l = s.listings.find(z => z.id === arg); if (!l || l.status !== 'active') { toast('รายการนี้มีคนรับไปแล้ว'); return; }
-      const c = code4(); closeSheet();
-      D(x => { const k = routeKey(l.stage); let y = patchL(x, l.id, () => ({ status: 'claimed', code: c, buyer: ME[role].name, claimedAt: simNow(x) }));
-        y = { ...y, claims: [{ lid: l.id, code: c, role, t: simNow(y) }, ...y.claims], demo: { ...y.demo, [k]: y.demo[k] + kgOf(l), onTime: y.demo.onTime + 1, closed: y.demo.closed + 1 } };
-        y = addLog(y, `${ME[role].name} กดรับ ${l.name} ${l.qty} ${l.unit} ฿${l.price} จาก ${l.stall} · รหัส ${c}`, 'ok');
-        y = addMsg(y, role, { from: 'me', kind: 'text', text: `รับ ${l.name} ${l.qty} ${l.unit}` });
-        if (l.mine) y = addMsg(y, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'claimed-v', lid: l.id } });
-        return y; });
-      return say(role, [{ kind: 'flex', card: { type: 'claimed-b', lid: l.id } }], 700);
+    /* ---- คนขน ---- */
+    case 'scan-open': return openSheet('porter', 'scan', arg);
+    case 'jobs': return say('porter', [{ kind: 'flex', card: { type: 'jobs' } }], 450);
+    case 'porter-sum': return say('porter', [{ kind: 'flex', card: { type: 'porter-sum' } }], 450);
+    case 'scan-submit': {
+      const { shop, stall, jobId, kg, grade } = arg; const g = GRADES[grade]; const vp = Math.round(kg * g.pts); const pp = Math.round(kg * g.porter);
+      closeSheet();
+      D(x => { let y = { ...x, points: { ...x.points, porter: x.points.porter + pp }, pickups: [{ shop, stall, kg, grade, pts: vp, t: simNow(x) }, ...x.pickups], jobs: x.jobs.map(j => j.id === jobId ? { ...j, status: 'done' } : j),
+          demo: { ...x.demo, kg: x.demo.kg + kg, grade: { ...x.demo.grade, [grade]: x.demo.grade[grade] + kg }, ptsIssued: x.demo.ptsIssued + vp + pp } };
+        y = flash(y, grade === 'C' ? 1 : 3);
+        y = addLog(y, `คนขนสแกนถัง ${stall} · ${kg} กก. เกรด ${grade} → ${shop} +${vp} แต้ม · คนขน +${pp}`, grade === 'C' ? 'warn' : 'ok');
+        if (grade !== 'C') y = addLog(y, `เข้าบ่อหมัก +${kg} กก. → แก๊สราว ${nf(kg * BIO.yield, 2)} m³`, '');
+        if (stall === ME.vendor.stall) {
+          y = { ...y, points: { ...y.points, vendor: y.points.vendor + vp }, pointLog: [{ t: simNow(y), text: `ส่งเศษเกรด ${grade} ${kg} กก.`, v: vp }, ...y.pointLog] };
+          y = addMsg(y, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'pickup', kg, grade, pts: vp } });
+          y = addLog(y, `push → ${ME.vendor.name}: ได้ +${vp} แต้ม`, 'api');
+        }
+        return addMsg(y, 'porter', { from: 'me', kind: 'text', text: `รับเศษ ${shop} ${kg} กก. เกรด ${grade}` }); });
+      return say('porter', [{ kind: 'flex', card: { type: 'receipt', shop, stall, kg, grade, vp, pp } }], 700);
     }
-    case 'my-claims': return say(role, [{ kind: 'flex', card: { type: 'myclaims' } }], 450);
-    case 'alert': return say(role, [{ kind: 'text', text: role === 'processor' ? 'อยากรับของแบบไหนบ้างคะ' : 'อยากให้เตือนเมื่อมีของแบบไหนคะ', quick: (role === 'processor' ? ['ผักใบ', 'พริก/มะนาว', 'ผลไม้สุกจัด', 'รับทุกอย่าง'] : ['ผักใบ', 'ผลไม้', 'ลดราคา 50%+']).map(v => ({ label: v, act: 'alert-set', arg: v })) }], 450);
-    case 'alert-set': D(x => ({ ...x, alerts: [...new Set([...x.alerts, arg])] }));
-      return say(role, [{ kind: 'text', text: `ตั้งค่า "${arg}" แล้วค่ะ มีของเข้าจะส่งการ์ดมาที่แชทนี้ทันที` }], 450);
+    /* ---- เกษตรกร ---- */
+    case 'fert-open': if (modOff(s, 'fert')) return say('farmer', [{ kind: 'text', text: 'ตลาดนี้ยังไม่เปิดขายปุ๋ยจากกาก (Module 2) ค่ะ จะแจ้งทันทีที่เปิดนะคะ' }], 500); return openSheet('farmer', 'fert');
+    case 'price': return say('farmer', [{ kind: 'flex', card: { type: 'price' } }], 450);
+    case 'my-orders': return say('farmer', [{ kind: 'flex', card: { type: 'orders' } }], 450);
+    case 'fert-order': {
+      const bags = arg; const kg = bags * 25; const total = kg * PRICE.fert; const c = 'PF-' + code4();
+      if (kg > s.fertStock) { toast('ปุ๋ยในสต็อกไม่พอ'); return; }
+      closeSheet();
+      D(x => { let y = { ...x, fertStock: x.fertStock - kg, orders: [{ code: c, bags, kg, total, t: simNow(x) }, ...x.orders], demo: { ...x.demo, fertSold: x.demo.fertSold + kg, revenue: x.demo.revenue + total } };
+        y = flash(y, 5); y = addLog(y, `${ME.farmer.farm} สั่งปุ๋ยจากกาก ${kg} กก. · ฿${nf(total)} เงินสด → รายได้ตลาด`, 'ok');
+        return addMsg(y, 'farmer', { from: 'me', kind: 'text', text: `สั่งปุ๋ย ${bags} กระสอบ` }); });
+      return say('farmer', [{ kind: 'flex', card: { type: 'order', code: c, bags, kg, total } }], 700);
+    }
+    /* ---- ร้านอาหาร ---- */
+    case 'meter': return say('resto', [{ kind: 'flex', card: { type: 'meter' } }], 450);
+    case 'bill': return say('resto', [{ kind: 'flex', card: { type: 'bill' } }], 450);
   }
 }
-function otherText(role, text) {
-  me(role, text); hook(`webhook · message "${text}"`);
-  if (role === 'porter') return say('porter', [{ kind: 'text', text: 'กด "สแกนรับเศษ" ที่เมนูด้านล่าง แล้วสแกน QR บนถังเขียวของร้านได้เลยค่ะ', quick: [{ label: 'สแกนรับเศษ', act: 'scan-open', icon: 'qr' }, { label: 'งานรอบนี้', act: 'jobs', icon: 'truck' }] }]);
-  const s = GET(); const okStage = l => role === 'processor' ? l.stage === 'process' : (l.stage === 'sell' || l.stage === 'discount');
-  const hit = s.listings.filter(l => l.status === 'active' && okStage(l) && (text.includes(l.name) || l.name.includes(text.trim())));
-  if (hit.length) return say(role, [{ kind: 'text', text: `เจอ ${hit.length} รายการค่ะ` }, ...hit.slice(0, 2).map(l => ({ kind: 'flex', card: { type: 'newitem', lid: l.id, reason: 'search' } }))]);
-  say(role, [{ kind: 'text', text: `ตอนนี้ยังไม่มี "${text}" ค่ะ ตั้งแจ้งเตือนไว้ไหมคะ`, quick: [{ label: 'ตั้งแจ้งเตือน', act: 'alert', icon: 'bell' }, { label: 'ดูรายการทั้งหมด', act: 'near-open', icon: 'list' }] }]);
+
+// จบวัน: สรุปให้ทุกฝั่ง
+function endDay() {
+  D(x => {
+    const kgToday = x.pickups.filter(p => p.stall === ME.vendor.stall).reduce((a, p) => a + p.kg, 0);
+    const ptsToday = x.pickups.filter(p => p.stall === ME.vendor.stall).reduce((a, p) => a + p.pts, 0);
+    let y = addMsg(x, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'daysum', kg: kgToday, pts: ptsToday } });
+    if (x.modules.gas) { const m3 = 2.6; const total = m3 * PRICE.gas;
+      y = { ...y, gasToday: m3, demo: { ...y.demo, gasSold: y.demo.gasSold + m3, revenue: y.demo.revenue + total } };
+      y = addMsg(y, 'resto', { from: 'bot', kind: 'flex', card: { type: 'gasday', m3 } }); y = addLog(y, `${ME.resto.name} ใช้ไบโอแก๊ส ${m3} m³ · ฿${nf(total, 1)} → รายได้ตลาด`, 'ok'); }
+    y = flash(y, 4);
+    return addLog(y, 'สิ้นวัน: push สรุปให้แม่ค้า ร้านอาหาร และอัปเดต Dashboard', 'api');
+  });
 }
 
-// แต้ม/เครดิตแลกเป็นเงินสดไม่ได้ ใช้เป็นส่วนลดซื้อวัตถุดิบจากฟาร์มพันธมิตรที่ FoodLoop ส่งเศษ/ปุ๋ยหมักไปให้
-const FARM_NOTE = 'แลกเป็นเงินสดไม่ได้ · ใช้เป็นส่วนลดซื้อวัตถุดิบจากฟาร์มที่เราส่งเศษไปให้';
-const REWARDS = {
-  porter: { unit: 'แต้ม', items: [
-    { id: 'veg20', t: 'ส่วนลด ฿20 ผักสดไร่ลุงมี', d: 'ไร่ที่รับปุ๋ยหมักจากตลาด · ขั้นต่ำ ฿100', cost: 40, i: 'leaf' },
-    { id: 'egg10', t: 'ส่วนลด 10% ไข่ไก่ฟาร์มป้าจิต', d: 'ฟาร์มที่รับเศษผักไปเลี้ยงไก่', cost: 60, i: 'heart' },
-    { id: 'rice50', t: 'ส่วนลด ฿50 ข้าวสารสหกรณ์นาอินทรีย์', d: 'นาที่ใช้ปุ๋ยหมักจากตลาด · ขั้นต่ำ ฿300', cost: 120, i: 'bag' }] },
-  vendor: { unit: 'ลัง-คืน', items: [
-    { id: 'veg30', t: 'ส่วนลด ฿30 ค่าผักจากไร่ลุงมี', d: 'ใช้ตอนไร่มาส่งของเข้าแผง · ขั้นต่ำ ฿300', cost: 1, i: 'leaf' },
-    { id: 'egg', t: 'ส่วนลด 10% ไข่ไก่ฟาร์มป้าจิต', d: 'ยกแผง ส่งถึงแผงทุกเช้า', cost: 1.5, i: 'heart' },
-    { id: 'fruit', t: 'ส่วนลด ฿80 ผลไม้สวนพี่ต้อม', d: 'สวนที่รับปุ๋ยหมักจากตลาด · ขั้นต่ำ ฿800', cost: 2, i: 'store' }] },
-};
-const balOf = (s, role) => role === 'porter' ? s.points : s.credits;
-
-const GRADES = {
-  A: { name: 'สะอาด คัดแล้ว', desc: 'เศษผักผลไม้ล้วน ไม่มีถุง เข้าบ่อไบโอแก๊สได้ทันที', pts: 3, credit: 0.1, col: '#06c755' },
-  B: { name: 'ปนเล็กน้อย', desc: 'มีเปลือกแข็ง เศษดิน หรือก้าน ต้องคัดอีกรอบ', pts: 2, credit: 0.05, col: '#ff9f0a' },
-  C: { name: 'ปนขยะอื่น', desc: 'มีถุงพลาสติกหรือโฟม ส่งทำปุ๋ยหมักหลังคัด ไม่ได้เครดิต', pts: 0.5, credit: 0, col: '#8a8f98' },
-};
-
 /* ======================= Rich menu (LINE Messaging API format) ======================= */
-// size 2500x1686 = "large" rich menu. แต่ละ area มี bounds + action แบบเดียวกับ JSON ที่ส่งให้ LINE จริง
-// ui = ใช้วาดรูป rich menu, a = handler ในเดโม (ฝั่ง webhook)
 const LIFF = id => `https://liff.line.me/2006512345-${id}`;
 const RM = {
-  vendor: { size: { width: 2500, height: 1686 }, selected: true, name: 'foodloop-vendor', chatBarText: 'เมนูแม่ค้า', areas: [
-    { bounds: { x: 0, y: 0, width: 833, height: 843 }, action: { type: 'postback', data: 'action=list_start', displayText: 'ลงของเหลือ' }, ui: { t: 'ลงของเหลือ', sub: 'พิมพ์ หรือ ส่งรูป', i: 'plus', hero: 1 }, a: 'list-start' },
-    { bounds: { x: 833, y: 0, width: 834, height: 843 }, action: { type: 'uri', uri: LIFF('coldroom') }, ui: { t: 'ฝากห้องเย็น', sub: 'จองด้วยเครดิต', i: 'snow', tone: 'blue' }, a: 'open-cold' },
-    { bounds: { x: 1667, y: 0, width: 833, height: 843 }, action: { type: 'message', text: 'เครดิตของฉัน' }, ui: { t: 'เครดิตของฉัน', sub: 'ลัง-คืน คงเหลือ', i: 'wallet', tone: 'amber' }, a: 'credit' },
-    { bounds: { x: 0, y: 843, width: 833, height: 843 }, action: { type: 'message', text: 'ของที่ขายแล้ว' }, ui: { t: 'ของที่ขายแล้ว', sub: 'สรุปวันนี้', i: 'receipt', tone: 'violet' }, a: 'sold' },
-    { bounds: { x: 833, y: 843, width: 834, height: 843 }, action: { type: 'message', text: 'ติดต่อเจ้าหน้าที่' }, ui: { t: 'ติดต่อตลาด', sub: 'คุยกับ จนท.', i: 'headset', tone: 'slate' }, a: 'contact' },
-    { bounds: { x: 1667, y: 843, width: 833, height: 843 }, action: { type: 'message', text: 'วิธีใช้' }, ui: { t: 'วิธีใช้', sub: 'ดูตัวอย่าง', i: 'help', tone: 'teal' }, a: 'howto' }] },
-  buyer: { size: { width: 2500, height: 1686 }, selected: true, name: 'foodloop-buyer', chatBarText: 'เมนูผู้ซื้อ', areas: [
-    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'uri', uri: LIFF('nearby') }, ui: { t: 'ของใกล้ฉัน', sub: 'ของสดลดราคา มีเวลานับถอยหลัง', i: 'pin', hero: 1 }, a: 'near-open' },
-    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'ที่ฉันรับแล้ว' }, ui: { t: 'ที่ฉันรับแล้ว', sub: 'รหัสรับของ', i: 'bag', tone: 'violet' }, a: 'my-claims' },
-    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'postback', data: 'action=alert', displayText: 'ตั้งแจ้งเตือนสินค้า' }, ui: { t: 'ตั้งแจ้งเตือน', sub: 'มีของเข้าบอกทันที', i: 'bell', tone: 'rose' }, a: 'alert' }] },
-  processor: { size: { width: 2500, height: 1686 }, selected: true, name: 'foodloop-processor', chatBarText: 'เมนูร้านแปรรูป', areas: [
-    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'uri', uri: LIFF('process') }, ui: { t: 'ของส่งต่อ', sub: 'วัตถุดิบราคาแปรรูป', i: 'pot', hero: 1 }, a: 'near-open' },
-    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'ที่รับแล้ว' }, ui: { t: 'ที่รับแล้ว', sub: 'รหัสรับของ', i: 'bag', tone: 'violet' }, a: 'my-claims' },
-    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'postback', data: 'action=prefs', displayText: 'ตั้งค่ารับของ' }, ui: { t: 'ตั้งค่ารับของ', sub: 'ชนิดวัตถุดิบ', i: 'settings', tone: 'amber' }, a: 'alert' }] },
-  porter: { size: { width: 2500, height: 1686 }, selected: true, name: 'foodloop-porter', chatBarText: 'เมนูคนขน', areas: [
-    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'uri', uri: LIFF('scan') }, ui: { t: 'สแกนรับเศษ', sub: 'สแกนถัง · ชั่ง · ได้แต้ม', i: 'qr', hero: 1 }, a: 'scan-open' },
-    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'งานรอบนี้' }, ui: { t: 'งานรอบนี้', sub: 'จุดที่ต้องไปรับ', i: 'truck', tone: 'teal' }, a: 'jobs' },
-    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'message', text: 'แต้มของฉัน' }, ui: { t: 'แต้มของฉัน', sub: 'ส่วนลดจากฟาร์ม', i: 'star', tone: 'amber' }, a: 'points' }] },
+  vendor: { size: { width: 2500, height: 1686 }, selected: true, name: 'looplard-vendor', chatBarText: 'เมนูแม่ค้า', areas: [
+    { bounds: { x: 0, y: 0, width: 833, height: 843 }, action: { type: 'postback', data: 'action=call_porter', displayText: 'ถังเต็ม เรียกคนขน' }, ui: { t: 'ถังเต็ม', sub: 'เรียกคนขนมารับ', i: 'truck', hero: 1 }, a: 'call-porter' },
+    { bounds: { x: 833, y: 0, width: 834, height: 843 }, action: { type: 'message', text: 'แต้มของฉัน' }, ui: { t: 'แต้มของฉัน', sub: 'ได้ตาม กก. ที่ส่ง', i: 'star', tone: 'amber' }, a: 'points' },
+    { bounds: { x: 1667, y: 0, width: 833, height: 843 }, action: { type: 'uri', uri: LIFF('redeem') }, ui: { t: 'แลกแต้ม', sub: 'ห้องเย็น / ปุ๋ย / แก๊ส', i: 'tag', tone: 'blue' }, a: 'redeem-open' },
+    { bounds: { x: 0, y: 843, width: 833, height: 843 }, action: { type: 'message', text: 'ประวัติส่งเศษ' }, ui: { t: 'ประวัติส่งเศษ', sub: 'กก. และเกรด', i: 'receipt', tone: 'violet' }, a: 'history' },
+    { bounds: { x: 833, y: 843, width: 834, height: 843 }, action: { type: 'message', text: 'QR ถังของฉัน' }, ui: { t: 'QR ถังของฉัน', sub: 'ติดที่ถังเขียว', i: 'qr', tone: 'slate' }, a: 'bin-qr' },
+    { bounds: { x: 1667, y: 843, width: 833, height: 843 }, action: { type: 'message', text: 'วิธีแยกเศษ' }, ui: { t: 'วิธีแยกเศษ', sub: 'เกรด A ได้แต้มเยอะ', i: 'help', tone: 'teal' }, a: 'howto' }] },
+  porter: { size: { width: 2500, height: 1686 }, selected: true, name: 'looplard-porter', chatBarText: 'เมนูคนขน', areas: [
+    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'uri', uri: LIFF('scan') }, ui: { t: 'สแกนรับเศษ', sub: 'สแกนถัง · ชั่ง · ให้เกรด', i: 'qr', hero: 1 }, a: 'scan-open' },
+    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'งานรอบนี้' }, ui: { t: 'งานรอบนี้', sub: 'ถังที่เต็มแล้ว', i: 'truck', tone: 'teal' }, a: 'jobs' },
+    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'message', text: 'สรุปวันนี้' }, ui: { t: 'สรุปวันนี้', sub: 'กก. · เกรด · แต้ม', i: 'chart', tone: 'amber' }, a: 'porter-sum' }] },
+  farmer: { size: { width: 2500, height: 1686 }, selected: true, name: 'looplard-farmer', chatBarText: 'เมนูเกษตรกร', areas: [
+    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'uri', uri: LIFF('fertilizer') }, ui: { t: 'สั่งปุ๋ยจากกาก', sub: 'ถูกกว่าปุ๋ยเคมี จ่ายเงินสด', i: 'leaf', hero: 1 }, a: 'fert-open' },
+    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'ราคาวันนี้' }, ui: { t: 'ราคาวันนี้', sub: 'เทียบปุ๋ยเคมี', i: 'tag', tone: 'amber' }, a: 'price' },
+    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'message', text: 'คำสั่งซื้อของฉัน' }, ui: { t: 'คำสั่งซื้อ', sub: 'รหัสรับปุ๋ย', i: 'receipt', tone: 'violet' }, a: 'my-orders' }] },
+  resto: { size: { width: 2500, height: 1686 }, selected: true, name: 'looplard-restaurant', chatBarText: 'เมนูร้านอาหาร', areas: [
+    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'message', text: 'มิเตอร์แก๊สวันนี้' }, ui: { t: 'มิเตอร์แก๊ส', sub: 'ไบโอแก๊สแทน LPG', i: 'flame', hero: 1 }, a: 'meter' },
+    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'บิลเดือนนี้' }, ui: { t: 'บิลเดือนนี้', sub: 'เทียบค่า LPG', i: 'receipt', tone: 'rose' }, a: 'bill' },
+    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'message', text: 'แจ้งปัญหาแก๊ส' }, ui: { t: 'แจ้งปัญหาแก๊ส', sub: 'คุยกับ จนท.', i: 'headset', tone: 'slate' }, a: 'contact' }] },
 };
 const TONE = { blue: ['#e6f1fb', '#2a83c9'], amber: ['#fff3d6', '#e39400'], violet: ['#efebff', '#6f5bd0'], slate: ['#eceff3', '#4f5b6b'], teal: ['#dff5f2', '#0f9a8e'], rose: ['#ffe9ec', '#e0475a'] };
 const RM_FONT = "Anuphan, 'Noto Sans Thai', sans-serif";
 
-// รูป rich menu 2500x1686 วาดด้วย SVG (ในของจริงคือไฟล์ PNG/JPEG ที่อัปโหลดผ่าน API)
 const RichImage = React.memo(function RichImage({ role }) {
   const rm = RM[role]; const gid = 'rg-' + role;
   return html`<svg viewBox="0 0 2500 1686" aria-hidden="true">
@@ -773,7 +647,7 @@ const RichImage = React.memo(function RichImage({ role }) {
       return html`<g key=${k}>
         ${u.hero ? html`<rect x=${x} y=${y} width=${w} height=${h} fill=${`url(#${gid})`} /><rect x=${x} y=${y} width=${w} height=${h} fill=${`url(#${gid}p)`} />
             <circle cx=${x + w * 0.92} cy=${y + h * 0.06} r=${big ? 420 : 260} fill="#fff" opacity=".1" /><circle cx=${x + w * 0.05} cy=${y + h * 0.98} r=${big ? 260 : 160} fill="#fff" opacity=".07" />
-            <text x=${x + (big ? 80 : 50)} y=${y + (big ? 130 : 95)} fontSize=${big ? 64 : 48} fontWeight="600" fill="#fff" opacity=".9" fontFamily=${RM_FONT}>อิ่มต่อ · FoodLoop</text>`
+            <text x=${x + (big ? 80 : 50)} y=${y + (big ? 130 : 95)} fontSize=${big ? 64 : 48} fontWeight="600" fill="#fff" opacity=".9" fontFamily=${RM_FONT}>อิ่มต่อ · LoopLard</text>`
           : html`<rect x=${x} y=${y} width=${w} height=${h} fill="#fff" />`}
         <circle cx=${cx} cy=${cy} r=${r} fill=${u.hero ? '#fff' : soft} opacity=${u.hero ? .2 : 1} />
         ${u.hero && html`<circle cx=${cx} cy=${cy} r=${r - 34} fill="#fff" opacity=".14" />`}
@@ -806,10 +680,7 @@ function Message({ m, role, s, prev }) {
   if (m.from === 'date') return html`<div className="datechip">${m.text}</div>`;
   const who = f => f === 'staff' ? 'bot' : f;
   const mine = m.from === 'me'; const first = !prev || who(prev.from) !== who(m.from);
-  let body;
-  if (m.kind === 'text') body = html`<div className="bubble">${m.text}</div>`;
-  else if (m.kind === 'image') body = html`<${Photo} p=${m.img} />`;
-  else body = html`<${FlexCard} m=${m} role=${role} s=${s} />`;
+  const body = m.kind === 'text' ? html`<div className="bubble">${m.text}</div>` : html`<${FlexCard} m=${m} role=${role} s=${s} />`;
   return html`<div className=${'row ' + (mine ? 'me ' : '') + (first ? 'first' : '')}>
     ${!mine && (first ? html`<div className="av"><${Logo} s=${36} /></div>` : html`<div style=${{ width: 36, flex: 'none' }}></div>`)}
     <div style=${{ minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
@@ -818,152 +689,138 @@ function Message({ m, role, s, prev }) {
     </div></div>`;
 }
 
-function Photo({ p, w = 190, h = 150 }) {
-  return html`<div className="photo" style=${{ width: w, height: h, background: `linear-gradient(180deg, ${p.bg} 0 58%, #8b5a2b 58% 100%)` }}>
-    <div style=${{ position: 'absolute', bottom: 10, left: '12%', right: '12%', height: '44%', background: 'repeating-linear-gradient(90deg,#b07a3f 0 8px,#9a6633 8px 10px)', borderRadius: '6px 6px 18px 18px' }}></div>
-    <div style=${{ position: 'absolute', bottom: '30%', display: 'flex' }}>${[0, 1, 2].map(k => html`<div key=${k} style=${{ margin: '0 -10px', transform: `rotate(${(k - 1) * 14}deg) translateY(${k === 1 ? -8 : 0}px)` }}><${Veg} kind=${p.kind} color=${p.color} size=${h * 0.46} /></div>`)}</div>
-    <div style=${{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 70% 20%, rgba(255,255,255,.25), transparent 50%)' }}></div></div>`;
-}
-
 function Btns({ m, role, items }) {
   return html`<div className="ft">${items.map((b, k) => {
     const chosen = m.done === b.label; const dis = !b.keep && !!m.done && !chosen;
     return html`<button key=${k} className=${'fbtn ' + (b.cls || '') + (chosen ? ' chosen' : '')} disabled=${dis || chosen}
-      onClick=${() => { if (!b.keep) D(s => patchMsg(s, role, m.id, x => ({ ...x, done: b.label }))); if (b.echo) me(role, b.label); hook(`webhook · postback action=${b.a}${b.arg && typeof b.arg === 'string' ? '&id=' + b.arg : ''}`); act(role, b.a, b.arg, m); }}>
+      onClick=${() => { if (!b.keep) D(s => patchMsg(s, role, m.id, x => ({ ...x, done: b.label }))); if (b.echo) me(role, b.label); hook(`webhook · postback action=${b.a}`); act(role, b.a, b.arg, m); }}>
       ${b.i && html`<${Icon} n=${b.i} s=${17} w=${2.2} />`}${chosen ? html`<${Icon} n="check" s=${16} w=${2.6} />` : ''}${b.label}</button>`; })}</div>`;
 }
 const Head = ({ bg, i, children }) => html`<div className="hd" style=${{ background: bg }}><${Icon} n=${i} s=${20} w=${2.2} />${children}</div>`;
-const G = { green: 'linear-gradient(135deg,#06c755,#049a42)', blue: 'linear-gradient(135deg,#2a83c9,#1d5f99)', orange: 'linear-gradient(135deg,#ff9f0a,#f57c00)', violet: 'linear-gradient(135deg,#7a68d4,#5a46c4)', rose: 'linear-gradient(135deg,#e5607a,#c2334a)', teal: 'linear-gradient(135deg,#2c8fb0,#1f6f8b)', dark: '#1f2933' };
+const G = { green: 'linear-gradient(135deg,#06c755,#049a42)', blue: 'linear-gradient(135deg,#2a83c9,#1d5f99)', amber: 'linear-gradient(135deg,#f2b705,#d68f00)', violet: 'linear-gradient(135deg,#7a68d4,#5a46c4)', soil: 'linear-gradient(135deg,#c98a3e,#9c5f22)', flame: 'linear-gradient(135deg,#d9663a,#a8401f)', teal: 'linear-gradient(135deg,#2c8fb0,#1f6f8b)', grey: 'linear-gradient(135deg,#8a8f98,#5f646c)', dark: '#1f2933' };
+const sum = (arr, f) => arr.reduce((a, x) => a + f(x), 0);
 
 function FlexCard({ m, role, s }) {
-  const c = m.card; const now = simNow(s); const L = id => s.listings.find(l => l.id === id);
+  const c = m.card;
   switch (c.type) {
     case 'welcome': {
-      const txt = { vendor: [`สวัสดีค่ะ ${ME.vendor.name} แผง ${ME.vendor.stall}`, 'ลงของเหลือได้ใน 3 แตะ ของที่ขายไม่ทันบอทส่งต่อให้เอง และเศษที่คัดดีได้เครดิตฝากห้องเย็นฟรี'],
-        porter: [`สวัสดีค่ะ ${ME.porter.name}`, 'สแกน QR ถังเขียวของร้าน ใส่น้ำหนัก เลือกเกรด ได้แต้มทันที แต้มใช้เป็นส่วนลดซื้อผัก ไข่ ข้าว จากฟาร์มพันธมิตร'],
-        buyer: [`สวัสดีค่ะ ${ME.buyer.name}`, `ของสดลดราคาจากแผงใน${BRAND.market} มีเวลานับถอยหลังทุกชิ้น กดรับแล้วรับรหัสไปแสดงที่แผง`],
-        processor: [`สวัสดีค่ะ ${ME.processor.name}`, 'ของที่แผงขายไม่ทันจะส่งมาที่แชทนี้อัตโนมัติ ราคาต่ำกว่าตลาด 60–80% กดรับแล้วรับรหัสไปแสดงที่แผง'] }[c.role];
+      const txt = { vendor: [`สวัสดีค่ะ ${ME.vendor.name} แผง ${ME.vendor.stall}`, 'แยกเศษผักผลไม้ใส่ถังเขียว ถังเต็มกดเรียกคนขน ได้แต้มตาม กก. ทำมากได้มาก แล้วใช้แต้มแลกฝากของสดในห้องเย็น ปุ๋ย หรือแก๊ส'],
+        porter: [`สวัสดีค่ะ ${ME.porter.name}`, 'มีถังเต็มบอทจะส่งงานมาที่นี่ สแกน QR ถัง ชั่ง ให้เกรด แต้มเข้าแม่ค้าทันที เกรด A/B คนขนได้ 1 แต้ม/กก.'],
+        farmer: [`สวัสดีค่ะ ${ME.farmer.name}`, `ปุ๋ยจากกากหมักของ${BRAND.market} ราคา ฿${PRICE.fert}/กก. ถูกกว่าปุ๋ยเคมี สั่งในแชทนี้ จ่ายเงินสดตอนรับ`],
+        resto: [`สวัสดีค่ะ ${ME.resto.name}`, 'ร้านต่อท่อไบโอแก๊สจากบ่อหมักของตลาดแล้ว ใช้แทน LPG ในราคาถูกกว่า ดูมิเตอร์และบิลได้ที่นี่'] }[c.role];
       return html`<div className="fx"><div className="hero" style=${{ height: 96, background: 'linear-gradient(135deg,#06c755,#0aa04a)' }}>
         <div style=${{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 85% 0%, rgba(255,255,255,.3), transparent 45%)' }}></div>
-        <div style=${{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', position: 'relative' }}><${Logo} s=${44} /><div><div style=${{ fontWeight: 700, fontSize: 18 }}>${BRAND.th} · ${BRAND.name}</div><div style=${{ fontSize: 12, opacity: .9 }}>${BRAND.tagline}</div></div></div></div>
+        <div style=${{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', position: 'relative' }}><${Logo} s=${44} /><div><div style=${{ fontWeight: 700, fontSize: 18 }}>${BRAND.th} · ${BRAND.name}</div><div style=${{ fontSize: 12, opacity: .9 }}>${BRAND.tagline} · เศษผักวันนี้ = ความเย็นพรุ่งนี้</div></div></div></div>
         <div className="bd"><div className="ttl">${txt[0]}</div><div style=${{ fontSize: 13.5, color: '#555', lineHeight: 1.5, paddingBottom: 8 }}>${txt[1]}</div></div></div>`;
     }
-    case 'draft': {
-      const d = c.draft; const end = now + d.ttl * MIN;
-      return html`<div className="fx"><${Hero} kind=${d.kind} color=${d.color}><span className="tag">ร่างประกาศ · ตรวจก่อนยืนยัน</span><//>
-        <div className="bd"><div className="ttl">${d.name}</div>
-          <div className="kv"><span>จำนวน</span><b>${d.qty} ${d.unit}</b></div>
-          <div style=${{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}><div className="price">฿${d.price}</div><span style=${{ fontSize: 12, color: '#888' }}>ทั้งกอง · ≈฿${nf(d.price / Math.max(d.qty, 1), 1)}/${d.unit}</span></div>
-          <div className="note"><b>แนะนำขายภายใน ${d.ttl >= 60 ? nf(d.ttl / 60, d.ttl % 60 ? 1 : 0) + ' ชม.' : d.ttl + ' นาที'}</b> (ถึง ${hm(end)})<br/>ราคาตลาดวันนี้ ≈ ฿${d.base}/${d.unit}${d.suggested ? ' · ราคานี้บอทแนะนำ' : ''}</div></div>
-        <${Btns} m=${m} role=${role} items=${[{ label: 'ยืนยันลงขาย', a: 'draft-confirm', cls: 'p', echo: true }, { label: 'แก้ราคา', a: 'draft-price', keep: true }, { label: 'ยกเลิก', a: 'draft-cancel', echo: true }]} /></div>`;
+    case 'pickup': {
+      const g = GRADES[c.grade]; const zero = c.grade === 'C';
+      return html`<div className="fx"><${Head} bg=${zero ? G.grey : G.green} i=${zero ? 'bin' : 'check'}>${zero ? 'รับเศษแล้ว · เกรด C ไม่ได้แต้ม' : 'รับเศษแล้ว · ได้แต้ม'}<//>
+        <div className="bd"><div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="big num burst" style=${{ color: zero ? '#8a8f98' : '#0a8a3e' }}>+${c.pts}</span><span>แต้ม</span></div>
+          <div className="kv"><span>น้ำหนัก</span><b className="num">${c.kg} กก.</b></div>
+          <div className="kv"><span>เกรด</span><b style=${{ color: g.col }}>${c.grade} · ${g.name}</b></div>
+          <div className="kv"><span>คนขน</span><b>${ME.porter.name}</b></div>
+          <div className="kv"><span>แต้มคงเหลือ</span><b className="num">${nf(s.points.vendor)}</b></div>
+          ${zero ? html`<div className="note warn">พบถุงพลาสติกปน ครั้งหน้าคัดออกก่อน จะได้เกรด A = ${nf(c.kg * 10)} แต้ม</div>`
+            : html`<div className="note">เศษนี้เข้าบ่อหมักของตลาด ผลิตไฟเดินห้องเย็นได้ราว ${nf(c.kg * BIO.yield * (1 - BIO.gasShare) * BIO.kwhPerM3, 1)} kWh</div>`}</div>
+        <${Btns} m=${m} role=${role} items=${zero ? [{ label: 'ดูวิธีแยกเศษ', a: 'howto', keep: true }] : [{ label: 'แลกแต้ม', a: 'redeem-open', cls: 'p', keep: true }]} /></div>`;
     }
-    case 'live': {
-      const l = L(c.lid); if (!l) return null; const rem = l.deadline - now; const i = STAGE_I[l.stage];
-      const views = Math.min(48, Math.floor((now - l.created) / MIN * 0.4) + 3);
-      const st = l.status === 'claimed' ? html`<span className="chip g">มีคนรับแล้ว · ${l.code}</span>` : l.status === 'organic' ? html`<span className="chip b">ไบโอแก๊ส</span>`
-        : l.stage === 'discount' ? html`<span className="chip o">ลดราคา</span>` : html`<span className=${'chip ' + ['g', 'v', 'r', 'b'][i]}>${i ? STAGES[i] : 'กำลังขาย'}</span>`;
-      return html`<div className="fx"><${Hero} kind=${l.kind} color=${l.color}><span className="tag">ประกาศแล้ว · ${l.stall}</span>
-          ${l.status === 'active' && html`<div className="ringpos"><${Ring} rem=${rem} total=${winOf(l)} /></div>`}<//>
-        <div className="bd"><div style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}><div className="ttl">${l.name} ${l.qty} ${l.unit}</div>${st}</div>
-          <div className="price">฿${l.price}${l.price !== l.base && html`<s>฿${l.base}</s>`}</div>
-          <div className="kv"><span>${l.status === 'active' ? 'เหลือเวลา' : 'สถานะ'}</span><b className="num">${l.status === 'active' ? fmtRem(rem) : l.status === 'claimed' ? 'รอลูกค้ามารับ' : 'ปิดแล้ว'}</b></div>
-          <div className="kv"><span>ผู้ซื้อเห็นแล้ว</span><b>${views} คน</b></div>
-          <${Steps4} i=${i} /></div><div style=${{ height: 8 }}></div></div>`;
+    case 'points': {
+      const r = role === 'porter' ? 'porter' : 'vendor';
+      return html`<div className="fx"><div className="hd" style=${{ background: G.amber, paddingBlock: 16 }}><div><div style=${{ fontSize: 12, opacity: .9, fontWeight: 500 }}>แต้มของ${ME[r].name}</div><div style=${{ fontSize: 32, lineHeight: 1.1 }}><span className="num">${nf(s.points[r])}</span> <span style=${{ fontSize: 15 }}>แต้ม</span></div></div></div>
+        <div className="bd"><div className="mini">${Object.entries(GRADES).map(([k, g]) => html`<div key=${k} className="it"><span className="gchip" style=${{ background: g.col }}>${k}</span><span style=${{ flex: 1 }}>${g.name}</span><b className="num">${r === 'porter' ? g.porter : g.pts} แต้ม/กก.</b></div>`)}</div>
+          ${r === 'vendor' && html`<div className="mini" style=${{ borderTop: '1px solid #eef0f2', marginTop: 4 }}>${s.pointLog.slice(0, 3).map((h, k) => html`<div key=${k} className="it"><span style=${{ flex: 1 }}>${h.text}</span><b className="num" style=${{ color: h.v > 0 ? '#0a8a3e' : '#b91c1c' }}>${h.v > 0 ? '+' : ''}${nf(h.v)}</b></div>`)}</div>`}
+          <div style=${{ fontSize: 12, color: '#888' }}>แต้มแลกเป็นเงินไม่ได้ · ใช้แลกบริการของตลาดผ่านเว็บ · หมดอายุใน 30 วัน</div></div>
+        <${Btns} m=${m} role=${role} items=${[{ label: 'แลกแต้ม', a: 'redeem-open', cls: 'p', keep: true }]} /></div>`;
     }
-    case 'ttl': {
-      const l = L(c.lid); if (!l) return null; const rem = l.deadline - now; const np = Math.max(5, Math.round(l.price * 0.6 / 5) * 5);
-      return html`<div className="fx"><${Head} bg=${G.orange} i="clock">ใกล้หมดเวลา · เหลือ <span className="num" style=${{ animation: 'pulse 1.4s infinite' }}>${l.status === 'active' ? fmtRem(rem) : '-'}</span><//>
-        <div className="bd" style=${{ flexDirection: 'row', alignItems: 'center', gap: 12 }}><div style=${{ width: 64, height: 64, borderRadius: 12, background: shade(l.color, .78), display: 'grid', placeItems: 'center', flex: 'none' }}><${Veg} kind=${l.kind} color=${l.color} size=${50} /></div>
-          <div><div className="ttl" style=${{ fontSize: 15 }}>${l.name} ${l.qty} ${l.unit} ยังไม่มีคนรับ</div><div style=${{ fontSize: 13, color: '#555' }}>ลดเป็น <b style=${{ color: '#0a8a3e' }}>฿${np}</b> ไหมคะ ราคาที่ลดตามเวลาช่วยให้คนกดรับเร็วขึ้น</div></div></div>
-        <${Btns} m=${m} role=${role} items=${[{ label: `ลดเหลือ ฿${np}`, a: 'ttl-discount', arg: l.id, cls: 'w', echo: true }, { label: 'ส่งแปรรูปเลย', a: 'ttl-process', arg: l.id, echo: true }, { label: 'ขายราคาเดิม', a: 'ttl-keep', echo: true }]} /></div>`;
+    case 'voucher': {
+      const it = c.item; const md = MODS[it.mod];
+      return html`<div className="fx"><${Head} bg=${it.mod === 'cold' ? G.blue : it.mod === 'fert' ? G.soil : G.flame} i=${it.i}>แลกแต้มสำเร็จ<//>
+        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><div className="ttl">${it.t}${c.qty > 1 ? ' × ' + c.qty : ''}</div><div style=${{ fontSize: 12.5, color: '#888' }}>${md.n}</div>
+          <${QR} seed=${c.code} size=${104} /><div className="code">${c.code}</div>
+          <div style=${{ width: '100%' }}><div className="kv"><span>ใช้แต้ม</span><b className="num">${nf(c.cost)}</b></div><div className="kv"><span>คงเหลือ</span><b className="num">${nf(s.points[role])} แต้ม</b></div>
+          ${it.id === 'space' && html`<div className="kv"><span>โควตาห้องเย็นของแผง</span><b>${s.cold.quota} ลัง · 7 วัน</b></div>`}</div>
+          <div style=${{ fontSize: 12, color: '#888' }}>${it.mod === 'cold' ? 'แสดง QR ที่หน้าห้องเย็นโซน B' : it.mod === 'fert' ? 'แสดง QR ที่จุดปุ๋ยหลังตลาด' : 'แสดง QR ที่จุดเติมแก๊ส'}</div></div><div style=${{ height: 8 }}></div></div>`;
     }
-    case 'cascade': {
-      const l = L(c.lid); if (!l) return null;
-      const T = { 1: [G.violet, 'truck', `ส่งต่อ ${l.name} ให้ร้านแปรรูปแล้ว`, `แจ้งร้านอาหารและโรงแปรรูป 6 ราย ราคา ฿${procPrice(l)} ภายใน 2 ชม. ป้าไม่ต้องทำอะไรเพิ่มค่ะ`],
-        2: [G.rose, 'heart', `ส่ง ${l.name} ให้โรงทานแล้ว`, 'ร้านแปรรูปไม่รับภายในเวลา บอทแจ้งโรงทานและมูลนิธิอาหารในชุมชนให้มารับฟรีภายใน 1 ชม.'],
-        3: [G.teal, 'leaf', `${l.name} ส่งเข้าบ่อไบโอแก๊ส`, `แจ้งคนขนไปรับที่แผง ${l.stall} แล้ว ถ้าคัดสะอาดได้เกรด A ป้าจะได้เครดิตห้องเย็นเพิ่มค่ะ`] }[c.stage];
-      return html`<div className="fx"><${Head} bg=${T[0]} i=${T[1]}>ส่งต่ออัตโนมัติ<//>
-        <div className="bd"><div className="ttl" style=${{ fontSize: 15 }}>${T[2]}</div><div style=${{ fontSize: 13, color: '#555' }}>${T[3]}</div><${Steps4} i=${c.stage} /></div><div style=${{ height: 8 }}></div></div>`;
+    case 'history': {
+      const mine = s.pickups.filter(p => p.stall === ME.vendor.stall); const kg = sum(mine, p => p.kg); const a = sum(mine.filter(p => p.grade === 'A'), p => p.kg);
+      return html`<div className="fx"><${Head} bg=${G.dark} i="receipt">ประวัติส่งเศษ · แผง ${ME.vendor.stall}<//>
+        <div className="bd"><div className="mini">${mine.map((p, k) => html`<div key=${k} className="it"><span className="gchip" style=${{ background: GRADES[p.grade].col }}>${p.grade}</span><div style=${{ flex: 1 }}><b className="num">${p.kg} กก.</b><div style=${{ fontSize: 12, color: '#888' }}>${hm(p.t)} · ${ME.porter.name}</div></div><b className="num" style=${{ color: p.pts ? '#0a8a3e' : '#999' }}>+${p.pts}</b></div>`)}</div>
+          <div className="kv" style=${{ borderTop: '1px solid #eef0f2', paddingTop: 8 }}><span>วันนี้รวม</span><b className="num">${nf(kg, 1)} กก. · เกรด A ${kg ? Math.round(a / kg * 100) : 0}%</b></div></div><div style=${{ height: 6 }}></div></div>`;
     }
-    case 'credit': {
-      const next = 1 - (s.credits % 1);
-      return html`<div className="fx"><div className="hd" style=${{ background: G.blue, paddingBlock: 16 }}><div><div style=${{ fontSize: 12, opacity: .85, fontWeight: 500 }}>เครดิตห้องเย็นของ${ME.vendor.name}</div><div style=${{ fontSize: 32, lineHeight: 1.1 }}><span className="num">${nf(s.credits, 1)}</span> <span style=${{ fontSize: 15 }}>ลัง-คืน</span></div></div></div>
-        <div className="bd"><div style=${{ fontSize: 12.5, color: '#555' }}>เศษเกรด A 10 กก. = ฝาก 1 ลัง 1 คืน · อีก ${nf(next * 10, 0)} กก. ได้เพิ่ม 1 · เครดิตหมดอายุใน 30 วัน</div>
-          <div className="mini">${s.creditLog.slice(0, 4).map((h, k) => html`<div key=${k} className="it"><span style=${{ flex: 1 }}>${h.text}</span><b className="num" style=${{ color: h.v > 0 ? '#0a8a3e' : '#b91c1c' }}>${h.v > 0 ? '+' : ''}${nf(h.v, 1)}</b></div>`)}</div></div>
-        <${Btns} m=${m} role=${role} items=${[{ label: 'จองห้องเย็น', a: 'open-cold', cls: 'c', keep: true }, { label: 'ใช้เป็นส่วนลดฟาร์ม', a: 'redeem-open', keep: true }]} /></div>`;
-    }
-    case 'voucher': return html`<div className="fx"><${Head} bg=${G.green} i=${c.item.i}>แลกสำเร็จ<//>
-        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><div className="ttl">${c.item.t}</div><div style=${{ fontSize: 12.5, color: '#888' }}>${c.item.d}</div>
-        <${QR} seed=${c.code} size=${104} /><div className="code" style=${{ fontSize: 24 }}>${c.code}</div>
-        <div style=${{ width: '100%' }}><div className="kv"><span>ใช้ไป</span><b>${c.item.cost} ${REWARDS[role].unit}</b></div><div className="kv"><span>คงเหลือ</span><b className="num">${nf(balOf(s, role), role === 'porter' ? 0 : 1)} ${REWARDS[role].unit}</b></div></div>
-        <div style=${{ fontSize: 12, color: '#888' }}>แสดง QR ตอนซื้อหรือตอนฟาร์มมาส่งของ · ใช้ได้ภายใน 30 วัน</div></div><div style=${{ height: 8 }}></div></div>`;
-    case 'creditgain': return html`<div className="fx"><${Head} bg=${G.blue} i="snow">ได้เครดิตห้องเย็น<//>
-        <div className="bd"><div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="price burst num" style=${{ color: '#1d5f99' }}>+${nf(c.cr, 1)}</span><span>ลัง-คืน</span></div>
-        <div style=${{ fontSize: 13, color: '#555' }}>ขอบคุณที่แยกเศษค่ะ คนขนรับไป ${c.kg} กก. ได้เกรด ${c.grade} เศษนี้เข้าบ่อไบโอแก๊สที่เดินห้องเย็นของตลาด</div>
-        <div className="kv"><span>คงเหลือ</span><b className="num">${nf(s.credits, 1)} ลัง-คืน</b></div></div>
-        <${Btns} m=${m} role=${role} items=${[{ label: 'จองห้องเย็นคืนนี้', a: 'open-cold', keep: true }]} /></div>`;
-    case 'booking': return html`<div className="fx"><${Head} bg=${G.blue} i="snow">จองห้องเย็นสำเร็จ<//>
-        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><${QR} seed=${c.code} size=${116} /><div className="code">${c.code}</div>
-        <div style=${{ fontSize: 12.5, color: '#888' }}>แสดง QR นี้ที่หน้าห้องเย็น โซน B</div>
-        <div style=${{ width: '100%' }}><div className="kv"><span>ฝาก</span><b>${c.crates} ลัง × ${c.nights} คืน</b></div><div className="kv"><span>เข้าห้องเย็น</span><b>${c.slot}</b></div><div className="kv"><span>อุณหภูมิ</span><b>4°C</b></div><div className="kv"><span>ใช้เครดิต</span><b>${c.crates * c.nights} ลัง-คืน</b></div></div></div><div style=${{ height: 8 }}></div></div>`;
-    case 'sold': {
-      const mine = s.listings.filter(l => l.mine);
-      const chip = l => l.status === 'claimed' ? html`<span className="chip g">ขายแล้ว</span>` : l.status === 'organic' ? html`<span className="chip b">ไบโอแก๊ส</span>` : l.stage === 'donate' ? html`<span className="chip r">บริจาค</span>`
-        : l.stage === 'process' ? html`<span className="chip v">แปรรูป</span>` : l.stage === 'discount' ? html`<span className="chip o">ลดราคา</span>` : html`<span className="chip x">กำลังขาย</span>`;
-      return html`<div className="fx"><${Head} bg=${G.dark} i="receipt">ของของ${ME.vendor.name}วันนี้<//>
-        <div className="bd"><div className="mini">${mine.map(l => html`<div key=${l.id} className="it"><${Veg} kind=${l.kind} color=${l.color} size=${30} /><div style=${{ flex: 1, minWidth: 0 }}><b>${l.name}</b> ${l.qty} ${l.unit}<div style=${{ fontSize: 12, color: '#888' }}>฿${l.price}${l.code ? ' · รหัส ' + l.code : l.status === 'active' ? ' · เหลือ ' + fmtRem(l.deadline - now) : ''}</div></div>${chip(l)}</div>`)}</div>
-          <div className="kv" style=${{ borderTop: '1px solid #eef0f2', paddingTop: 8 }}><span>รายได้วันนี้</span><b className="num">฿${nf(mine.filter(l => l.status === 'claimed').reduce((a, l) => a + l.price, 0))}</b></div></div><div style=${{ height: 6 }}></div></div>`;
-    }
+    case 'binqr': return html`<div className="fx"><${Head} bg=${G.green} i="qr">QR ถังของ${ME.vendor.name}<//>
+        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><${Bin} stall=${ME.vendor.stall} s=${110} fill=${0.75} />
+        <div style=${{ fontSize: 13, color: '#555' }}>สติกเกอร์ QR ติดที่ถังเขียวหน้าแผง ${ME.vendor.stall} คนขนสแกนแล้วแต้มเข้าบัญชีป้าอัตโนมัติ</div></div><div style=${{ height: 8 }}></div></div>`;
+    case 'howto': return html`<div className="fx"><${Head} bg=${G.teal} i="help">วิธีแยกเศษให้ได้เกรด A<//>
+        <div className="bd"><div className="mini">${Object.entries(GRADES).map(([k, g]) => html`<div key=${k} className="it" style=${{ alignItems: 'flex-start' }}><span className="gchip" style=${{ background: g.col }}>${k}</span><div style=${{ flex: 1 }}><b>${g.name}</b><div style=${{ fontSize: 12, color: '#777' }}>${g.desc}</div></div><b className="num">${g.pts}/กก.</b></div>`)}</div>
+          <div className="note">ใส่ได้: เปลือก ก้าน ใบผัก ผลไม้เน่า · ห้ามใส่: ถุง โฟม ยาง หนังยาง · เปลือกส้มแยกถุงเล็กให้คนขน</div></div><div style=${{ height: 6 }}></div></div>`;
     case 'handoff': return html`<div className="fx"><div className="bd" style=${{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingBottom: 14 }}>
         <div className="av" style=${{ width: 48, height: 48, background: '#ffd66b', fontWeight: 700 }}>สช</div>
         <div style=${{ flex: 1 }}><div style=${{ fontWeight: 700 }}>คุณสมชาย</div><div style=${{ fontSize: 12.5, color: '#888' }}>เจ้าหน้าที่ตลาด · ตอบภายใน ~5 นาที</div><div style=${{ fontSize: 12, color: '#0a8a3e', fontWeight: 600, marginTop: 2 }}>● ออนไลน์</div></div></div></div>`;
-    case 'claimed-v': {
-      const l = L(c.lid); if (!l) return null;
-      return html`<div className="fx"><${Head} bg=${G.green} i="bag">มีคนกดรับแล้ว<//>
-        <div className="bd"><div className="ttl" style=${{ fontSize: 15 }}>${l.name} ${l.qty} ${l.unit} · ฿${l.price}</div><div style=${{ fontSize: 13, color: '#555' }}>${l.buyer} จะมารับที่แผง ${l.stall} ภายใน 30 นาที ให้ลูกค้าแสดงรหัสนี้</div><div className="code" style=${{ padding: '6px 0 10px' }}>${l.code}</div></div></div>`;
-    }
-    case 'claimed-b': {
-      const l = L(c.lid); if (!l) return null; const due = (l.claimedAt || now) + 30 * MIN;
-      return html`<div className="fx"><${Hero} kind=${l.kind} color=${l.color} h=${92}><span className="tag">รับของได้ที่แผง ${l.stall}</span><div className="ringpos"><${Ring} rem=${due - now} total=${30 * MIN} size=${44} /></div><//>
-        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><div className="ttl">${l.name} ${l.qty} ${l.unit} · ${l.price ? '฿' + l.price : 'ฟรี'}</div><${QR} seed=${l.code} size=${104} /><div className="code">${l.code}</div>
-        <div style=${{ fontSize: 12.5, color: '#888' }}>แสดงรหัสกับ${l.shop} ภายใน ${hm(due)} · จ่ายที่แผง</div></div><div style=${{ height: 8 }}></div></div>`;
-    }
-    case 'myclaims': {
-      const mine = s.listings.filter(l => l.buyer === ME[role].name);
-      return html`<div className="fx"><${Head} bg=${G.dark} i="bag">ที่ฉันรับแล้ว<//>
-        <div className="bd"><div className="mini">${mine.length ? mine.map(l => html`<div key=${l.id} className="it"><${Veg} kind=${l.kind} color=${l.color} size=${30} /><div style=${{ flex: 1 }}><b>${l.name}</b> ${l.qty} ${l.unit}<div style=${{ fontSize: 12, color: '#888' }}>${l.shop} · ${l.stall}</div></div><b className="num">${l.code}</b></div>`) : html`<div className="it" style=${{ color: '#888' }}>ยังไม่มีค่ะ ลองกดปุ่มใหญ่ในเมนู</div>`}</div></div><div style=${{ height: 6 }}></div></div>`;
-    }
-    case 'newitem': {
-      const l = L(c.lid); if (!l) return null; const rem = l.deadline - now; const live = l.status === 'active' && (role === 'processor' ? l.stage === 'process' : l.stage === 'sell' || l.stage === 'discount');
-      const head = { new: 'ของใหม่ใกล้คุณ', discount: 'ลดราคาแล้ว', process: 'ส่งต่อ · ราคาแปรรูป', search: 'ผลการค้นหา' }[c.reason];
-      return html`<div className="fx"><${Hero} kind=${l.kind} color=${l.color} h=${100}><span className="tag">${head}</span>${live && html`<div className="ringpos"><${Ring} rem=${rem} total=${winOf(l)} size=${44} /></div>`}<//>
-        <div className="bd"><div className="ttl" style=${{ fontSize: 16 }}>${l.name} ${l.qty} ${l.unit}</div><div className="price" style=${{ fontSize: 21 }}>฿${l.price}${l.price !== l.base && html`<s>฿${l.base}</s>`}</div>
-          <div className="kv"><span>${l.shop} · แผง ${l.stall}</span><b>เดิน 2 นาที</b></div></div>
-        ${live ? html`<${Btns} m=${m} role=${role} items=${[{ label: 'กดรับ', a: 'claim', arg: l.id, cls: 'p' }]} />` : html`<div className="ft"><button className="fbtn" disabled>${l.buyer === ME[role]?.name ? 'คุณรับแล้ว · ' + l.code : l.status === 'claimed' ? 'มีคนรับไปแล้ว' : 'ส่งต่อขั้นถัดไปแล้ว'}</button></div>`}</div>`;
-    }
     case 'job': {
       const j = s.jobs.find(z => z.id === c.jid); if (!j) return null;
-      return html`<div className="fx"><${Head} bg=${j.status === 'done' ? '#6b7280' : G.teal} i="truck">${j.status === 'done' ? 'งานนี้เสร็จแล้ว' : 'งานใหม่ · รับเศษ'}<//>
-        <div className="bd"><div className="ttl" style=${{ fontSize: 16 }}>${j.shop} · แผง ${j.stall}</div><div className="kv"><span>${j.note}</span><b>~${j.est} กก</b></div><div className="kv"><span>ค่าแต้มโดยประมาณ (เกรด A)</span><b className="num">${j.est * 3} แต้ม</b></div></div>
+      return html`<div className="fx"><${Head} bg=${j.status === 'done' ? '#6b7280' : G.teal} i="truck">${j.status === 'done' ? 'รับถังนี้แล้ว' : 'ถังเต็ม · ไปรับ'}<//>
+        <div className="bd" style=${{ flexDirection: 'row', gap: 12, alignItems: 'center' }}><${Bin} stall=${j.stall} s=${62} fill=${j.status === 'done' ? 0.1 : 0.9} />
+          <div style=${{ flex: 1 }}><div className="ttl" style=${{ fontSize: 16 }}>${j.shop} · ${j.stall}</div><div style=${{ fontSize: 12.5, color: '#777' }}>${j.note}</div><div className="kv" style=${{ marginTop: 4 }}><span>ประมาณ</span><b>~${j.est} กก.</b></div></div></div>
         ${j.status === 'done' ? html`<div style=${{ height: 8 }}></div>` : html`<${Btns} m=${m} role=${role} items=${[{ label: 'สแกนรับเลย', a: 'scan-open', arg: j.id, cls: 'p', i: 'qr', keep: true }]} />`}</div>`;
     }
     case 'jobs': {
       const open = s.jobs.filter(j => j.status === 'open');
       return html`<div className="fx"><${Head} bg=${G.dark} i="truck">งานรอบนี้ (${open.length})<//>
-        <div className="bd"><div className="mini">${open.length ? open.map(j => html`<div key=${j.id} className="it"><${Icon} n="pin" s=${20} c="#2c8fb0" /><div style=${{ flex: 1 }}><b>${j.shop}</b> · ${j.stall}<div style=${{ fontSize: 12, color: '#888' }}>${j.note}</div></div><b className="num">~${j.est} กก</b></div>`) : html`<div className="it" style=${{ color: '#888' }}>ไม่มีงานค้าง ลองกด +1 ชม. ที่แผงควบคุมเพื่อให้ของหมดเวลา</div>`}</div></div>
-        ${open.length ? html`<${Btns} m=${m} role=${role} items=${[{ label: 'สแกนรับงานแรก', a: 'scan-open', arg: open[0].id, cls: 'p', i: 'qr', keep: true }]} />` : html`<div style=${{ height: 6 }}></div>`}</div>`;
+        <div className="bd"><div className="mini">${open.length ? open.map(j => html`<div key=${j.id} className="it"><${Icon} n="bin" s=${20} c="#13b85a" /><div style=${{ flex: 1 }}><b>${j.shop}</b> · ${j.stall}<div style=${{ fontSize: 12, color: '#888' }}>${j.note}</div></div><b className="num">~${j.est} กก.</b></div>`) : html`<div className="it" style=${{ color: '#888' }}>ไม่มีถังรอรับ ลองให้แม่ค้ากด "ถังเต็ม เรียกคนขน"</div>`}</div></div>
+        ${open.length ? html`<${Btns} m=${m} role=${role} items=${[{ label: 'สแกนรับถังแรก', a: 'scan-open', arg: open[0].id, cls: 'p', i: 'qr', keep: true }]} />` : html`<div style=${{ height: 6 }}></div>`}</div>`;
     }
     case 'receipt': {
       const g = GRADES[c.grade];
-      return html`<div className="fx"><${Head} bg=${G.green} i="check">บันทึกรับเศษแล้ว<//>
-        <div className="bd"><div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="price burst num">+${c.pts}</span><span>แต้ม</span></div>
-        <div className="kv"><span>ร้าน</span><b>${c.shop} · ${c.stall}</b></div><div className="kv"><span>น้ำหนัก</span><b className="num">${c.kg} กก</b></div>
-        <div className="kv"><span>เกรด</span><b style=${{ color: g.col }}>${c.grade} · ${g.name}</b></div><div className="kv"><span>แต้มสะสม</span><b className="num">${nf(s.points)}</b></div></div><div style=${{ height: 8 }}></div></div>`;
+      return html`<div className="fx"><${Head} bg=${c.grade === 'C' ? G.grey : G.green} i="check">บันทึกแล้ว<//>
+        <div className="bd"><div className="kv"><span>ร้าน</span><b>${c.shop} · ${c.stall}</b></div><div className="kv"><span>น้ำหนัก</span><b className="num">${c.kg} กก.</b></div>
+          <div className="kv"><span>เกรด</span><b style=${{ color: g.col }}>${c.grade} · ${g.name}</b></div>
+          <div className="kv"><span>แม่ค้าได้</span><b className="num">+${c.vp} แต้ม</b></div><div className="kv"><span>คนขนได้</span><b className="num">+${c.pp} แต้ม</b></div>
+          ${c.grade === 'C' ? html`<div className="note warn">เกรด C ไม่เข้าบ่อหมัก ส่งคัดซ้ำก่อนเข้าเครื่องสับ</div>` : html`<div className="note">ส่งเข้าบ่อหมักไบโอแก๊ส · ${nf(c.kg * BIO.yield, 2)} m³</div>`}</div><div style=${{ height: 8 }}></div></div>`;
     }
-    case 'points': return html`<div className="fx"><div className="hd" style=${{ background: 'linear-gradient(135deg,#f2b705,#d68f00)', paddingBlock: 16 }}><div><div style=${{ fontSize: 12, opacity: .9, fontWeight: 500 }}>แต้มของ${ME.porter.name}</div><div style=${{ fontSize: 32, lineHeight: 1.1 }}><span className="num">${nf(s.points)}</span> <span style=${{ fontSize: 15 }}>แต้ม</span></div></div></div>
-        <div className="bd"><div className="mini">${Object.entries(GRADES).map(([k, g]) => html`<div key=${k} className="it"><span className="chip" style=${{ background: g.col, color: '#fff' }}>${k}</span><span style=${{ flex: 1 }}>${g.name}</span><b className="num">${g.pts} แต้ม/กก</b></div>`)}</div>
-        <div style=${{ fontSize: 12.5, color: '#888' }}>${FARM_NOTE} (อัตราตัวอย่าง)</div></div>
-        <${Btns} m=${m} role=${role} items=${[{ label: 'แลกของรางวัล', a: 'redeem-open', cls: 'p', keep: true }]} /></div>`;
+    case 'porter-sum': {
+      const kg = sum(s.pickups, p => p.kg); const a = sum(s.pickups.filter(p => p.grade === 'A'), p => p.kg);
+      return html`<div className="fx"><${Head} bg=${G.amber} i="chart">สรุปวันนี้ · ${ME.porter.name}<//>
+        <div className="bd"><div className="kv"><span>ถังที่รับ</span><b className="num">${s.pickups.length} ถัง</b></div><div className="kv"><span>น้ำหนักรวม</span><b className="num">${nf(kg, 1)} กก.</b></div>
+          <div className="kv"><span>เกรด A</span><b className="num">${kg ? Math.round(a / kg * 100) : 0}%</b></div><div className="kv"><span>แต้มคนขน</span><b className="num">${nf(s.points.porter)}</b></div></div>
+        <${Btns} m=${m} role=${role} items=${[{ label: 'แลกแต้ม', a: 'redeem-open', keep: true }]} /></div>`;
+    }
+    case 'daysum': return html`<div className="fx"><${Head} bg=${G.violet} i="moon">สรุปวันนี้ของ${ME.vendor.name}<//>
+        <div className="bd"><div className="kv"><span>ส่งเศษ</span><b className="num">${nf(c.kg, 1)} กก.</b></div><div className="kv"><span>ได้แต้ม</span><b className="num">+${nf(c.pts)}</b></div>
+          <div className="kv"><span>แต้มคงเหลือ</span><b className="num">${nf(s.points.vendor)}</b></div>
+          <div className="note">เศษของป้าวันนี้ลดคาร์บอนได้ ${nf(c.kg * co2PerKg(s.modules), 1)} kgCO₂e เทียบกับฝังกลบ</div></div>
+        <${Btns} m=${m} role=${role} items=${[{ label: 'ฝากของสดคืนนี้', a: 'redeem-open', cls: 'c', keep: true }]} /></div>`;
+    case 'price': return html`<div className="fx"><${Head} bg=${G.soil} i="leaf">ราคาปุ๋ยจากกากวันนี้<//>
+        <div className="bd"><div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="big">฿${PRICE.fert}</span><span>/กก.</span><s style=${{ color: '#aaa', marginLeft: 6 }}>ปุ๋ยเคมี ฿${PRICE.fertChem}</s></div>
+          <div className="kv"><span>กระสอบ 25 กก.</span><b className="num">฿${nf(PRICE.fert * 25)}</b></div><div className="kv"><span>มีในสต็อก</span><b className="num">${modOff(s, 'fert') ? 'ยังไม่เปิด' : nf(s.fertStock) + ' กก.'}</b></div>
+          <div style=${{ fontSize: 12, color: '#888' }}>ราคาตัวอย่าง · จ่ายเงินสดตอนรับ · รายได้เข้าตลาด</div></div>
+        <${Btns} m=${m} role=${role} items=${[{ label: 'สั่งปุ๋ย', a: 'fert-open', cls: 'o', keep: true }]} /></div>`;
+    case 'order': return html`<div className="fx"><${Head} bg=${G.soil} i="leaf">สั่งปุ๋ยสำเร็จ<//>
+        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><div className="ttl">ปุ๋ยจากกาก ${c.bags} กระสอบ (${c.kg} กก.)</div><${QR} seed=${c.code} size=${100} /><div className="code">${c.code}</div>
+          <div style=${{ width: '100%' }}><div className="kv"><span>ยอดชำระ</span><b className="num">฿${nf(c.total)}</b></div><div className="kv"><span>ถ้าเป็นปุ๋ยเคมี</span><b className="num" style=${{ color: '#999' }}>฿${nf(c.kg * PRICE.fertChem)}</b></div></div>
+          <div style=${{ fontSize: 12, color: '#888' }}>ชำระเงินสดตอนรับที่จุดปุ๋ยหลังตลาด</div></div><div style=${{ height: 8 }}></div></div>`;
+    case 'orders': return html`<div className="fx"><${Head} bg=${G.dark} i="receipt">คำสั่งซื้อของ${ME.farmer.name}<//>
+        <div className="bd"><div className="mini">${s.orders.length ? s.orders.map(o => html`<div key=${o.code} className="it"><${Icon} n="leaf" s=${20} c="#c07a2c" /><div style=${{ flex: 1 }}><b>${o.kg} กก.</b><div style=${{ fontSize: 12, color: '#888' }}>฿${nf(o.total)} · ${hm(o.t)}</div></div><b className="num">${o.code}</b></div>`) : html`<div className="it" style=${{ color: '#888' }}>ยังไม่มีคำสั่งซื้อ</div>`}</div></div><div style=${{ height: 6 }}></div></div>`;
+    case 'meter': {
+      if (modOff(s, 'gas')) return html`<div className="fx"><${Head} bg=${G.grey} i="flame">ยังไม่เปิดไบโอแก๊ส<//><div className="bd"><div style=${{ fontSize: 13, color: '#555', paddingBottom: 8 }}>ตลาดยังไม่เปิด Module 3 ร้านใช้ LPG ตามเดิม</div></div></div>`;
+      const m3 = s.gasToday; const save = m3 * (PRICE.lpgEq - PRICE.gas);
+      return html`<div className="fx"><${Head} bg=${G.flame} i="gauge">มิเตอร์ไบโอแก๊ส · ${ME.resto.stall}<//>
+        <div className="bd"><div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="big num">${nf(m3, 1)}</span><span>m³ วันนี้</span></div>
+          <div className="kv"><span>เทียบเท่า LPG</span><b className="num">${nf(m3 * 0.45, 2)} กก.</b></div><div className="kv"><span>ประหยัดวันนี้</span><b className="num" style=${{ color: '#0a8a3e' }}>฿${nf(save, 1)}</b></div>
+          <div className="lbl" style=${{ marginTop: 4 }}>แก๊สในถุงเก็บของตลาด</div><div className="meter"><i style=${{ width: '68%', background: '#d9663a' }}></i></div>
+          <div style=${{ fontSize: 12, color: '#888' }}>แก๊สไม่พอ ระบบสลับเป็น LPG สำรองอัตโนมัติ</div></div>
+        <${Btns} m=${m} role=${role} items=${[{ label: 'ดูบิลเดือนนี้', a: 'bill', keep: true }]} /></div>`;
+    }
+    case 'bill': {
+      const m3 = 61 + s.demo.gasSold; const bio = m3 * PRICE.gas; const lpg = m3 * PRICE.lpgEq;
+      return html`<div className="fx"><${Head} bg=${G.flame} i="receipt">บิลไบโอแก๊สเดือนนี้<//>
+        <div className="bd"><div className="kv"><span>ใช้ไป</span><b className="num">${nf(m3, 1)} m³</b></div><div className="kv"><span>ค่าไบโอแก๊ส (฿${PRICE.gas}/m³)</span><b className="num">฿${nf(bio)}</b></div>
+          <div className="kv"><span>ถ้าใช้ LPG</span><b className="num" style=${{ color: '#999' }}>฿${nf(lpg)}</b></div><div className="kv"><span>ประหยัด</span><b className="num" style=${{ color: '#0a8a3e' }}>฿${nf(lpg - bio)}</b></div>
+          <div style=${{ fontSize: 12, color: '#888' }}>ราคาตัวอย่าง · ชำระที่สำนักงานตลาด</div></div><div style=${{ height: 6 }}></div></div>`;
+    }
+    case 'gasday': return html`<div className="fx"><${Head} bg=${G.flame} i="flame">สรุปแก๊สวันนี้<//>
+        <div className="bd"><div className="kv"><span>ใช้ไบโอแก๊ส</span><b className="num">${c.m3} m³</b></div><div className="kv"><span>ประหยัดเทียบ LPG</span><b className="num" style=${{ color: '#0a8a3e' }}>฿${nf(c.m3 * (PRICE.lpgEq - PRICE.gas), 1)}</b></div>
+          <div className="kv"><span>ลดคาร์บอน</span><b className="num">${nf(c.m3 * 0.45 * 3, 1)} kgCO₂e</b></div></div><div style=${{ height: 6 }}></div></div>`;
   }
   return null;
 }
@@ -974,94 +831,63 @@ function Sheet({ title, sub = 'liff.line.me', onClose, children }) {
     <div className="sh"><button onClick=${onClose} aria-label="ปิด"><${Icon} n="close" s=${20} w=${2} /></button><div className="t"><b>${title}</b><small>${sub}</small></div><button aria-label="ตัวเลือก"><${Icon} n="dots" s=${22} w=${3} /></button></div>
     <div className="sb">${children}</div></div><//>`;
 }
-const SAMPLES = [
-  { name: 'มะเขือเทศ', qty: 4, unit: 'กก', kind: 'round', color: '#e2463a', bg: '#f4e2c8' },
-  { name: 'ผักบุ้ง', qty: 2, unit: 'กก', kind: 'leaf', color: '#4fae3b', bg: '#dce9d2' },
-  { name: 'กล้วยน้ำว้า', qty: 3, unit: 'หวี', kind: 'banana', color: '#f0c22e', bg: '#efe3c4' },
-  { name: 'กะหล่ำปลี', qty: 6, unit: 'กก', kind: 'cabbage', color: '#9fd27a', bg: '#e1ead7' },
-];
-function PhotoSheet() {
-  return html`<${Sheet} title="รูปภาพ" sub="เลือกรูปเพื่อส่ง" onClose=${closeSheet}>
-    <div className="card" style=${{ display: 'flex', gap: 12, alignItems: 'center' }}><${Icon} n="camera" s=${26} c="#06c755" /><div style=${{ fontSize: 13.5, color: '#4b5563' }}>ถ่ายกองผักให้เห็นทั้งกอง บอทเดาชื่อและน้ำหนักจากรูป แม่ค้าแค่กดยืนยัน</div></div>
-    <div className="lbl">รูปตัวอย่าง · แตะเพื่อส่ง</div>
-    <div style=${{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>${SAMPLES.map((p, k) => html`<button key=${k} onClick=${() => act('vendor', 'photo-send', p)} style=${{ border: 0, padding: 0, background: 'none', borderRadius: 8, overflow: 'hidden' }} aria-label=${'ส่งรูป ' + p.name}><${Photo} p=${p} w=${'100%'} h=${130} /></button>`)}</div>
-    <button className="cta" onClick=${() => act('vendor', 'photo-send', SAMPLES[Math.floor(Math.random() * SAMPLES.length)])}>ถ่ายรูป</button><//>`;
-}
-function ColdSheet({ s }) {
-  const [crates, setCrates] = useState(1), [nights, setNights] = useState(1), [slot, setSlot] = useState('18:00 วันนี้');
-  const cost = crates * nights, ok = cost <= s.credits && s.cold.used + crates <= s.cold.cap; const pct = s.cold.used / s.cold.cap;
-  return html`<${Sheet} title="ฝากห้องเย็น · FoodLoop" onClose=${closeSheet}>
-    <div className="card" style=${{ background: 'linear-gradient(135deg,#2a83c9,#1d5f99)', color: '#fff' }}>
-      <div style=${{ fontSize: 12.5, opacity: .85 }}>เครดิตของ${ME.vendor.name}</div>
-      <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="big num">${nf(s.credits, 1)}</span><span>ลัง-คืน</span></div>
-      <div style=${{ fontSize: 12.5, opacity: .85, marginTop: 4 }}>ได้จากการคัดเศษเกรด A · หมดอายุใน 30 วัน</div></div>
-    <div className="card" style=${{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style=${{ display: 'flex', justifyContent: 'space-between' }}><span className="lbl">ห้องเย็นโซน B ตอนนี้</span><span style=${{ fontWeight: 700 }}><span className="num">${s.cold.temp}°C</span> · ว่าง ${s.cold.cap - s.cold.used} ลัง</span></div>
-      <div className="gauge"><i style=${{ width: pct * 100 + '%', background: pct > .85 ? '#ff9f0a' : '#2a83c9' }}></i></div>
-      <div style=${{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: '#4b5563' }}><${Icon} n="bolt" s=${16} c="#06c755" /> ไฟวันนี้มาจากไบโอแก๊สของเศษในตลาด 62%</div></div>
-    <div className="card" style=${{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style=${{ fontWeight: 600 }}>จำนวนลัง</span><div className="stepper"><button onClick=${() => setCrates(Math.max(1, crates - 1))} aria-label="ลดลัง">−</button><span className="v">${crates}</span><button onClick=${() => setCrates(Math.min(6, crates + 1))} aria-label="เพิ่มลัง">+</button></div></div>
-      <div style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style=${{ fontWeight: 600 }}>จำนวนคืน</span><div className="stepper"><button onClick=${() => setNights(Math.max(1, nights - 1))} aria-label="ลดคืน">−</button><span className="v">${nights}</span><button onClick=${() => setNights(Math.min(3, nights + 1))} aria-label="เพิ่มคืน">+</button></div></div>
-      <div><div className="lbl" style=${{ marginBottom: 6 }}>เวลานำของเข้า</div><div className="pills">${['17:00 วันนี้', '18:00 วันนี้', '19:30 วันนี้'].map(v => html`<button key=${v} aria-pressed=${slot === v} onClick=${() => setSlot(v)}>${v}</button>`)}</div></div></div>
-    <div style=${{ flex: 1 }}></div>
-    <div style=${{ textAlign: 'center', fontSize: 13, color: ok ? '#4b5563' : '#b91c1c' }}>${ok ? `ใช้ ${cost} ลัง-คืน · เหลือ ${nf(s.credits - cost, 1)}` : 'เครดิตไม่พอ คัดเศษเกรด A ให้คนขนเพื่อรับเพิ่ม'}</div>
-    <button className="cta c" disabled=${!ok} onClick=${() => act('vendor', 'cold-book', { crates, nights, slot })}>จองด้วยเครดิต</button><//>`;
+function RedeemSheet({ s, role }) {
+  const [qty, setQty] = useState({}); const bal = s.points[role];
+  const free = s.cold.cap - s.cold.used;
+  return html`<${Sheet} title="แลกแต้ม · LoopLard" sub="looplard.app/redeem" onClose=${closeSheet}>
+    <div className="card" style=${{ background: 'linear-gradient(135deg,#f2b705,#d68f00)', color: '#fff' }}>
+      <div style=${{ fontSize: 12.5, opacity: .9 }}>แต้มของ${ME[role].name}</div>
+      <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="bign num">${nf(bal)}</span><span>แต้ม</span></div>
+      <div style=${{ fontSize: 12.5, opacity: .95, marginTop: 4 }}>แลกเป็นเงินไม่ได้ · ใช้แลกบริการของตลาด · หมดอายุใน 30 วัน</div></div>
+    ${s.modules.cold && html`<div className="card" style=${{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12.5, color: '#4b5563' }}><${Icon} n="snow" s=${22} c="#2a83c9" />ห้องเย็นโซน B ว่าง ${free} ลัง · ${s.cold.temp}°C · โควตาแผงละ ${s.cold.quota} ลัง</div>`}
+    ${REDEEM.map(it => { const off = modOff(s, it.mod); const q = qty[it.id] || 1; const cost = it.cost * q; const ok = !off && bal >= cost;
+      return html`<div key=${it.id} className=${'ritem' + (off ? ' off' : '')}>
+        <div className="ri" style=${{ background: it.mod === 'cold' ? '#e6f1fb' : it.mod === 'fert' ? '#f8ecdc' : '#fbe7df', color: MODS[it.mod].c }}><${Icon} n=${it.i} s=${26} w=${1.9} /></div>
+        <div style=${{ minWidth: 0 }}><b style=${{ fontSize: 14.5 }}>${it.t}</b><div style=${{ fontSize: 12, color: '#6b7280' }}>${off ? 'ตลาดนี้ยังไม่เปิด ' + MODS[it.mod].n : it.d}</div>
+          <div className="row2"><b className="num" style=${{ color: '#b07700' }}>${nf(cost)} แต้ม</b>
+            ${it.step && !off ? html`<div className="stepper"><button onClick=${() => setQty({ ...qty, [it.id]: Math.max(1, q - 1) })} aria-label="ลด">−</button><span className="v">${q}</span><button onClick=${() => setQty({ ...qty, [it.id]: Math.min(5, q + 1) })} aria-label="เพิ่ม">+</button></div>` : ''}
+            <button className="fbtn p" disabled=${!ok} style=${{ height: 34, padding: '0 14px', fontSize: 14 }} onClick=${() => act(role, 'redeem', { item: it, qty: q })}>แลก</button></div></div></div>`; })}<//>`;
 }
 function ScanSheet({ s, jobId }) {
-  const job = s.jobs.find(j => j.id === jobId) || s.jobs.find(j => j.status === 'open');
+  const job = s.jobs.find(j => j.id === jobId && j.status === 'open') || s.jobs.find(j => j.status === 'open');
   const [step, setStep] = useState('scan'); const [kg, setKg] = useState(''); const [grade, setGrade] = useState(null);
   const shop = job ? { shop: job.shop, stall: job.stall, jobId: job.id } : { shop: ME.vendor.name, stall: ME.vendor.stall };
   useEffect(() => { if (step !== 'scan') return; const t = setTimeout(() => setStep('weigh'), 2300); return () => clearTimeout(t); }, [step]);
   const press = k => setKg(v => k === 'del' ? v.slice(0, -1) : (k === '.' && v.includes('.')) || v.length >= 5 ? v : v + k);
   const n = parseFloat(kg) || 0;
-  return html`<${Sheet} title="สแกนรับเศษ · FoodLoop" onClose=${closeSheet}>
+  return html`<${Sheet} title="สแกนรับเศษ · LoopLard" onClose=${closeSheet}>
     ${step === 'scan' && html`<${React.Fragment}><div className="viewfinder" onClick=${() => setStep('weigh')} role="button" aria-label="จำลองการสแกน">
-        ${[[0, 0], [1, 0], [0, 1], [1, 1]].map(([x, y], k) => html`<span key=${k} className="corner" style=${{ [x ? 'right' : 'left']: '14%', [y ? 'bottom' : 'top']: '14%', borderWidth: `${y ? 0 : 4}px ${x ? 4 : 0}px ${y ? 4 : 0}px ${x ? 0 : 4}px`, borderRadius: 8 }}></span>`)}
-        <div style=${{ opacity: .9, transform: 'scale(.9)' }}><${QR} seed=${shop.stall} size=${150} /></div><div className="scanline"></div></div>
+        ${[[0, 0], [1, 0], [0, 1], [1, 1]].map(([x, y], k) => html`<span key=${k} className="corner" style=${{ [x ? 'right' : 'left']: '12%', [y ? 'bottom' : 'top']: '12%', borderWidth: `${y ? 0 : 4}px ${x ? 4 : 0}px ${y ? 4 : 0}px ${x ? 0 : 4}px`, borderRadius: 8 }}></span>`)}
+        <${Bin} stall=${shop.stall} s=${150} fill=${0.85} /><div className="scanline"></div></div>
       <div style=${{ textAlign: 'center', color: '#4b5563', fontSize: 13.5 }}>liff.scanCodeV2() · ส่อง QR บนถังเขียวของ <b>${shop.shop} · ${shop.stall}</b><br/>(แตะเพื่อข้าม)</div><//>`}
     ${step === 'weigh' && html`<${React.Fragment}>
       <div className="card" style=${{ display: 'flex', alignItems: 'center', gap: 10 }}><span style=${{ width: 36, height: 36, borderRadius: 10, background: '#e3f8ea', display: 'grid', placeItems: 'center' }}><${Icon} n="check" s=${20} c="#06c755" w=${2.6} /></span><div><b>${shop.shop} · แผง ${shop.stall}</b><div style=${{ fontSize: 12, color: '#6b7280' }}>สแกนถังสำเร็จ</div></div></div>
-      <div className="card" style=${{ textAlign: 'center' }}><div className="lbl">น้ำหนักจากตาชั่ง</div><div style=${{ font: '700 46px var(--f-mono)', lineHeight: 1.2, color: n ? '#111' : '#c5cad1' }}>${kg || '0'}<span style=${{ fontSize: 18, color: '#6b7280' }}> กก</span></div>
-        <div className="pills" style=${{ justifyContent: 'center', marginTop: 6 }}>${[5, 8, 12, 20].map(v => html`<button key=${v} onClick=${() => setKg(String(v))} aria-pressed=${kg === String(v)}>${v} กก</button>`)}</div></div>
+      <div className="card" style=${{ textAlign: 'center' }}><div className="lbl">น้ำหนักจากตาชั่ง (หักน้ำหนักถังแล้ว)</div><div style=${{ font: '700 46px var(--f-mono)', lineHeight: 1.2, color: n ? '#111' : '#c5cad1' }}>${kg || '0'}<span style=${{ fontSize: 18, color: '#6b7280' }}> กก.</span></div>
+        <div className="pills" style=${{ justifyContent: 'center', marginTop: 6 }}>${[4, 7, 9.5, 12].map(v => html`<button key=${v} onClick=${() => setKg(String(v))} aria-pressed=${kg === String(v)}>${v} กก.</button>`)}</div></div>
       <div className="keypad">${['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'].map(k => html`<button key=${k} onClick=${() => press(k)} aria-label=${k === 'del' ? 'ลบ' : k}>${k === 'del' ? '⌫' : k}</button>`)}</div>
-      <button className="cta" disabled=${!n} onClick=${() => setStep('grade')}>ต่อไป · เลือกเกรด</button><//>`}
+      <button className="cta" disabled=${!n} onClick=${() => setStep('grade')}>ต่อไป · ให้เกรด</button><//>`}
     ${step === 'grade' && html`<${React.Fragment}>
-      <div className="lbl">${shop.shop} · ${n} กก — เศษเป็นแบบไหน</div>
+      <div className="lbl">${shop.shop} · ${n} กก. — เศษในถังเป็นแบบไหน</div>
       ${Object.entries(GRADES).map(([k, g]) => html`<button key=${k} className="grade" aria-pressed=${grade === k} onClick=${() => setGrade(k)}>
         <span className="g" style=${{ background: g.col }}>${k}</span><span><b style=${{ fontSize: 15 }}>${g.name}</b><div style=${{ fontSize: 12.5, color: '#6b7280', lineHeight: 1.4 }}>${g.desc}</div></span>
-        <span style=${{ textAlign: 'right' }}><b className="num" style=${{ fontSize: 17 }}>+${Math.round(n * g.pts)}</b><div style=${{ fontSize: 11, color: '#6b7280' }}>แต้ม</div></span></button>`)}
+        <span style=${{ textAlign: 'right' }}><b className="num" style=${{ fontSize: 17 }}>+${Math.round(n * g.pts)}</b><div style=${{ fontSize: 11, color: '#6b7280' }}>แต้มแม่ค้า</div></span></button>`)}
       <div style=${{ flex: 1 }}></div>
-      <button className="cta" disabled=${!grade} onClick=${() => act('porter', 'scan-submit', { ...shop, kg: n, grade })}>${grade ? `บันทึก · ได้ ${Math.round(n * GRADES[grade].pts)} แต้ม` : 'เลือกเกรดก่อน'}</button><//>`}
+      <button className="cta" disabled=${!grade} onClick=${() => act('porter', 'scan-submit', { ...shop, kg: n, grade })}>${grade ? `บันทึก · แม่ค้าได้ ${Math.round(n * GRADES[grade].pts)} แต้ม` : 'เลือกเกรดก่อน'}</button><//>`}
   <//>`;
 }
-function RedeemSheet({ s, role }) {
-  const r = REWARDS[role]; const bal = balOf(s, role);
-  return html`<${Sheet} title="แลกของรางวัล · FoodLoop" onClose=${closeSheet}>
-    <div className="card" style=${{ background: role === 'porter' ? 'linear-gradient(135deg,#f2b705,#d68f00)' : 'linear-gradient(135deg,#2a83c9,#1d5f99)', color: '#fff' }}>
-      <div style=${{ fontSize: 12.5, opacity: .9 }}>${role === 'porter' ? 'แต้มของ' + ME.porter.name : 'เครดิตของ' + ME.vendor.name}</div>
-      <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="big num">${nf(bal, role === 'porter' ? 0 : 1)}</span><span>${r.unit}</span></div>
-      <div style=${{ fontSize: 12.5, opacity: .9, marginTop: 4 }}>${FARM_NOTE}</div></div>
-    <div className="card" style=${{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12.5, color: '#4b5563' }}><${Icon} n="truck" s=${22} c="#06a94d" />เศษจากตลาด → ปุ๋ยหมัก/อาหารสัตว์ให้ฟาร์ม → ฟาร์มขายวัตถุดิบกลับมาให้คนในตลาดถูกลง</div>
-    ${r.items.map(it => { const ok = bal >= it.cost; return html`<div key=${it.id} className="listing">
-      <div className="th" style=${{ background: '#eef8f1', color: '#06a94d' }}><${Icon} n=${it.i} s=${30} w=${1.8} /></div>
-      <div style=${{ minWidth: 0 }}><b style=${{ fontSize: 14.5 }}>${it.t}</b><div style=${{ fontSize: 12, color: '#6b7280' }}>${it.d}</div><b className="num" style=${{ fontSize: 14, color: '#0a8a3e' }}>${it.cost} ${r.unit}</b></div>
-      <button className="fbtn p" disabled=${!ok} style=${{ height: 32, padding: '0 12px', fontSize: 13 }} onClick=${() => act(role, 'redeem', it)}>แลก</button></div>`; })}<//>`;
-}
-function NearSheet({ s, role }) {
-  const proc = role === 'processor'; const [f, setF] = useState('all'); const now = simNow(s);
-  const items = s.listings.filter(l => l.status === 'active' && (proc ? l.stage === 'process' : (l.stage === 'sell' || l.stage === 'discount')) && (proc || f === 'all' || l.stage === 'discount')).sort((a, b) => a.deadline - b.deadline);
-  return html`<${Sheet} title=${(proc ? 'ของส่งต่อ' : 'ของใกล้ฉัน') + ' · FoodLoop'} onClose=${closeSheet}>
-    ${proc ? html`<div className="card" style=${{ fontSize: 13, color: '#4b5563' }}>ของที่แผงขายไม่ทัน ราคาแปรรูป · ถ้าไม่มีร้านรับใน 2 ชม. จะส่งต่อให้โรงทาน</div>`
-      : html`<div className="pills">${[['all', 'ทั้งหมด'], ['disc', 'ลดราคา']].map(([k, t]) => html`<button key=${k} aria-pressed=${f === k} onClick=${() => setF(k)}>${t}</button>`)}</div>`}
-    ${items.length ? items.map(l => html`<div key=${l.id} className="listing">
-      <div className="th" style=${{ background: shade(l.color, .78) }}><${Veg} kind=${l.kind} color=${l.color} size=${48} /></div>
-      <div style=${{ minWidth: 0 }}><b style=${{ fontSize: 15 }}>${l.name} ${l.qty} ${l.unit}</b>
-        <div style=${{ fontSize: 12, color: '#6b7280' }}>${l.shop} · ${l.stall} · เดิน 2 นาที</div>
-        <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><b style=${{ color: '#0a8a3e', fontSize: 17 }}>฿${l.price}</b>${l.price !== l.base && html`<s style=${{ color: '#9aa0a6', fontSize: 12 }}>฿${l.base}</s>`}
-          ${l.stage === 'discount' ? html`<span className="chip o">ลดราคา</span>` : ''}</div></div>
-      <div style=${{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}><${Ring} rem=${l.deadline - now} total=${winOf(l)} size=${42} />
-        <button className="fbtn p" style=${{ height: 32, padding: '0 12px', fontSize: 13 }} onClick=${() => act(role, 'claim', l.id)}>กดรับ</button></div></div>`)
-      : html`<div className="card" style=${{ textAlign: 'center', color: '#6b7280' }}>${proc ? 'ยังไม่มีของส่งต่อ ลองกด +1 ชม. ที่แผงควบคุม' : 'ยังไม่มีของในหมวดนี้'}</div>`}<//>`;
+function FertSheet({ s }) {
+  const [bags, setBags] = useState(2); const kg = bags * 25; const total = kg * PRICE.fert;
+  return html`<${Sheet} title="สั่งปุ๋ยจากกาก · LoopLard" onClose=${closeSheet}>
+    <div className="card" style=${{ background: 'linear-gradient(135deg,#c98a3e,#9c5f22)', color: '#fff' }}><div style=${{ fontSize: 12.5, opacity: .9 }}>ปุ๋ยหมักจากกากบ่อไบโอแก๊สของ${BRAND.market}</div>
+      <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="bign">฿${PRICE.fert}</span><span>/กก.</span><s style=${{ opacity: .75, marginLeft: 6 }}>ปุ๋ยเคมี ฿${PRICE.fertChem}</s></div>
+      <div style=${{ fontSize: 12.5, opacity: .9, marginTop: 4 }}>สต็อกพร้อมส่ง ${nf(s.fertStock)} กก.</div></div>
+    <div className="card" style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style=${{ fontWeight: 600 }}>จำนวนกระสอบ (25 กก.)</span>
+      <div className="stepper"><button onClick=${() => setBags(Math.max(1, bags - 1))} aria-label="ลด">−</button><span className="v">${bags}</span><button onClick=${() => setBags(Math.min(12, bags + 1))} aria-label="เพิ่ม">+</button></div></div>
+    <div className="card"><div className="kv" style=${{ display: 'flex', justifyContent: 'space-between' }}><span>รวม ${kg} กก.</span><b className="num">฿${nf(total)}</b></div>
+      <div style=${{ display: 'flex', justifyContent: 'space-between', color: '#0a8a3e', fontSize: 13, marginTop: 4 }}><span>ประหยัดเทียบปุ๋ยเคมี</span><b className="num">฿${nf(kg * (PRICE.fertChem - PRICE.fert))}</b></div></div>
+    <div style=${{ flex: 1 }}></div>
+    <div style=${{ textAlign: 'center', fontSize: 12.5, color: '#6b7280' }}>ชำระเงินสดตอนรับ · ไม่ได้ร่วมแยกเศษจึงซื้อด้วยเงิน</div>
+    <button className="cta" style=${{ background: '#c07a2c' }} disabled=${kg > s.fertStock} onClick=${() => act('farmer', 'fert-order', bags)}>ยืนยันสั่งซื้อ ฿${nf(total)}</button><//>`;
 }
 
 /* ======================= phone ======================= */
@@ -1073,11 +899,9 @@ function Phone({ s }) {
   useEffect(() => { setMode('menu'); setMenuOpen(true); setText(''); }, [role]);
   const last = [...msgs].reverse().find(m => m.from !== 'date');
   const quick = last && last.from === 'bot' && last.quick && !last.quickUsed ? last.quick : null;
-  const send = () => { const t = text.trim(); if (!t) return; setText(''); act(role, 'say', t); };
-  const useQuick = q => { D(x => patchMsg(x, role, last.id, m => ({ ...m, quickUsed: true }))); if (q.act === 'say') return act(role, 'say', q.label);
-    if (!['photo-open', 'open-cold', 'scan-open', 'near-open'].includes(q.act)) { me(role, q.label); hook(`webhook · message "${q.label}" (quick reply)`); } act(role, q.act, q.arg); };
+  const send = () => { const t = text.trim(); if (!t) return; setText(''); onText(role, t); };
+  const useQuick = q => { D(x => patchMsg(x, role, last.id, m => ({ ...m, quickUsed: true }))); if (q.act !== 'redeem-open') { me(role, q.label); hook(`webhook · message "${q.label}" (quick reply)`); } act(role, q.act, q.arg); };
   const sh = s.sheet && s.sheet.role === role ? s.sheet : null;
-  const photo = () => role === 'vendor' ? act('vendor', 'photo-open') : toast('ในเดโมส่งรูปได้เฉพาะฝั่งแม่ค้า');
   return html`<div className="phone"><div className="screen">
     <div className="island"></div>
     <div className="status"><span className="num">${hm(simNow(s))}</span><span className="ic">
@@ -1098,180 +922,175 @@ function Phone({ s }) {
           <span style=${{ width: 36 }}></span></div><//>`
       : html`<div className="bar">
         <button className="ib" onClick=${() => { setMode('menu'); setMenuOpen(true); }} aria-label="เปิด rich menu"><${Icon} n="grid" s=${22} w=${1.8} /></button>
-        <button className="ib" aria-label="เพิ่มเติม" onClick=${photo}><${Icon} n="plus" s=${25} w=${1.8} /></button>
-        <button className="ib" onClick=${photo} aria-label="กล้อง"><${Icon} n="camera" s=${24} w=${1.7} /></button>
-        <button className="ib" onClick=${photo} aria-label="รูปภาพ"><${Icon} n="image" s=${23} w=${1.7} /></button>
-        <div className="field"><input id=${'chat-' + role} value=${text} placeholder="Aa" autoComplete="off"
-          onChange=${e => { setText(e.target.value); if (role === 'vendor') markStart(); }} onKeyDown=${e => { if (e.key === 'Enter') send(); }} />
+        <button className="ib" aria-label="เพิ่มเติม"><${Icon} n="plus" s=${25} w=${1.8} /></button>
+        <button className="ib" aria-label="กล้อง"><${Icon} n="camera" s=${24} w=${1.7} /></button>
+        <button className="ib" aria-label="รูปภาพ"><${Icon} n="image" s=${23} w=${1.7} /></button>
+        <div className="field"><input id=${'chat-' + role} value=${text} placeholder="Aa" autoComplete="off" onChange=${e => setText(e.target.value)} onKeyDown=${e => { if (e.key === 'Enter') send(); }} />
           <button aria-label="อีโมจิ"><${Icon} n="smile" s=${21} w=${1.7} /></button></div>
         ${text ? html`<button className="ib send" onClick=${send} aria-label="ส่ง"><${Icon} n="send" s=${23} w=${2} /></button>` : html`<button className="ib" aria-label="ข้อความเสียง"><${Icon} n="mic" s=${23} w=${1.7} /></button>`}</div>`}
-    ${sh && sh.type === 'photo' && html`<${PhotoSheet} />`}
-    ${sh && sh.type === 'cold' && html`<${ColdSheet} s=${s} />`}
-    ${sh && sh.type === 'scan' && html`<${ScanSheet} s=${s} jobId=${sh.data} />`}
-    ${sh && sh.type === 'near' && html`<${NearSheet} s=${s} role=${role} />`}
     ${sh && sh.type === 'redeem' && html`<${RedeemSheet} s=${s} role=${role} />`}
+    ${sh && sh.type === 'scan' && html`<${ScanSheet} s=${s} jobId=${sh.data} />`}
+    ${sh && sh.type === 'fert' && html`<${FertSheet} s=${s} />`}
   </div></div>`;
 }
 
 /* ======================= side panels ======================= */
 const GUIDE = {
-  vendor: { t: 'แม่ค้า · ลงของใน 3 แตะ', steps: [
-    ['พิมพ์บรรทัดเดียว', 'บอทแยกชื่อ จำนวน ราคา ให้เอง', 'ส่ง "คะน้า 3 กก 40"', () => vendorText('คะน้า 3 กก 40')],
-    ['กด "ยืนยันลงขาย" บนการ์ด', 'ผู้ซื้อได้ push ทันที ดูได้ที่แท็บผู้ซื้อ', null],
-    ['เร่งเวลา +30 นาที', 'บอททักก่อนหมดเวลา: ลดราคา หรือส่งแปรรูป', 'เร่งเวลา', () => jump(30)],
-    ['ส่งรูปแทนการพิมพ์', 'บอทเดาชนิดและน้ำหนักจากรูป', 'เปิดกล้อง', () => act('vendor', 'photo-open')],
-    ['ฝากห้องเย็นด้วยเครดิต', 'จองแล้วได้ QR เข้าห้องเย็น', 'เปิดหน้าจอง', () => act('vendor', 'open-cold')],
-    ['พิมพ์สิ่งที่บอทไม่เข้าใจ 2 ครั้ง', 'ระบบส่งต่อให้เจ้าหน้าที่ตลาด', 'ส่ง "ตาชั่งพัง"', () => vendorText('ตาชั่งพัง')],
+  vendor: { t: 'แม่ค้า · แยกเศษ ได้แต้ม แลกบริการ', steps: [
+    ['ถังเต็ม กด "ถังเต็ม เรียกคนขน"', 'งานเด้งไปที่ LINE ของคนขนทันที', 'เรียกคนขน', () => { me('vendor', 'ถังเต็ม เรียกคนขน'); act('vendor', 'call-porter'); }],
+    ['ไปแท็บคนขน สแกน ชั่ง ให้เกรด', 'แต้มเด้งกลับมาที่แชทแม่ค้า', 'ไปแท็บคนขน', () => setRole('porter')],
+    ['แลกแต้มผ่านเว็บ', 'ฝากของสดฟรี / ส่วนลดค่าฝาก / เพิ่มพื้นที่ห้องเย็น / ปุ๋ย / แก๊ส', 'เปิดหน้าแลกแต้ม', () => act('vendor', 'redeem-open')],
+    ['ดูวิธีแยกเศษ', 'เกรด A 10 แต้ม/กก. · เกรด C ไม่ได้แต้ม', 'เปิดการ์ด', () => { me('vendor', 'วิธีแยกเศษ'); act('vendor', 'howto'); }],
+    ['พิมพ์สิ่งที่บอทไม่เข้าใจ 2 ครั้ง', 'ระบบส่งต่อให้เจ้าหน้าที่ตลาด', 'ส่ง "ตาชั่งพัง"', () => onText('vendor', 'ตาชั่งพัง')],
   ] },
-  buyer: { t: 'ผู้ซื้อ · ของสดพร้อมนับถอยหลัง', steps: [
-    ['กด "ของใกล้ฉัน"', 'เรียงตามเวลาที่เหลือ กรองของลดราคาได้', 'เปิดรายการ', () => act('buyer', 'near-open')],
-    ['กดรับ', 'ได้รหัสรับของ + QR แม่ค้าได้แจ้งพร้อมกัน', null],
-    ['ตั้งแจ้งเตือนสินค้า', 'มีของเข้าแล้วบอทส่งการ์ดมาเอง', 'ตั้งแจ้งเตือน', () => { me('buyer', 'ตั้งแจ้งเตือนสินค้า'); act('buyer', 'alert'); }],
+  porter: { t: 'คนขน · สแกน ชั่ง ให้เกรด', steps: [
+    ['กด "สแกนรับเศษ"', 'สแกน QR ถังเขียว ระบบรู้ว่าถังของแผงไหน', 'เปิดสแกน', () => act('porter', 'scan-open')],
+    ['ใส่น้ำหนัก แล้วให้เกรด A/B/C', 'ลองให้เกรด C จะเห็นว่าแม่ค้าได้ 0 แต้มพร้อมคำแนะนำ', null],
+    ['ดูสรุปวันนี้', 'จำนวนถัง กก. และ % เกรด A', 'สรุปวันนี้', () => { me('porter', 'สรุปวันนี้'); act('porter', 'porter-sum'); }],
   ] },
-  processor: { t: 'ร้านแปรรูป · รับของที่ส่งต่อ', steps: [
-    ['การ์ดส่งต่อเข้าแชทเอง', 'ของที่แผงขายไม่ทัน บอท push มาให้อัตโนมัติ', 'เร่งเวลา +1 ชม.', () => jump(60)],
-    ['กด "ของส่งต่อ"', 'ทุกรายการพร้อมเวลาที่เหลือก่อนไปขั้นบริจาค', 'เปิดรายการ', () => act('processor', 'near-open')],
-    ['กดรับ', 'ได้รหัสรับของ แม่ค้าได้แจ้งเตือน', null],
-    ['ถ้าไม่มีร้านรับ', 'ส่งต่อโรงทาน แล้วเป็นเศษเข้าไบโอแก๊ส', null],
+  farmer: { t: 'เกษตรกร · ซื้อปุ๋ยจากกากด้วยเงินสด', steps: [
+    ['กด "สั่งปุ๋ยจากกาก"', `฿${PRICE.fert}/กก. เทียบปุ๋ยเคมี ฿${PRICE.fertChem}`, 'เปิดหน้าสั่ง', () => act('farmer', 'fert-open')],
+    ['ได้รหัสรับปุ๋ย จ่ายเงินสดตอนรับ', 'ยอดขายเข้าเป็นรายได้ตลาดบน Dashboard', null],
+    ['ลองปิด Module 2 ใน Dashboard', 'ตลาดเลือกเปิด module เองได้ ระบบจะไม่รับสั่ง', 'ไป Dashboard', () => D(x => ({ ...x, view: 'dash' }))],
   ] },
-  porter: { t: 'คนขน · สแกน ชั่ง ได้แต้ม', steps: [
-    ['กด "สแกนรับเศษ"', 'ระบบจับ QR ถังเขียวของร้าน', 'เปิดสแกน', () => act('porter', 'scan-open')],
-    ['ใส่น้ำหนัก แล้วเลือกเกรด A/B/C', 'แต้มขึ้นทันที 3 / 2 / 0.5 แต้มต่อกก.', null],
-    ['เศษเกรด A ของแผง B12', 'แม่ค้าได้เครดิตห้องเย็น ดูได้ที่แท็บแม่ค้า', null],
-    ['ใช้แต้ม (ไม่ใช่เงินสด)', 'เป็นส่วนลดซื้อวัตถุดิบจากฟาร์มที่รับเศษจากตลาด', 'เปิดหน้าแลก', () => act('porter', 'redeem-open')],
-    ['ของที่หมดทุกขั้น กลายเป็นงานใหม่', 'กด +1 ชม. หลายครั้ง แล้วดู "งานรอบนี้"', '+1 ชม.', () => jump(60)],
+  resto: { t: 'ร้านอาหาร · ไบโอแก๊สแทน LPG', steps: [
+    ['กด "มิเตอร์แก๊ส"', 'ใช้ไปกี่ m³ ประหยัดเท่าไรเทียบ LPG', 'ดูมิเตอร์', () => { me('resto', 'มิเตอร์แก๊สวันนี้'); act('resto', 'meter'); }],
+    ['กด "จบวัน"', 'บอทส่งสรุปแก๊สให้ร้าน และสรุปแต้มให้แม่ค้า', 'จบวัน', () => endDay()],
+    ['ดูบิลเดือนนี้', 'ค่าไบโอแก๊สเทียบค่า LPG', 'ดูบิล', () => { me('resto', 'บิลเดือนนี้'); act('resto', 'bill'); }],
   ] },
 };
-const jump = m => { D(s => addLog({ ...s, offset: s.offset + m * MIN }, `เร่งเวลา +${m} นาที`, '')); setTimeout(() => D(tick), 30); };
-
+const LOOP = [
+  { t: 'แม่ค้าแยกเศษ', s: 'ถังเขียว + QR ประจำร้าน', i: 'bin', c: '#13b85a' },
+  { t: 'คนขนชั่งน้ำหนัก', s: 'ให้เกรด A–C · แต้มเข้า LINE', i: 'scale', c: '#0f9a8e' },
+  { t: 'บ่อหมักไบโอแก๊ส', s: 'ในพื้นที่ตลาด', i: 'tank', c: '#3b7d4f' },
+  { t: 'ไบโอแก๊ส', s: 'หุงต้ม + ปั่นไฟ', i: 'bolt', c: '#2e8b3f' },
+  { t: 'ห้องเย็นรวม', s: 'Module 1 · แต้มกลับสู่แม่ค้า', i: 'snow', c: '#2a83c9', mod: 'cold' },
+  { t: 'ปุ๋ยจากกาก', s: 'Module 2 · ขายให้เกษตรกร', i: 'leaf', c: '#c07a2c', mod: 'fert' },
+  { t: 'ร้านอาหารในตลาด', s: 'Module 3 · ใช้แทน LPG', i: 'flame', c: '#b6532f', mod: 'gas' },
+];
+function LoopPanel({ s }) {
+  const on = s.flash && Date.now() - s.flash.at < 2500 ? s.flash.step : -1;
+  const lit = k => on === -1 ? false : on === 1 ? k <= 1 : on === 3 ? k <= 3 : k === on || k === 3 || k === 2;
+  return html`<div className="panel"><div className="eyebrow">Loop lard</div><h3 style=${{ marginTop: 8 }}>เศษผักวันนี้ = ความเย็นพรุ่งนี้</h3>
+    <div className="loop">${LOOP.map((n, k) => html`<div key=${k} className=${'n' + (lit(k) ? ' on' : '') + (n.mod && !s.modules[n.mod] ? ' off' : '')}>
+      <span className="ic" style=${{ background: n.c }}><${Icon} n=${n.i} s=${17} w=${2} /></span><span><b>${n.t}</b><small>${n.s}${n.mod && !s.modules[n.mod] ? ' · ปิดอยู่' : ''}</small></span></div>`)}</div></div>`;
+}
 function Guide({ s }) {
   const g = GUIDE[s.role];
   return html`<div className="col">
-    <div className="panel"><div className="eyebrow">เวลาในเดโม</div>
-      <div className="clock"><span className="num">${hm(simNow(s))}</span><span style=${{ color: 'var(--muted)', fontSize: 13 }}>${BRAND.market}</span></div>
-      <div className="btnrow"><button className="btn" onClick=${() => jump(30)}><${Icon} n="fast" s=${15} /> +30 นาที</button><button className="btn" onClick=${() => jump(60)}><${Icon} n="fast" s=${15} /> +1 ชม.</button>
-        <button className="btn" onClick=${() => D(() => initState())}><${Icon} n="reset" s=${15} /> เริ่มใหม่</button></div></div>
     <div className="panel"><div className="eyebrow">ลองเล่นตามนี้</div><h3 style=${{ marginTop: 8 }}>${g.t}</h3>
-      <ol className="steps">${g.steps.map(([a, b, c, f], k) => html`<li key=${s.role + k}><span className="n">${k + 1}</span><div><p>${a}<em>${b}</em></p>${c && html`<button className="try" onClick=${f}>${c} <${Icon} n="chevR" s=${14} w=${2.4} /></button>`}</div></li>`)}</ol></div>
+      <ol className="steps">${g.steps.map(([a, b, c, f], k) => html`<li key=${s.role + k}><span className="n">${k + 1}</span><div><p>${a}<em>${b}</em></p>${c && html`<button className="try" onClick=${f}>${c} <${Icon} n="chevR" s=${14} w=${2.4} /></button>`}</div></li>`)}</ol>
+      <div className="btnrow" style=${{ marginTop: 10 }}><button className="btn" onClick=${() => endDay()}><${Icon} n="moon" s=${15} /> จบวัน</button><button className="btn" onClick=${() => D(() => initState())}><${Icon} n="reset" s=${15} /> เริ่มใหม่</button></div></div>
+    <${LoopPanel} s=${s} />
     <details className="panel"><summary>Rich Menu JSON ของบทบาทนี้ <${Icon} n="chevD" s=${16} /></summary>
       <p className="sub" style=${{ margin: '10px 0 0' }}>โครงเดียวกับที่ POST ไป /v2/bot/richmenu จริง ใช้รูป 2500×1686 แล้วผูกกับ user ตามบทบาท</p><pre>${richJSON(s.role)}</pre></details>
   </div>`;
 }
 function Log({ s }) {
-  const TAG = { ok: 'OK', warn: 'TTL', cascade: 'CASCADE', cold: 'COLD', api: 'LINE API', '': 'SYS' };
+  const TAG = { ok: 'OK', warn: 'GRADE C', cold: 'COLD', api: 'LINE API', '': 'SYS' };
   return html`<div className="col right"><div className="panel"><div className="eyebrow">เบื้องหลังระบบ</div><h3 style=${{ marginTop: 8 }}>Webhook และงานอัตโนมัติ</h3><p className="sub">ทุกแตะในมือถือ ส่งผลต่อแชทคนอื่นและ Dashboard</p>
     <div className="log">${s.log.map(e => html`<div key=${e.id} className=${'e ' + e.tone}><span className="num">${hm(e.t)}</span><span><span className="tag">${TAG[e.tone]}</span>${e.text}</span></div>`)}</div></div></div>`;
 }
 
 /* ======================= dashboard ======================= */
+// ข้อมูลจำลอง 14 วันของ pilot 1 โซน · สัดส่วนเกรด A ขยับจาก ~62% ไปเกิน 80% ในสัปดาห์ที่ 2
 const BASE_DAYS = (() => Array.from({ length: 14 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - 13 + i);
-  const w = [0.88, 1, .92, .97, 1.08, 1.15, 1.22][d.getDay()]; const f = w * (0.74 + i * 0.026) * (i === 13 ? 0.62 : 1);
-  return { label: `${d.getDate()}/${d.getMonth() + 1}`, today: i === 13, sold: Math.round(78 * f), disc: Math.round(34 * f), proc: Math.round(24 * f), don: Math.round(12 * f), bio: Math.round(60 * f), cold: Math.min(96, Math.round(54 + i * 1.7 + (i % 3) * 4)) }; }))();
-const BASE = { items: 412, onTime: 331, gradeKg: { A: 690, B: 215, C: 70 }, creditIssued: 58.4, creditUsed: 41, listSec: 14 };
-const SHOPS = [['ป้าแดง', 'B12', 64, 86, 78, 9], ['ลุงชัย', 'C03', 51, 79, 61, 7], ['เจ๊หมวย', 'A07', 47, 83, 70, 8], ['พี่นก', 'B04', 38, 74, 55, 5], ['ป้าสมร', 'D11', 29, 69, 48, 3]];
-const SER = [['sold', 'ขายได้ราคาปกติ', '--s-sold'], ['disc', 'ขายได้หลังลดราคา', '--s-disc'], ['proc', 'ส่งร้านแปรรูป', '--s-proc'], ['don', 'บริจาค', '--s-don'], ['bio', 'ไบโอแก๊ส / ปุ๋ย', '--s-bio']];
-const dayTot = d => d.sold + d.disc + d.proc + d.don + d.bio;
+  const tot = Math.round((380 + i * 10 + (i % 3) * 18) * (i === 13 ? 0.6 : 1)); const ra = 0.64 + i * 0.018 + (i % 2) * 0.01; const rc = Math.max(0.03, 0.14 - i * 0.008);
+  const A = Math.round(tot * ra), C = Math.round(tot * rc);
+  return { label: `${d.getDate()}/${d.getMonth() + 1}`, today: i === 13, A, B: tot - A - C, C }; }))();
+const SHOPS = [['ป้าแดง', 'B12', 86, 88, 412, 300], ['เจ๊หมวย', 'A07', 92, 84, 438, 250], ['ลุงชัย', 'C03', 101, 71, 395, 100], ['พี่นก', 'B04', 64, 66, 236, 50], ['ป้าสมร', 'D11', 58, 79, 251, 200]];
+const SER = [['A', 'เกรด A', '--s-a'], ['B', 'เกรด B', '--s-b'], ['C', 'เกรด C (ไม่เข้าบ่อ)', '--s-c']];
+const tot3 = d => d.A + d.B + d.C;
+const energy = d => (d.A + d.B) * BIO.yield * (1 - BIO.gasShare) * BIO.kwhPerM3;
 
 function StackBars({ days }) {
   const W = 660, H = 250, l = 40, r = 8, t = 10, b = 26;
-  const max = Math.ceil(Math.max(...days.map(dayTot)) / 100) * 100; const bw = (W - l - r) / days.length; const y = v => t + (H - t - b) * (1 - v / max);
-  return html`<svg className="chart" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="กราฟแท่ง กิโลกรัมที่ไม่ลงฝังกลบรายวัน">
+  const max = Math.ceil(Math.max(...days.map(tot3)) / 100) * 100; const bw = (W - l - r) / days.length; const y = v => t + (H - t - b) * (1 - v / max);
+  return html`<svg className="chart" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="กราฟแท่ง กิโลกรัมเศษที่รับต่อวัน แยกตามเกรด">
     ${[0, .25, .5, .75, 1].map(f => html`<g key=${f}><line x1=${l} x2=${W - r} y1=${y(max * f)} y2=${y(max * f)} stroke="var(--line)" strokeDasharray=${f ? '3 4' : ''} /><text x=${l - 8} y=${y(max * f) + 4} textAnchor="end">${max * f}</text></g>`)}
     ${days.map((d, i) => { let acc = 0; const x = l + i * bw + bw * .18, w = bw * .64;
       return html`<g key=${i}>${SER.map(([k, name, c]) => { const v = d[k]; const y0 = y(acc + v), h = y(acc) - y(acc + v); acc += v;
-        return html`<rect key=${k} x=${x} y=${y0} width=${w} height=${Math.max(0, h - 1)} rx="2" fill=${`var(${c})`}><title>${d.label} · ${name} ${v} กก</title></rect>`; })}
-        ${d.today && html`<rect x=${x - 3} y=${y(dayTot(d)) - 3} width=${w + 6} height=${y(0) - y(dayTot(d)) + 3} rx="4" fill="none" stroke="var(--ink)" strokeDasharray="3 3" />`}
+        return html`<rect key=${k} x=${x} y=${y0} width=${w} height=${Math.max(0, h - 1)} rx="2" fill=${`var(${c})`}><title>${d.label} · ${name} ${v} กก.</title></rect>`; })}
+        ${d.today && html`<rect x=${x - 3} y=${y(tot3(d)) - 3} width=${w + 6} height=${y(0) - y(tot3(d)) + 3} rx="4" fill="none" stroke="var(--ink)" strokeDasharray="3 3" />`}
         ${(i % 2 === 1 || d.today) && html`<text x=${x + w / 2} y=${H - 8} textAnchor="middle" style=${d.today ? { fill: 'var(--ink)', fontWeight: 600 } : null}>${d.today ? 'วันนี้' : d.label}</text>`}</g>`; })}</svg>`;
 }
-function ColdLine({ days, today }) {
-  const W = 420, H = 190, l = 34, r = 12, t = 12, b = 24; const pts = days.map(d => d.today ? today : d.cold);
-  const x = i => l + i * (W - l - r) / (pts.length - 1), y = v => t + (H - t - b) * (1 - v / 100);
+function EnergyLine({ days, need }) {
+  const W = 420, H = 190, l = 34, r = 12, t = 12, b = 24; const pts = days.filter(d => !d.today).map(energy);
+  const max = Math.ceil(Math.max(need, ...pts) / 10) * 10 + 10;
+  const x = i => l + i * (W - l - r) / (pts.length - 1), y = v => t + (H - t - b) * (1 - v / max);
   const line = pts.map((v, i) => `${i ? 'L' : 'M'}${x(i)} ${y(v)}`).join(''); const area = line + `L${x(pts.length - 1)} ${y(0)}L${x(0)} ${y(0)}Z`;
-  return html`<svg className="chart" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="กราฟการใช้ห้องเย็น">
-    ${[0, 50, 100].map(v => html`<g key=${v}><line x1=${l} x2=${W - r} y1=${y(v)} y2=${y(v)} stroke="var(--line)" strokeDasharray=${v ? '3 4' : ''} /><text x=${l - 6} y=${y(v) + 4} textAnchor="end">${v}%</text></g>`)}
-    <line x1=${l} x2=${W - r} y1=${y(80)} y2=${y(80)} stroke="var(--warn)" strokeDasharray="5 4" /><text x=${W - r} y=${y(80) - 5} textAnchor="end" style=${{ fill: 'var(--warn)' }}>เป้า 80%</text>
-    <path d=${area} fill="var(--cold)" opacity=".14" /><path d=${line} fill="none" stroke="var(--cold)" strokeWidth="2.4" strokeLinejoin="round" />
-    <circle cx=${x(pts.length - 1)} cy=${y(pts[pts.length - 1])} r="5" fill="var(--cold)" stroke="var(--surface)" strokeWidth="2.5" />
-    <text x=${x(pts.length - 1) - 8} y=${y(pts[pts.length - 1]) - 10} textAnchor="end" style=${{ fill: 'var(--ink)', fontWeight: 600 }}>${pts[pts.length - 1]}%</text>
-    <text x=${l} y=${H - 6}>${days[0].label}</text><text x=${W - r} y=${H - 6} textAnchor="end">วันนี้</text></svg>`;
+  return html`<svg className="chart" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="ไฟที่ผลิตจากไบโอแก๊สเทียบไฟที่ห้องเย็นใช้">
+    ${[0, max / 2, max].map(v => html`<g key=${v}><line x1=${l} x2=${W - r} y1=${y(v)} y2=${y(v)} stroke="var(--line)" strokeDasharray=${v ? '3 4' : ''} /><text x=${l - 6} y=${y(v) + 4} textAnchor="end">${v}</text></g>`)}
+    ${need > 0 && html`<line x1=${l} x2=${W - r} y1=${y(need)} y2=${y(need)} stroke="var(--cold)" strokeDasharray="5 4" strokeWidth="1.5" /><text x=${W - r} y=${y(need) - 5} textAnchor="end" style=${{ fill: 'var(--cold)' }}>ห้องเย็นใช้ ${need} kWh</text>`}
+    <path d=${area} fill="var(--accent)" opacity=".14" /><path d=${line} fill="none" stroke="var(--accent)" strokeWidth="2.4" strokeLinejoin="round" />
+    <circle cx=${x(pts.length - 1)} cy=${y(pts[pts.length - 1])} r="5" fill="var(--accent)" stroke="var(--surface)" strokeWidth="2.5" />
+    <text x=${x(pts.length - 1) - 8} y=${y(pts[pts.length - 1]) + 18} textAnchor="end" style=${{ fill: 'var(--ink)', fontWeight: 600 }}>${nf(pts[pts.length - 1], 1)} kWh</text>
+    <text x=${l} y=${H - 6}>${days[0].label}</text><text x=${W - r} y=${H - 6} textAnchor="end">เมื่อวาน</text></svg>`;
 }
-function Donut({ g }) {
-  const tot = g.A + g.B + g.C; const R = 54, C = 2 * Math.PI * R; let acc = 0; const col = { A: 'var(--s-sold)', B: 'var(--s-disc)', C: 'var(--muted)' };
-  const pa = Math.round(g.A / tot * 100);
-  return html`<div style=${{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}><svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="สัดส่วนเกรดเศษ">
-    ${['A', 'B', 'C'].map(k => { const f = g[k] / tot; const el = html`<circle key=${k} cx="70" cy="70" r=${R} fill="none" stroke=${col[k]} strokeWidth="18" strokeDasharray=${`${Math.max(0, f * C - 2)} ${C}`} strokeDashoffset=${-acc * C} transform="rotate(-90 70 70)"><title>เกรด ${k} ${nf(g[k])} กก</title></circle>`; acc += f; return el; })}
-    <text x="70" y="66" textAnchor="middle" style=${{ fill: 'var(--ink)', font: '600 24px var(--f-mono)' }}>${pa}%</text><text x="70" y="86" textAnchor="middle" style=${{ fill: 'var(--muted)', font: '11px var(--f-mono)' }}>เกรด A</text></svg>
-    <div style=${{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13.5 }}>${['A', 'B', 'C'].map(k => html`<div key=${k} style=${{ display: 'flex', gap: 8, alignItems: 'center' }}><i style=${{ width: 10, height: 10, borderRadius: 3, background: col[k], display: 'inline-block' }}></i><b style=${{ width: 16 }}>${k}</b><span style=${{ color: 'var(--muted)', width: 96 }}>${GRADES[k].name}</span><span className="num">${nf(g[k])} กก</span></div>`)}
-      <span className=${'pill ' + (pa >= 80 ? 'good' : 'meh')} style=${{ alignSelf: 'flex-start', font: '600 11px/1 var(--f-mono)', padding: '4px 7px', borderRadius: 6 }}>เป้า pilot ≥ 80%</span></div></div>`;
-}
-
-// สูตรตามสไลด์ Low Carbon: kgCO2e = kg×EF ฝังกลบ + LPG×EF LPG + kWh×EF ไฟ − (ไฟระบบ + มีเทนรั่ว)
-function carbon(kgAll, kgBio, a) {
-  const m3 = kgBio * a.yield; const lpg = m3 * 0.5 * 0.45; const kwh = m3 * 0.5 * 1.6;
-  const landfill = kgAll * a.efLf, gas = lpg * a.efLpg, power = kwh * a.efGrid;
-  const minus = kgBio * 0.05 * a.efGrid + m3 * 0.6 * 0.72 * (a.leak / 100) * 28;
-  return { m3, lpg, kwh, landfill, gas, power, minus, total: landfill + gas + power - minus };
+function Co2Bars({ mods }) {
+  const max = 2.6; const sc = v => Math.abs(v) / max * 100;
+  return html`<div className="co2">${CO2.map(r => { const off = (r.k === 'gas' && !mods.gas) || (r.k === 'cold' && !mods.cold) || (r.k === 'fert' && !mods.fert);
+    return html`<div key=${r.k} className=${'r' + (off ? ' off' : '')}><span>${r.t}</span><span className="track"><i style=${{ left: 0, width: sc(r.v) + '%', background: r.v > 0 ? (r.k === 'base' ? 'var(--bad)' : 'var(--warn)') : 'var(--accent)' }}></i></span><b className="num" style=${{ textAlign: 'right' }}>${r.v > 0 ? '+' : ''}${r.v.toFixed(2)}</b></div>`; })}
+    <div className="r tot"><span>ลดได้ต่อ kg เศษที่เข้าลูป (ตาม module ที่เปิด)</span><span></span><b className="num" style=${{ textAlign: 'right', color: 'var(--accent-ink)' }}>${co2PerKg(mods).toFixed(2)}</b></div></div>`;
 }
 
 function Dashboard({ s }) {
-  const [a, setA] = useState({ rate: 1200, efLf: 0.6, efLpg: 3.0, efGrid: 0.5, yield: 0.08, leak: 2 });
-  const setK = k => e => setA({ ...a, [k]: +e.target.value || 0 });
-  const dm = s.demo;
-  const days = BASE_DAYS.map(d => d.today ? { ...d, sold: d.sold + Math.round(dm.sold), disc: d.disc + Math.round(dm.disc), proc: d.proc + Math.round(dm.proc), don: d.don + Math.round(dm.don), bio: d.bio + Math.round(dm.bio) } : d);
-  const kg = days.reduce((x, d) => x + dayTot(d), 0); const kgBio = days.reduce((x, d) => x + d.bio, 0);
-  const co = carbon(kg, kgBio, a); const k30 = 30 / 14;
-  const g = { A: BASE.gradeKg.A + dm.grade.A, B: BASE.gradeKg.B + dm.grade.B, C: BASE.gradeKg.C + dm.grade.C };
-  const onTime = (BASE.onTime + dm.onTime) / (BASE.items + dm.closed) * 100;
-  const coldToday = Math.round(s.cold.used / s.cold.cap * 100);
-  const credUsed = BASE.creditUsed + dm.creditUsed; const lastSec = dm.listTimes.length ? dm.listTimes[dm.listTimes.length - 1] : null;
-  const avgSec = (BASE.listSec * 60 + dm.listTimes.reduce((x, y) => x + y, 0)) / (60 + dm.listTimes.length);
-  const live = dm.listed + dm.closed + dm.bio > 0;
+  const [rate, setRate] = useState(1200);
+  const dm = s.demo; const mods = s.modules;
+  const days = BASE_DAYS.map(d => d.today ? { ...d, A: d.A + Math.round(dm.grade.A), B: d.B + Math.round(dm.grade.B), C: d.C + Math.round(dm.grade.C) } : d);
+  const kgAll = days.reduce((a, d) => a + tot3(d), 0); const kgLoop = days.reduce((a, d) => a + d.A + d.B, 0); const kgA = days.reduce((a, d) => a + d.A, 0);
+  const wk2 = days.slice(7); const pA2 = wk2.reduce((a, d) => a + d.A, 0) / wk2.reduce((a, d) => a + tot3(d), 0) * 100;
+  const yesterday = days[12]; const kwhY = energy(yesterday); const m3Y = (yesterday.A + yesterday.B) * BIO.yield;
+  const co2 = kgLoop * co2PerKg(mods);
+  const revenue = (mods.fert ? 14 * 30 * PRICE.fert : 0) + (mods.gas ? 14 * 18 * PRICE.gas : 0) + dm.revenue;
+  const toggle = k => D(x => addLog({ ...x, modules: { ...x.modules, [k]: !x.modules[k] } }, `เจ้าของตลาด${x.modules[k] ? 'ปิด' : 'เปิด'} ${MODS[k].n}`, ''));
   return html`<div className="dash">
-    <div className="dhead"><div><div className="eyebrow">Web Dashboard · เจ้าของตลาด</div><h1>${BRAND.market} · 14 วันล่าสุด</h1><p>ขยะที่ลดได้ เงินที่ประหยัด คาร์บอน และการใช้ห้องเย็น ในหน้าเดียว</p></div>
+    <div className="dhead"><div><div className="eyebrow">Web Dashboard · เจ้าของตลาด · ข้อมูลจำลอง</div><h1>${BRAND.market} · Pilot โซน B · 14 วัน</h1><p>วัด kg · m³ แก๊ส · kWh · kgCO₂e ทุกวัน ทุก kg มีเจ้าของ</p></div>
       <div className="sp"><button className="btn" onClick=${() => D(x => ({ ...x, view: 'phone' }))}><${Icon} n="phone" s=${15} /> กลับไปหน้า LINE</button><button className="btn primary" onClick=${() => window.print()}><${Icon} n="doc" s=${15} /> รายงาน PDF ส่ง อปท.</button></div></div>
-    <div className="notice">ตัวเลขฐานเป็น<b>ข้อมูลตัวอย่าง</b>สำหรับนำเสนอ ${live ? html`· รวมผลจากเดโมแล้ว (${dm.listed} รายการใหม่, รับเศษ ${nf(dm.bio, 1)} กก)` : html`· ลองกดในหน้า LINE แล้วกลับมาดู ตัวเลข "วันนี้" จะขยับตาม`} <span className="np">· แทนด้วยตัวเลข pilot จริงเมื่อทดลองโซนเดียว 2 สัปดาห์</span></div>
+    <div className="mods"><span className="eyebrow" style=${{ marginRight: 4 }}>Module ที่ตลาดเปิด</span>
+      ${Object.entries(MODS).map(([k, m]) => html`<button key=${k} className="mod" aria-pressed=${mods[k]} onClick=${() => toggle(k)}><span className="sw"></span><${Icon} n=${m.i} s=${17} c=${m.c} /><span>${m.n}</span></button>`)}</div>
     <div className="kpis">
-      <div className="kpi"><span className="l">ขยะที่ไม่ลงฝังกลบ</span><span className="v">${nf(kg / 1000, 2)}<small>ตัน</small></span><span className="d">≈ ${nf(kg * k30 / 1000, 1)} ตัน/เดือน · ${nf(kg)} กก</span></div>
-      <div className="kpi"><span className="l">ค่ากำจัดขยะที่ประหยัด</span><span className="v">฿${nf(kg / 1000 * a.rate)}</span><span className="d">≈ ฿${nf(kg * k30 / 1000 * a.rate)}/เดือน ที่ ฿${nf(a.rate)}/ตัน</span></div>
-      <div className="kpi"><span className="l">คาร์บอนที่ลดได้</span><span className="v">${nf(co.total)}<small>kgCO₂e</small></span><span className="d">ฝังกลบ + LPG + ไฟ − ไฟระบบ/มีเทนรั่ว</span></div>
-      <div className="kpi"><span className="l">ขาย / ส่งต่อทันเวลา</span><span className="v">${nf(onTime, 1)}<small>%</small></span><span className="d">${BASE.onTime + dm.onTime} จาก ${BASE.items + dm.closed} รายการ</span><span className=${'pill ' + (onTime >= 80 ? 'good' : 'meh')}>เป้า ≥ 80%</span></div>
-      <div className="kpi"><span className="l">ใช้ห้องเย็นวันนี้</span><span className="v">${coldToday}<small>%</small></span><span className="d">${s.cold.used}/${s.cold.cap} ลัง · เครดิตใช้ ${nf(credUsed, 1)}/${nf(BASE.creditIssued, 1)} ลัง-คืน</span></div>
-      <div className="kpi"><span className="l">เวลาลงของต่อรายการ</span><span className="v">${nf(avgSec, 1)}<small>วินาที</small></span><span className="d">${lastSec ? `ล่าสุดจากเดโม ${lastSec} วิ` : 'ลองลงของในหน้า LINE เพื่อจับเวลา'}</span><span className=${'pill ' + (avgSec <= 15 ? 'good' : 'meh')}>เป้า ≤ 15 วิ</span></div>
+      <div className="kpi"><span className="l">เศษเข้าลูป (ไม่ลงฝังกลบ)</span><span className="v">${nf(kgLoop / 1000, 2)}<small>ตัน</small></span><span className="d">14 วัน · รับทั้งหมด ${nf(kgAll)} กก.</span></div>
+      <div className="kpi"><span className="l">เกรด A สัปดาห์ที่ 2</span><span className="v">${nf(pA2, 1)}<small>%</small></span><span className="d">ทั้ง pilot ${nf(kgA / kgAll * 100, 1)}%</span><span className=${'pill ' + (pA2 >= 80 ? 'good' : 'meh')}>เกณฑ์ผ่าน ≥ 80%</span></div>
+      <div className="kpi"><span className="l">ไฟจากไบโอแก๊ส (เมื่อวาน)</span><span className="v">${nf(kwhY, 1)}<small>kWh</small></span><span className="d">แก๊ส ${nf(m3Y, 1)} m³ · ห้องเย็นใช้ ${mods.cold ? BIO.coldNeed : 0} kWh</span>${mods.cold && html`<span className=${'pill ' + (kwhY >= BIO.coldNeed ? 'good' : 'meh')}>ผลิต ≥ ห้องเย็นใช้</span>`}</div>
+      <div className="kpi"><span className="l">คาร์บอนที่ลดได้</span><span className="v">${nf(co2)}<small>kgCO₂e</small></span><span className="d">${co2PerKg(mods).toFixed(2)} kgCO₂e ต่อ kg เศษ</span></div>
+      <div className="kpi"><span className="l">ค่าฝังกลบที่ประหยัด</span><span className="v">฿${nf(kgLoop / 1000 * rate)}</span><span className="d">ที่ ฿${nf(rate)}/ตัน · ≈ ฿${nf(kgLoop / 14 * 30 / 1000 * rate)}/เดือน</span></div>
+      <div className="kpi"><span className="l">รายได้ใหม่ของตลาด</span><span className="v">฿${nf(revenue)}</span><span className="d">ขายปุ๋ย + แก๊สด้วยเงินสด ให้คนที่ไม่ได้แยกเศษ</span></div>
     </div>
     <div className="grid2">
-      <div className="panel"><h3>กิโลกรัมที่ไม่ลงฝังกลบ รายวัน</h3><p className="sub">แยกตามขั้นของ Auto-Cascade ที่ของไปถึง</p>
+      <div className="panel"><h3>เศษที่คนขนรับต่อวัน แยกตามเกรด</h3><p className="sub">เกรด A/B เข้าบ่อหมัก · เกรด C คัดซ้ำ ไม่ได้แต้ม</p>
         <div className="legend">${SER.map(([k, n, c]) => html`<span key=${k}><i style=${{ background: `var(${c})` }}></i>${n}</span>`)}</div><${StackBars} days=${days} /></div>
       <div className="col">
-        <div className="panel"><h3>การใช้ห้องเย็น</h3><p className="sub">% ความจุที่ถูกจองต่อวัน</p><${ColdLine} days=${days} today=${coldToday} /></div>
-        <div className="panel"><h3>คุณภาพเศษที่คัด</h3><p className="sub">เกรด A เข้าบ่อไบโอแก๊สได้ทันที</p><${Donut} g=${g} /></div>
+        <div className="panel"><h3>สมดุลพลังงาน</h3><p className="sub">kWh ที่ผลิตจากไบโอแก๊ส เทียบไฟที่ห้องเย็นใช้</p><${EnergyLine} days=${days} need=${mods.cold ? BIO.coldNeed : 0} /></div>
+        <div className="panel"><h3>ห้องเย็นรวม (Module 1)</h3><p className="sub">${mods.cold ? `ใช้ ${s.cold.used}/${s.cold.cap} ลัง · ${s.cold.temp}°C · แต้มแลกฝากไปแล้ว ${nf(dm.ptsRedeemed)} แต้มในเดโมนี้` : 'ปิดอยู่'}</p>
+          <div className="bar-in" style=${{ height: 10 }}><i style=${{ width: (mods.cold ? s.cold.used / s.cold.cap * 100 : 0) + '%', background: 'var(--cold)' }}></i></div></div>
       </div>
     </div>
     <div className="grid2">
-      <div className="panel"><h3>แผงที่ใช้ระบบมากที่สุด</h3><p className="sub">14 วันล่าสุด</p><div className="tbl"><table><thead><tr><th>แผง</th><th className="n">ลงของ</th><th>ขายทันเวลา</th><th className="n">เกรด A</th><th className="n">เครดิตที่ใช้</th></tr></thead>
-        <tbody>${SHOPS.map(([n, st, items, ot, ga, cr]) => html`<tr key=${st}><td><b>${n}</b> <span style=${{ color: 'var(--muted)' }}>${st}</span></td><td className="n">${items + (st === ME.vendor.stall ? dm.listed : 0)}</td>
-          <td><div style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><div className="bar-in" style=${{ flex: 1 }}><i style=${{ width: ot + '%' }}></i></div><span className="num" style=${{ fontSize: 12.5 }}>${ot}%</span></div></td><td className="n">${ga}%</td><td className="n">${cr + (st === ME.vendor.stall ? dm.creditUsed : 0)}</td></tr>`)}</tbody></table></div></div>
-      <div className="panel"><h3>รายงานคาร์บอน (สูตรตามสไลด์ Low Carbon)</h3><p className="sub">14 วันล่าสุด · ปรับสมมติฐานได้</p>
-        <div className="calc">
-          ${[['เศษไม่ลงฝังกลบ × EF ฝังกลบ', co.landfill, '+'], [`LPG ที่ร้านไม่ต้องซื้อ ${nf(co.lpg, 1)} กก. × EF LPG`, co.gas, '+'], [`ไฟหลวงที่แทนด้วยไบโอแก๊ส ${nf(co.kwh)} kWh`, co.power, '+'], ['ไฟระบบ + มีเทนรั่ว', co.minus, '−']].map(([t, v, sg]) => html`<div key=${t} className="it"><span>${t}</span><b className="num">${sg}${nf(v)}</b></div>`)}
-          <div className="it tot"><span>kgCO₂e ที่ลด · คาดการณ์ 30 วัน ${nf(co.total * k30 / 1000, 2)} tCO₂e</span><b className="num">${nf(co.total)}</b></div></div>
-        <div className="assume" style=${{ marginTop: 14 }}>
-          ${[['rate', 'ค่ากำจัดขยะ (บาท/ตัน)', 50], ['efLf', 'EF ฝังกลบ (kgCO₂e/กก)', .05], ['efLpg', 'EF LPG (kgCO₂e/กก)', .1], ['efGrid', 'EF ไฟฟ้า (kgCO₂e/kWh)', .01], ['yield', 'ไบโอแก๊ส (m³/กก เศษ)', .01], ['leak', 'มีเทนรั่ว (%)', 1]].map(([k, t, st]) => html`<label key=${k} htmlFor=${'as-' + k}>${t}<input id=${'as-' + k} type="number" value=${a[k]} min="0" step=${st} onChange=${setK(k)} /></label>`)}</div>
-        <p className="sub" style=${{ marginTop: 10, marginBottom: 0 }}>ทุกค่าเป็นค่าตั้งต้นตัวอย่าง ค่า EF ควรใช้ของ อบก. และอัตราไบโอแก๊สใช้ผล BMP test ของเศษจริงก่อนส่งรายงาน</p></div>
+      <div className="panel"><h3>แผงที่แยกเศษมากที่สุด</h3><p className="sub">ทำมากได้มาก · ไม่ต้องบังคับ</p><div className="tbl"><table><thead><tr><th>แผง</th><th className="n">กก. 14 วัน</th><th>เกรด A</th><th className="n">แต้มที่ได้</th><th className="n">แต้มที่แลก</th></tr></thead>
+        <tbody>${SHOPS.map(([n, st, kg, a, got, used]) => {
+          return html`<tr key=${st}><td><b>${n}</b> <span style=${{ color: 'var(--muted)' }}>${st}</span></td><td className="n">${kg}</td>
+          <td><div style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><div className="bar-in" style=${{ flex: 1 }}><i style=${{ width: a + '%' }}></i></div><span className="num" style=${{ fontSize: 12.5 }}>${a}%</span></div></td><td className="n">${got}</td><td className="n">${used}</td></tr>`; })}</tbody></table></div></div>
+      <div className="panel"><h3>Low Carbon · ต่อ kg เศษ</h3><p className="sub">เทียบฝังกลบ vs เข้าลูป LoopLard · หักมีเทนรั่วแล้ว · module ที่ปิดไม่นับเครดิต</p>
+        <${Co2Bars} mods=${mods} />
+        <div className="assume" style=${{ marginTop: 12, display: 'flex', gap: 10, alignItems: 'center', fontSize: 12.5, color: 'var(--muted)' }}><label htmlFor="rate" style=${{ display: 'flex', gap: 8, alignItems: 'center' }}>ค่าฝังกลบ (บาท/ตัน)
+          <input id="rate" type="number" value=${rate} min="0" step="50" onChange=${e => setRate(+e.target.value || 0)} style=${{ width: 100, border: '1px solid var(--line)', background: 'var(--surface-2)', color: 'var(--ink)', borderRadius: 8, padding: '6px 8px', font: '500 14px var(--f-mono)' }} /></label></div>
+        <p className="sub" style=${{ marginTop: 10, marginBottom: 0 }}>EF จาก อบก. และการวิเคราะห์ของทีม · อัตราไบโอแก๊สรอผล BMP test</p></div>
     </div></div>`;
 }
 
 /* ======================= app ======================= */
-const ROLES = [['vendor', 'แม่ค้า', 'store'], ['buyer', 'ผู้ซื้อ', 'bag'], ['processor', 'แปรรูป', 'pot'], ['porter', 'คนขน', 'truck']];
-const SHOT_CAP = { vendor: '01 · ต้นทางลงของ', buyer: '02 · ผู้ซื้อกดรับ', processor: '03 · หมดเวลา → ส่งต่อ', porter: 'Cold Loop · คนขนรับเศษ' };
+const ROLES = [['vendor', 'แม่ค้า', 'store'], ['porter', 'คนขน', 'truck'], ['farmer', 'เกษตรกร', 'tractor'], ['resto', 'ร้านอาหาร', 'flame']];
+const SHOT_CAP = { vendor: '01 · แม่ค้าแยกเศษ ได้แต้ม แลกบริการ', porter: '02 · คนขนสแกนถัง ชั่ง ให้เกรด', farmer: '03 · ปุ๋ยจากกากขายให้เกษตรกร', resto: '03 · ไบโอแก๊สแทน LPG ให้ร้านอาหาร' };
 function App() {
   const [s, d] = useReducer((st, f) => f(st), null, initState);
   const ref = useRef(s); ref.current = s; D = d; GET = () => ref.current;
-  useEffect(() => { const t = setInterval(() => d(tick), 1000); return () => clearInterval(t); }, []);
-  const setRole = r => d(x => ({ ...x, role: r, unread: { ...x.unread, [r]: 0 } }));
+  const [, tick] = useState(0);
+  useEffect(() => { const t = setInterval(() => tick(x => x + 1), 1000); return () => clearInterval(t); }, []);
   const roleTabs = html`<div className="seg" role="group" aria-label="บทบาท">${ROLES.map(([k, t, i]) => html`<button key=${k} aria-pressed=${s.role === k} onClick=${() => setRole(k)}><${Icon} n=${i} s=${16} />${t}${s.unread[k] > 0 && s.role !== k && html`<span className="badge">${s.unread[k]}</span>`}</button>`)}</div>`;
   const view = v => d(x => ({ ...x, view: v }));
   return html`<${React.Fragment}>
-    <header className="top"><div className="brand"><${Logo} s=${38} /><div><b>${BRAND.th} · ${BRAND.name}</b><small>ต้นแบบ LINE OA + LIFF + Dashboard · ข้อมูลตัวอย่าง</small></div></div>
+    <header className="top"><div className="brand"><${Logo} s=${38} /><div><b>${BRAND.th} · ${BRAND.name}</b><small>ต้นแบบ LINE OA + LIFF + Dashboard · ข้อมูลจำลอง</small></div></div>
       <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
         <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')} aria-label="แคปจอใส่สไลด์"><${Icon} n="frame" s=${16} /><span className="lg">แคปจอใส่สไลด์</span></button>
         <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')} aria-label="Dashboard"><${Icon} n="chart" s=${16} /><span className="lg">Dashboard</span></button></div></header>
