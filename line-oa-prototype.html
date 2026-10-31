@@ -303,7 +303,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
   .top .seg{flex-wrap:nowrap;flex:none}
   .top .seg button{padding:7px 10px;font-size:13px;gap:5px}
   .center{gap:8px}
-  .center .seg,.shot .seg{display:grid;grid-template-columns:repeat(4,1fr);width:100%;border-radius:16px;padding:3px}
+  .center .seg,.shot .seg{display:grid;grid-template-columns:repeat(3,1fr);width:100%;border-radius:16px;padding:3px}
   .center .seg button,.shot .seg button{flex-direction:column;gap:2px;padding:6px 2px;border-radius:13px;font-size:12px;justify-content:center}
   .center .seg .badge,.shot .seg .badge{position:absolute;top:2px;right:calc(50% - 22px);min-width:16px;height:16px;line-height:16px;font-size:10px}
   .phone{width:100%;height:calc(100svh - 128px);min-height:540px;max-height:860px;border-radius:22px;padding:0;background:none;box-shadow:0 12px 32px -14px rgba(10,30,20,.45),0 0 0 1px rgba(10,30,20,.08)}
@@ -332,7 +332,9 @@ const html = htm.bind(React.createElement);
 
 /* ======================= config (ตัวเลขตัวอย่าง ปรับตามผล pilot) ======================= */
 const BRAND = { name: 'LoopLard', th: 'อิ่มต่อ', market: 'ตลาดสดเทศบาล', tagline: 'แยกเศษ แลกบริการ' };
-const ME = { vendor: { name: 'ป้าแดง', stall: 'B12' }, porter: { name: 'พี่เอก' }, farmer: { name: 'ลุงมี', farm: 'ไร่ลุงมี' }, resto: { name: 'ข้าวแกงป้าศรี', stall: 'F03' } };
+const ME = { vendor: { name: 'ป้าแดง', stall: 'B12' }, porter: { name: 'พี่เอก' }, market: { name: 'คุณสมชาย', title: 'จนท.ตลาด' } };
+// เกษตรกรและร้านอาหารไม่ได้ใช้แอป ซื้อด้วยเงินสดที่สำนักงานตลาด แล้ว จนท. บันทึกขาย
+const FARM_BUYERS = ['ไร่ลุงมี', 'สวนพี่ต้อม', 'ลูกค้าทั่วไป'];
 const MIN = 60000;
 // แต้มต่อ กก. ตามเกรด · เกรด C ไม่ได้แต้ม ทั้งแม่ค้าและคนขน
 const GRADES = {
@@ -432,8 +434,10 @@ function initState() {
     pointLog: [{ t: at(320), text: 'ส่งเศษเกรด A 6.5 กก.', v: 65 }, { t: at(1500), text: 'แลกฝากของสดฟรี 1 ลัง', v: -50 }, { t: at(1700), text: 'ส่งเศษเกรด B 4 กก.', v: 20 }],
     jobs: [{ id: 'J1', shop: 'ลุงชัย', stall: 'C03', est: 9, status: 'open', note: 'ถังเขียวเต็ม · แจ้งเมื่อ 15:28' }],
     pickups: [{ t: at(320), shop: 'ป้าแดง', stall: 'B12', kg: 6.5, grade: 'A', pts: 65 }, { t: at(200), shop: 'เจ๊หมวย', stall: 'A07', kg: 8, grade: 'A', pts: 80 }, { t: at(150), shop: 'พี่นก', stall: 'B04', kg: 5, grade: 'B', pts: 25 }],
-    cold: { cap: 24, used: 15, temp: 4, quota: 2 }, fertStock: 340, orders: [], vouchers: [],
-    gasToday: 2.1,
+    cold: { cap: 24, used: 15, temp: 4, quota: 2 }, fertStock: 340, sales: [],
+    vouchers: [{ code: 'LL-7KQ2', vendor: 'เจ๊หมวย', stall: 'A07', item: REDEEM[0], qty: 2, status: 'pending', t: at(25) }],
+    gasMeters: [{ name: 'ข้าวแกงป้าศรี', stall: 'F03', m3: 61, paid: false }, { name: 'ก๋วยเตี๋ยวลุงหมาน', stall: 'F07', m3: 48, paid: false }],
+    digester: { ph: 7.1, bag: 68, temp: 36, m3: 44 },
     demo: { kg: 0, grade: { A: 0, B: 0, C: 0 }, fertSold: 0, gasSold: 0, revenue: 0, ptsIssued: 0, ptsRedeemed: 0 },
     chats: {
       vendor: [
@@ -447,18 +451,14 @@ function initState() {
         { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'porter' }, t: at(420) },
         { id: uid(), from: 'bot', kind: 'flex', card: { type: 'job', jid: 'J1' }, t: at(12) },
       ],
-      farmer: [
+      market: [
         { id: uid(), from: 'date', text: 'วันนี้' },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'farmer' }, t: at(600) },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'price' }, t: at(300) },
-      ],
-      resto: [
-        { id: uid(), from: 'date', text: 'วันนี้' },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'resto' }, t: at(600) },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'meter' }, t: at(60) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'market' }, t: at(500) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'digester' }, t: at(120) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'vnew', code: 'LL-7KQ2' }, t: at(25) },
       ],
     },
-    unread: { vendor: 0, porter: 1, farmer: 1, resto: 1 }, typing: { vendor: false, porter: false, farmer: false, resto: false },
+    unread: { vendor: 0, porter: 1, market: 1 }, typing: { vendor: false, porter: false, market: false },
     log: [{ id: uid(), t: at(1), text: 'เริ่มเดโม: โซน B ใช้ระบบ 34 แผง · บ่อหมักเดินปกติ', tone: '' }],
   };
 }
@@ -487,10 +487,12 @@ const modOff = (s, m) => !s.modules[m];
 
 const QV = [{ label: 'ถังเต็ม เรียกคนขน', act: 'call-porter', icon: 'truck' }, { label: 'แต้มของฉัน', act: 'points', icon: 'star' }, { label: 'คุยกับเจ้าหน้าที่', act: 'contact', icon: 'headset' }];
 
-function handoff(role) {
-  say(role, [{ kind: 'text', text: 'บอทส่งเรื่องต่อให้เจ้าหน้าที่ตลาดแล้วค่ะ รอสักครู่นะคะ' }, { kind: 'flex', card: { type: 'handoff' } }], 700);
-  D(s => addLog(s, 'บอทไม่เข้าใจ 2 ครั้ง → เปิด chat mode ให้ จนท.ตลาด (คุณสมชาย) ตอบเอง', 'warn'));
-  setTimeout(() => D(s => addMsg(s, role, { from: 'staff', kind: 'text', text: '[จนท.สมชาย] สวัสดีครับ เดี๋ยวผมเดินไปดูให้ภายใน 5 นาทีนะครับ' })), 3200);
+// ส่งต่อคนจริง: เรื่องเด้งเข้าแชท จนท.ตลาด กด "รับเรื่อง" แล้วตอบแม่ค้าในแชท OA เดียวกัน
+function handoff(role, text) {
+  const s = GET(); const last = text || [...s.chats[role]].reverse().find(m => m.from === 'me')?.text || 'ขอคุยกับเจ้าหน้าที่';
+  say(role, [{ kind: 'text', text: 'บอทส่งเรื่องให้เจ้าหน้าที่ตลาดแล้วค่ะ รอสักครู่นะคะ' }, { kind: 'flex', card: { type: 'handoff' } }], 700);
+  D(x => { let y = addLog(x, `บอทตอบไม่ได้ → ส่งเรื่องเข้าแชท จนท.ตลาด`, 'warn');
+    return addMsg(y, 'market', { from: 'bot', kind: 'flex', card: { type: 'ticket', who: role === 'porter' ? ME.porter.name : `${ME.vendor.name} · ${ME.vendor.stall}`, role, text: last } }); });
 }
 
 function onText(role, text) {
@@ -509,15 +511,16 @@ function onText(role, text) {
     if (/สแกน|รับ/.test(t)) return go('scan-open');
     if (/งาน/.test(t)) return go('jobs');
     if (/แต้ม|สรุป/.test(t)) return go('porter-sum');
-  } else if (role === 'farmer') {
-    if (/สั่ง|ซื้อ/.test(t)) return go('fert-open');
-    if (/ราคา|ปุ๋ย/.test(t)) return go('price');
-  } else if (role === 'resto') {
-    if (/บิล|จ่าย/.test(t)) return go('bill');
-    if (/แก๊ส|มิเตอร์/.test(t)) return go('meter');
+  } else if (role === 'market') {
+    if (/สแกน|qr|แลก/.test(t)) return go('vscan-open');
+    if (/ขาย|ปุ๋ย|เงิน/.test(t)) return go('sale-open');
+    if (/แก๊ส|บิล|ร้าน/.test(t)) return go('gasbills');
+    if (/บ่อ|ph|หมัก/.test(t)) return go('digester');
+    if (/ห้องเย็น/.test(t)) return go('coldtoday');
+    return say('market', [{ kind: 'text', text: 'ใช้เมนูด้านล่างได้เลยครับ' }], 400);
   }
   const misses = s.misses + 1; D(x => ({ ...x, misses }));
-  if (misses >= 2) { D(x => ({ ...x, misses: 0 })); return handoff(role); }
+  if (misses >= 2) { D(x => ({ ...x, misses: 0 })); return handoff(role, text); }
   say(role, [{ kind: 'text', text: 'ขอโทษค่ะ บอทยังไม่เข้าใจ ลองกดเมนูด้านล่างได้เลยค่ะ' }]);
 }
 
@@ -551,6 +554,8 @@ function act(role, a, arg, msg) {
         if (item.id === 'fert') y = { ...y, fertStock: y.fertStock - 5 * qty };
         y = flash(y, item.mod === 'cold' ? 4 : item.mod === 'fert' ? 5 : 6);
         y = addLog(y, `แลกแต้มผ่านเว็บ: ${ME[role].name} · ${item.t}${qty > 1 ? ' × ' + qty : ''} · −${cost} แต้ม`, item.mod === 'cold' ? 'cold' : 'ok');
+        y = { ...y, vouchers: [{ code: c, vendor: ME[role].name, stall: role === 'vendor' ? ME.vendor.stall : '-', item, qty, status: 'pending', t: simNow(y), role }, ...y.vouchers] };
+        y = addMsg(y, 'market', { from: 'bot', kind: 'flex', card: { type: 'vnew', code: c } });
         return addMsg(y, role, { from: 'me', kind: 'text', text: `แลก ${item.t}${qty > 1 ? ' × ' + qty : ''}` }); });
       return say(role, [{ kind: 'flex', card: { type: 'voucher', item, qty, code: c, cost } }], 700);
     }
@@ -574,22 +579,49 @@ function act(role, a, arg, msg) {
         return addMsg(y, 'porter', { from: 'me', kind: 'text', text: `รับเศษ ${shop} ${kg} กก. เกรด ${grade}` }); });
       return say('porter', [{ kind: 'flex', card: { type: 'receipt', shop, stall, kg, grade, vp, pp } }], 700);
     }
-    /* ---- เกษตรกร ---- */
-    case 'fert-open': if (modOff(s, 'fert')) return say('farmer', [{ kind: 'text', text: 'ตลาดนี้ยังไม่เปิดขายปุ๋ยจากกาก (Module 2) ค่ะ จะแจ้งทันทีที่เปิดนะคะ' }], 500); return openSheet('farmer', 'fert');
-    case 'price': return say('farmer', [{ kind: 'flex', card: { type: 'price' } }], 450);
-    case 'my-orders': return say('farmer', [{ kind: 'flex', card: { type: 'orders' } }], 450);
-    case 'fert-order': {
-      const bags = arg; const kg = bags * 25; const total = kg * PRICE.fert; const c = 'PF-' + code4();
+    /* ---- จนท.ตลาด ---- */
+    case 'vscan-open': return openSheet('market', 'vscan', arg);
+    case 'vscan-confirm': {
+      const v = s.vouchers.find(z => z.code === arg); if (!v || v.status !== 'pending') return;
+      closeSheet();
+      D(x => { let y = { ...x, vouchers: x.vouchers.map(z => z.code === v.code ? { ...z, status: 'used' } : z) };
+        y = flash(y, v.item.mod === 'cold' ? 4 : v.item.mod === 'fert' ? 5 : 6);
+        y = addLog(y, `จนท.ยืนยันรหัส ${v.code} · ${v.vendor} ${v.item.t}${v.qty > 1 ? ' × ' + v.qty : ''}`, v.item.mod === 'cold' ? 'cold' : 'ok');
+        y = addMsg(y, 'market', { from: 'me', kind: 'text', text: `ยืนยัน ${v.code}` });
+        if (v.stall === ME.vendor.stall) y = addMsg(y, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'checkin', code: v.code } });
+        return y; });
+      return say('market', [{ kind: 'text', text: `ยืนยันแล้วครับ ${v.vendor} · ${v.item.t}${v.qty > 1 ? ' × ' + v.qty : ''}` }], 500);
+    }
+    case 'sale-open': return openSheet('market', 'sale', arg);
+    case 'sale-fert': {
+      const { buyer, bags } = arg; const kg = bags * 25; const total = kg * PRICE.fert;
+      if (modOff(s, 'fert')) { toast('ตลาดยังไม่เปิด Module 2'); return; }
       if (kg > s.fertStock) { toast('ปุ๋ยในสต็อกไม่พอ'); return; }
       closeSheet();
-      D(x => { let y = { ...x, fertStock: x.fertStock - kg, orders: [{ code: c, bags, kg, total, t: simNow(x) }, ...x.orders], demo: { ...x.demo, fertSold: x.demo.fertSold + kg, revenue: x.demo.revenue + total } };
-        y = flash(y, 5); y = addLog(y, `${ME.farmer.farm} สั่งปุ๋ยจากกาก ${kg} กก. · ฿${nf(total)} เงินสด → รายได้ตลาด`, 'ok');
-        return addMsg(y, 'farmer', { from: 'me', kind: 'text', text: `สั่งปุ๋ย ${bags} กระสอบ` }); });
-      return say('farmer', [{ kind: 'flex', card: { type: 'order', code: c, bags, kg, total } }], 700);
+      D(x => { let y = { ...x, fertStock: x.fertStock - kg, sales: [{ kind: 'fert', buyer, kg, total, t: simNow(x) }, ...x.sales], demo: { ...x.demo, fertSold: x.demo.fertSold + kg, revenue: x.demo.revenue + total } };
+        y = flash(y, 5); y = addLog(y, `ขายปุ๋ยจากกากให้ ${buyer} ${kg} กก. · ฿${nf(total)} เงินสด → รายได้ตลาด`, 'ok');
+        return addMsg(y, 'market', { from: 'me', kind: 'text', text: `บันทึกขายปุ๋ย ${buyer} ${bags} กระสอบ` }); });
+      return say('market', [{ kind: 'flex', card: { type: 'salercpt', kind: 'fert', buyer, kg, total } }], 600);
     }
-    /* ---- ร้านอาหาร ---- */
-    case 'meter': return say('resto', [{ kind: 'flex', card: { type: 'meter' } }], 450);
-    case 'bill': return say('resto', [{ kind: 'flex', card: { type: 'bill' } }], 450);
+    case 'sale-gas': {
+      const g = s.gasMeters.find(z => z.stall === arg); if (!g || g.paid) return; const total = g.m3 * PRICE.gas;
+      if (modOff(s, 'gas')) { toast('ตลาดยังไม่เปิด Module 3'); return; }
+      closeSheet();
+      D(x => { let y = { ...x, gasMeters: x.gasMeters.map(z => z.stall === arg ? { ...z, paid: true } : z), sales: [{ kind: 'gas', buyer: g.name, m3: g.m3, total, t: simNow(x) }, ...x.sales], demo: { ...x.demo, gasSold: x.demo.gasSold + g.m3, revenue: x.demo.revenue + total } };
+        y = flash(y, 6); y = addLog(y, `เก็บค่าไบโอแก๊ส ${g.name} (${g.stall}) ${g.m3} m³ · ฿${nf(total)} → รายได้ตลาด`, 'ok');
+        return addMsg(y, 'market', { from: 'me', kind: 'text', text: `รับค่าแก๊ส ${g.name}` }); });
+      return say('market', [{ kind: 'flex', card: { type: 'salercpt', kind: 'gas', buyer: g.name, m3: g.m3, total } }], 600);
+    }
+    case 'gasbills': return say('market', [{ kind: 'flex', card: { type: 'gasbills' } }], 450);
+    case 'digester': return say('market', [{ kind: 'flex', card: { type: 'digester' } }], 450);
+    case 'coldtoday': return say('market', [{ kind: 'flex', card: { type: 'coldtoday' } }], 450);
+    case 'tickets': return say('market', [{ kind: 'flex', card: { type: 'tickets' } }], 450);
+    case 'ticket-take': {
+      D(x => { let y = addMsg(x, 'market', { from: 'me', kind: 'text', text: 'รับเรื่องครับ' });
+        y = addLog(y, `จนท.สมชายรับเรื่องจาก ${msg.card.who} → ตอบในแชท OA เดียวกัน`, 'api');
+        return addMsg(y, msg.card.role, { from: 'staff', kind: 'text', text: '[จนท.สมชาย] สวัสดีครับ รับเรื่องแล้ว เดี๋ยวผมเดินไปดูให้ภายใน 5 นาทีนะครับ' }); });
+      return;
+    }
   }
 }
 
@@ -599,11 +631,10 @@ function endDay() {
     const kgToday = x.pickups.filter(p => p.stall === ME.vendor.stall).reduce((a, p) => a + p.kg, 0);
     const ptsToday = x.pickups.filter(p => p.stall === ME.vendor.stall).reduce((a, p) => a + p.pts, 0);
     let y = addMsg(x, 'vendor', { from: 'bot', kind: 'flex', card: { type: 'daysum', kg: kgToday, pts: ptsToday } });
-    if (x.modules.gas) { const m3 = 2.6; const total = m3 * PRICE.gas;
-      y = { ...y, gasToday: m3, demo: { ...y.demo, gasSold: y.demo.gasSold + m3, revenue: y.demo.revenue + total } };
-      y = addMsg(y, 'resto', { from: 'bot', kind: 'flex', card: { type: 'gasday', m3 } }); y = addLog(y, `${ME.resto.name} ใช้ไบโอแก๊ส ${m3} m³ · ฿${nf(total, 1)} → รายได้ตลาด`, 'ok'); }
+    if (x.modules.gas) y = { ...y, gasMeters: y.gasMeters.map(g => ({ ...g, m3: +(g.m3 + (g.stall === 'F03' ? 2.6 : 1.9)).toFixed(1), paid: false })) };
+    y = addMsg(y, 'market', { from: 'bot', kind: 'flex', card: { type: 'mdaysum' } });
     y = flash(y, 4);
-    return addLog(y, 'สิ้นวัน: push สรุปให้แม่ค้า ร้านอาหาร และอัปเดต Dashboard', 'api');
+    return addLog(y, 'สิ้นวัน: push สรุปให้แม่ค้าและ จนท.ตลาด · อัปเดตมิเตอร์แก๊สร้านอาหาร และ Dashboard', 'api');
   });
 }
 
@@ -621,14 +652,13 @@ const RM = {
     { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'uri', uri: LIFF('scan') }, ui: { t: 'สแกนรับเศษ', sub: 'สแกนถัง · ชั่ง · ให้เกรด', i: 'qr', hero: 1 }, a: 'scan-open' },
     { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'งานรอบนี้' }, ui: { t: 'งานรอบนี้', sub: 'ถังที่เต็มแล้ว', i: 'truck', tone: 'teal' }, a: 'jobs' },
     { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'message', text: 'สรุปวันนี้' }, ui: { t: 'สรุปวันนี้', sub: 'กก. · เกรด · แต้ม', i: 'chart', tone: 'amber' }, a: 'porter-sum' }] },
-  farmer: { size: { width: 2500, height: 1686 }, selected: true, name: 'looplard-farmer', chatBarText: 'เมนูเกษตรกร', areas: [
-    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'uri', uri: LIFF('fertilizer') }, ui: { t: 'สั่งปุ๋ยจากกาก', sub: 'ถูกกว่าปุ๋ยเคมี จ่ายเงินสด', i: 'leaf', hero: 1 }, a: 'fert-open' },
-    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'ราคาวันนี้' }, ui: { t: 'ราคาวันนี้', sub: 'เทียบปุ๋ยเคมี', i: 'tag', tone: 'amber' }, a: 'price' },
-    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'message', text: 'คำสั่งซื้อของฉัน' }, ui: { t: 'คำสั่งซื้อ', sub: 'รหัสรับปุ๋ย', i: 'receipt', tone: 'violet' }, a: 'my-orders' }] },
-  resto: { size: { width: 2500, height: 1686 }, selected: true, name: 'looplard-restaurant', chatBarText: 'เมนูร้านอาหาร', areas: [
-    { bounds: { x: 0, y: 0, width: 1250, height: 1686 }, action: { type: 'message', text: 'มิเตอร์แก๊สวันนี้' }, ui: { t: 'มิเตอร์แก๊ส', sub: 'ไบโอแก๊สแทน LPG', i: 'flame', hero: 1 }, a: 'meter' },
-    { bounds: { x: 1250, y: 0, width: 1250, height: 843 }, action: { type: 'message', text: 'บิลเดือนนี้' }, ui: { t: 'บิลเดือนนี้', sub: 'เทียบค่า LPG', i: 'receipt', tone: 'rose' }, a: 'bill' },
-    { bounds: { x: 1250, y: 843, width: 1250, height: 843 }, action: { type: 'message', text: 'แจ้งปัญหาแก๊ส' }, ui: { t: 'แจ้งปัญหาแก๊ส', sub: 'คุยกับ จนท.', i: 'headset', tone: 'slate' }, a: 'contact' }] },
+  market: { size: { width: 2500, height: 1686 }, selected: true, name: 'looplard-market-staff', chatBarText: 'เมนูเจ้าหน้าที่', areas: [
+    { bounds: { x: 0, y: 0, width: 833, height: 843 }, action: { type: 'uri', uri: LIFF('verify') }, ui: { t: 'สแกนรหัสแลก', sub: 'ยืนยันแต้มที่แม่ค้าแลก', i: 'qr', hero: 1 }, a: 'vscan-open' },
+    { bounds: { x: 833, y: 0, width: 834, height: 843 }, action: { type: 'uri', uri: LIFF('sale') }, ui: { t: 'บันทึกขาย', sub: 'ปุ๋ย / แก๊ส เงินสด', i: 'receipt', tone: 'amber' }, a: 'sale-open' },
+    { bounds: { x: 1667, y: 0, width: 833, height: 843 }, action: { type: 'message', text: 'บิลแก๊สร้านอาหาร' }, ui: { t: 'บิลแก๊สร้าน', sub: 'มิเตอร์รายร้าน', i: 'flame', tone: 'rose' }, a: 'gasbills' },
+    { bounds: { x: 0, y: 843, width: 833, height: 843 }, action: { type: 'message', text: 'สถานะบ่อหมัก' }, ui: { t: 'บ่อหมัก', sub: 'pH · แก๊ส · อุณหภูมิ', i: 'tank', tone: 'teal' }, a: 'digester' },
+    { bounds: { x: 833, y: 843, width: 834, height: 843 }, action: { type: 'message', text: 'ห้องเย็นวันนี้' }, ui: { t: 'ห้องเย็นวันนี้', sub: 'ลังที่ฝาก · ที่ว่าง', i: 'snow', tone: 'blue' }, a: 'coldtoday' },
+    { bounds: { x: 1667, y: 843, width: 833, height: 843 }, action: { type: 'message', text: 'เรื่องจากแม่ค้า' }, ui: { t: 'เรื่องจากแม่ค้า', sub: 'ที่บอทตอบไม่ได้', i: 'headset', tone: 'slate' }, a: 'tickets' }] },
 };
 const TONE = { blue: ['#e6f1fb', '#2a83c9'], amber: ['#fff3d6', '#e39400'], violet: ['#efebff', '#6f5bd0'], slate: ['#eceff3', '#4f5b6b'], teal: ['#dff5f2', '#0f9a8e'], rose: ['#ffe9ec', '#e0475a'] };
 const RM_FONT = "Anuphan, 'Noto Sans Thai', sans-serif";
@@ -706,8 +736,7 @@ function FlexCard({ m, role, s }) {
     case 'welcome': {
       const txt = { vendor: [`สวัสดีค่ะ ${ME.vendor.name} แผง ${ME.vendor.stall}`, 'แยกเศษผักผลไม้ใส่ถังเขียว ถังเต็มกดเรียกคนขน ได้แต้มตาม กก. ทำมากได้มาก แล้วใช้แต้มแลกฝากของสดในห้องเย็น ปุ๋ย หรือแก๊ส'],
         porter: [`สวัสดีค่ะ ${ME.porter.name}`, 'มีถังเต็มบอทจะส่งงานมาที่นี่ สแกน QR ถัง ชั่ง ให้เกรด แต้มเข้าแม่ค้าทันที เกรด A/B คนขนได้ 1 แต้ม/กก.'],
-        farmer: [`สวัสดีค่ะ ${ME.farmer.name}`, `ปุ๋ยจากกากหมักของ${BRAND.market} ราคา ฿${PRICE.fert}/กก. ถูกกว่าปุ๋ยเคมี สั่งในแชทนี้ จ่ายเงินสดตอนรับ`],
-        resto: [`สวัสดีค่ะ ${ME.resto.name}`, 'ร้านต่อท่อไบโอแก๊สจากบ่อหมักของตลาดแล้ว ใช้แทน LPG ในราคาถูกกว่า ดูมิเตอร์และบิลได้ที่นี่'] }[c.role];
+        market: [`สวัสดีครับ ${ME.market.name} · ${ME.market.title}`, 'สแกนรหัสที่แม่ค้าแลกแต้ม บันทึกขายปุ๋ยให้เกษตรกรและเก็บค่าแก๊สร้านอาหารด้วยเงินสด ดูสถานะบ่อหมัก และรับเรื่องที่บอทตอบไม่ได้'] }[c.role];
       return html`<div className="fx"><div className="hero" style=${{ height: 96, background: 'linear-gradient(135deg,#06c755,#0aa04a)' }}>
         <div style=${{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 85% 0%, rgba(255,255,255,.3), transparent 45%)' }}></div>
         <div style=${{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', position: 'relative' }}><${Logo} s=${44} /><div><div style=${{ fontWeight: 700, fontSize: 18 }}>${BRAND.th} · ${BRAND.name}</div><div style=${{ fontSize: 12, opacity: .9 }}>${BRAND.tagline} · เศษผักวันนี้ = ความเย็นพรุ่งนี้</div></div></div></div>
@@ -790,37 +819,63 @@ function FlexCard({ m, role, s }) {
           <div className="kv"><span>แต้มคงเหลือ</span><b className="num">${nf(s.points.vendor)}</b></div>
           <div className="note">เศษของป้าวันนี้ลดคาร์บอนได้ ${nf(c.kg * co2PerKg(s.modules), 1)} kgCO₂e เทียบกับฝังกลบ</div></div>
         <${Btns} m=${m} role=${role} items=${[{ label: 'ฝากของสดคืนนี้', a: 'redeem-open', cls: 'c', keep: true }]} /></div>`;
-    case 'price': return html`<div className="fx"><${Head} bg=${G.soil} i="leaf">ราคาปุ๋ยจากกากวันนี้<//>
-        <div className="bd"><div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="big">฿${PRICE.fert}</span><span>/กก.</span><s style=${{ color: '#aaa', marginLeft: 6 }}>ปุ๋ยเคมี ฿${PRICE.fertChem}</s></div>
-          <div className="kv"><span>กระสอบ 25 กก.</span><b className="num">฿${nf(PRICE.fert * 25)}</b></div><div className="kv"><span>มีในสต็อก</span><b className="num">${modOff(s, 'fert') ? 'ยังไม่เปิด' : nf(s.fertStock) + ' กก.'}</b></div>
-          <div style=${{ fontSize: 12, color: '#888' }}>ราคาตัวอย่าง · จ่ายเงินสดตอนรับ · รายได้เข้าตลาด</div></div>
-        <${Btns} m=${m} role=${role} items=${[{ label: 'สั่งปุ๋ย', a: 'fert-open', cls: 'o', keep: true }]} /></div>`;
-    case 'order': return html`<div className="fx"><${Head} bg=${G.soil} i="leaf">สั่งปุ๋ยสำเร็จ<//>
-        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><div className="ttl">ปุ๋ยจากกาก ${c.bags} กระสอบ (${c.kg} กก.)</div><${QR} seed=${c.code} size=${100} /><div className="code">${c.code}</div>
-          <div style=${{ width: '100%' }}><div className="kv"><span>ยอดชำระ</span><b className="num">฿${nf(c.total)}</b></div><div className="kv"><span>ถ้าเป็นปุ๋ยเคมี</span><b className="num" style=${{ color: '#999' }}>฿${nf(c.kg * PRICE.fertChem)}</b></div></div>
-          <div style=${{ fontSize: 12, color: '#888' }}>ชำระเงินสดตอนรับที่จุดปุ๋ยหลังตลาด</div></div><div style=${{ height: 8 }}></div></div>`;
-    case 'orders': return html`<div className="fx"><${Head} bg=${G.dark} i="receipt">คำสั่งซื้อของ${ME.farmer.name}<//>
-        <div className="bd"><div className="mini">${s.orders.length ? s.orders.map(o => html`<div key=${o.code} className="it"><${Icon} n="leaf" s=${20} c="#c07a2c" /><div style=${{ flex: 1 }}><b>${o.kg} กก.</b><div style=${{ fontSize: 12, color: '#888' }}>฿${nf(o.total)} · ${hm(o.t)}</div></div><b className="num">${o.code}</b></div>`) : html`<div className="it" style=${{ color: '#888' }}>ยังไม่มีคำสั่งซื้อ</div>`}</div></div><div style=${{ height: 6 }}></div></div>`;
-    case 'meter': {
-      if (modOff(s, 'gas')) return html`<div className="fx"><${Head} bg=${G.grey} i="flame">ยังไม่เปิดไบโอแก๊ส<//><div className="bd"><div style=${{ fontSize: 13, color: '#555', paddingBottom: 8 }}>ตลาดยังไม่เปิด Module 3 ร้านใช้ LPG ตามเดิม</div></div></div>`;
-      const m3 = s.gasToday; const save = m3 * (PRICE.lpgEq - PRICE.gas);
-      return html`<div className="fx"><${Head} bg=${G.flame} i="gauge">มิเตอร์ไบโอแก๊ส · ${ME.resto.stall}<//>
-        <div className="bd"><div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="big num">${nf(m3, 1)}</span><span>m³ วันนี้</span></div>
-          <div className="kv"><span>เทียบเท่า LPG</span><b className="num">${nf(m3 * 0.45, 2)} กก.</b></div><div className="kv"><span>ประหยัดวันนี้</span><b className="num" style=${{ color: '#0a8a3e' }}>฿${nf(save, 1)}</b></div>
-          <div className="lbl" style=${{ marginTop: 4 }}>แก๊สในถุงเก็บของตลาด</div><div className="meter"><i style=${{ width: '68%', background: '#d9663a' }}></i></div>
-          <div style=${{ fontSize: 12, color: '#888' }}>แก๊สไม่พอ ระบบสลับเป็น LPG สำรองอัตโนมัติ</div></div>
-        <${Btns} m=${m} role=${role} items=${[{ label: 'ดูบิลเดือนนี้', a: 'bill', keep: true }]} /></div>`;
+    /* ---- จนท.ตลาด ---- */
+    case 'vnew': {
+      const v = s.vouchers.find(z => z.code === c.code); if (!v) return null; const used = v.status === 'used';
+      return html`<div className="fx"><${Head} bg=${used ? G.grey : v.item.mod === 'cold' ? G.blue : v.item.mod === 'fert' ? G.soil : G.flame} i=${v.item.i}>${used ? 'ยืนยันแล้ว' : 'มีคนแลกแต้ม · รอยืนยัน'}<//>
+        <div className="bd"><div className="ttl" style=${{ fontSize: 15.5 }}>${v.item.t}${v.qty > 1 ? ' × ' + v.qty : ''}</div>
+          <div className="kv"><span>แม่ค้า</span><b>${v.vendor} · ${v.stall}</b></div><div className="kv"><span>รหัส</span><b className="num">${v.code}</b></div><div className="kv"><span>แลกเมื่อ</span><b>${hm(v.t)}</b></div></div>
+        ${used ? html`<div style=${{ height: 8 }}></div>` : html`<${Btns} m=${m} role=${role} items=${[{ label: 'สแกนยืนยัน', a: 'vscan-open', arg: v.code, cls: 'p', i: 'qr', keep: true }]} />`}</div>`;
     }
-    case 'bill': {
-      const m3 = 61 + s.demo.gasSold; const bio = m3 * PRICE.gas; const lpg = m3 * PRICE.lpgEq;
-      return html`<div className="fx"><${Head} bg=${G.flame} i="receipt">บิลไบโอแก๊สเดือนนี้<//>
-        <div className="bd"><div className="kv"><span>ใช้ไป</span><b className="num">${nf(m3, 1)} m³</b></div><div className="kv"><span>ค่าไบโอแก๊ส (฿${PRICE.gas}/m³)</span><b className="num">฿${nf(bio)}</b></div>
-          <div className="kv"><span>ถ้าใช้ LPG</span><b className="num" style=${{ color: '#999' }}>฿${nf(lpg)}</b></div><div className="kv"><span>ประหยัด</span><b className="num" style=${{ color: '#0a8a3e' }}>฿${nf(lpg - bio)}</b></div>
-          <div style=${{ fontSize: 12, color: '#888' }}>ราคาตัวอย่าง · ชำระที่สำนักงานตลาด</div></div><div style=${{ height: 6 }}></div></div>`;
+    case 'checkin': {
+      const v = s.vouchers.find(z => z.code === c.code); if (!v) return null;
+      return html`<div className="fx"><${Head} bg=${G.blue} i="check">${v.item.mod === 'cold' ? 'นำของเข้าห้องเย็นแล้ว' : 'รับของแล้ว'}<//>
+        <div className="bd"><div className="kv"><span>${v.item.t}</span><b>${v.qty > 1 ? '× ' + v.qty : ''}</b></div><div className="kv"><span>ยืนยันโดย</span><b>${ME.market.name}</b></div>
+          ${v.item.mod === 'cold' && html`<div className="note">ห้องเย็นโซน B ${s.cold.temp}°C · มารับของได้พรุ่งนี้ก่อน 10:00</div>`}</div><div style=${{ height: 8 }}></div></div>`;
     }
-    case 'gasday': return html`<div className="fx"><${Head} bg=${G.flame} i="flame">สรุปแก๊สวันนี้<//>
-        <div className="bd"><div className="kv"><span>ใช้ไบโอแก๊ส</span><b className="num">${c.m3} m³</b></div><div className="kv"><span>ประหยัดเทียบ LPG</span><b className="num" style=${{ color: '#0a8a3e' }}>฿${nf(c.m3 * (PRICE.lpgEq - PRICE.gas), 1)}</b></div>
-          <div className="kv"><span>ลดคาร์บอน</span><b className="num">${nf(c.m3 * 0.45 * 3, 1)} kgCO₂e</b></div></div><div style=${{ height: 6 }}></div></div>`;
+    case 'ticket': return html`<div className="fx"><${Head} bg=${G.dark} i="headset">เรื่องที่บอทตอบไม่ได้<//>
+        <div className="bd"><div className="kv"><span>จาก</span><b>${c.who}</b></div><div className="note">"${c.text}"</div></div>
+        <${Btns} m=${m} role=${role} items=${[{ label: 'รับเรื่อง', a: 'ticket-take', cls: 'p' }]} /></div>`;
+    case 'tickets': {
+      const list = s.chats.market.filter(z => z.card && z.card.type === 'ticket');
+      return html`<div className="fx"><${Head} bg=${G.dark} i="headset">เรื่องจากแม่ค้า (${list.filter(z => !z.done).length} รอรับ)<//>
+        <div className="bd"><div className="mini">${list.length ? list.map(z => html`<div key=${z.id} className="it"><div style=${{ flex: 1 }}><b>${z.card.who}</b><div style=${{ fontSize: 12, color: '#888' }}>"${z.card.text}"</div></div><span className="chip" style=${{ background: z.done ? '#e3f8ea' : '#fff1dc', color: z.done ? '#0a7d39' : '#b86e00' }}>${z.done ? 'รับแล้ว' : 'รอรับ'}</span></div>`) : html`<div className="it" style=${{ color: '#888' }}>ยังไม่มีเรื่องค้าง</div>`}</div></div><div style=${{ height: 6 }}></div></div>`;
+    }
+    case 'digester': {
+      const d = s.digester; const ok = d.ph >= 6.8 && d.ph <= 7.6;
+      return html`<div className="fx"><${Head} bg=${G.teal} i="tank">สถานะบ่อหมักไบโอแก๊ส<//>
+        <div className="bd"><div className="kv"><span>pH</span><b className="num" style=${{ color: ok ? '#0a8a3e' : '#b86e00' }}>${d.ph} · ${ok ? 'ปกติ' : 'ระวังบ่อเปรี้ยว'}</b></div>
+          <div className="kv"><span>อุณหภูมิบ่อ</span><b className="num">${d.temp}°C</b></div><div className="kv"><span>แก๊สเมื่อวาน</span><b className="num">${d.m3} m³</b></div>
+          <div className="kv"><span>เศษเข้าบ่อวันนี้</span><b className="num">${nf(sum(s.pickups.filter(p => p.grade !== 'C'), p => p.kg), 1)} กก.</b></div>
+          <div className="lbl" style=${{ marginTop: 4 }}>ถุงเก็บแก๊ส ${d.bag}%</div><div className="meter"><i style=${{ width: d.bag + '%', background: '#2c8fb0' }}></i></div>
+          <div style=${{ fontSize: 12, color: '#888' }}>pH ลดต่อเนื่องหรือแก๊สลด ระบบแจ้งเตือนที่แชทนี้ · ห้ามลงบ่อคนเดียว</div></div><div style=${{ height: 6 }}></div></div>`;
+    }
+    case 'coldtoday': {
+      const pend = s.vouchers.filter(v => v.item.mod === 'cold' && v.status === 'pending');
+      return html`<div className="fx"><${Head} bg=${G.blue} i="snow">ห้องเย็นรวมวันนี้<//>
+        <div className="bd">${modOff(s, 'cold') ? html`<div style=${{ fontSize: 13, color: '#555', paddingBottom: 6 }}>ตลาดยังไม่เปิด Module 1</div>` : html`
+          <div className="kv"><span>ใช้แล้ว</span><b className="num">${s.cold.used}/${s.cold.cap} ลัง · ${s.cold.temp}°C</b></div>
+          <div className="meter"><i style=${{ width: s.cold.used / s.cold.cap * 100 + '%', background: '#2a83c9' }}></i></div>
+          <div className="kv"><span>รอนำเข้า</span><b>${pend.length} รายการ</b></div>
+          <div className="mini">${pend.map(v => html`<div key=${v.code} className="it"><span style=${{ flex: 1 }}>${v.vendor} · ${v.stall}</span><b className="num">${v.code}</b></div>`)}</div>
+          <div style=${{ fontSize: 12, color: '#888' }}>ไฟวันนี้มาจากไบโอแก๊ส ${Math.min(100, Math.round(s.digester.m3 * (1 - BIO.gasShare) * BIO.kwhPerM3 / BIO.coldNeed * 100))}%</div>`}</div><div style=${{ height: 6 }}></div></div>`;
+    }
+    case 'gasbills': return html`<div className="fx"><${Head} bg=${G.flame} i="flame">บิลไบโอแก๊สร้านอาหาร<//>
+        <div className="bd">${modOff(s, 'gas') ? html`<div style=${{ fontSize: 13, color: '#555', paddingBottom: 6 }}>ตลาดยังไม่เปิด Module 3 ร้านใช้ LPG ตามเดิม</div>` : html`<div className="mini">${s.gasMeters.map(g => html`<div key=${g.stall} className="it"><div style=${{ flex: 1 }}><b>${g.name}</b> · ${g.stall}<div style=${{ fontSize: 12, color: '#888' }}>${g.m3} m³ · ถ้าใช้ LPG ฿${nf(g.m3 * PRICE.lpgEq)}</div></div><b className="num" style=${{ color: g.paid ? '#0a8a3e' : '#111' }}>${g.paid ? 'จ่ายแล้ว' : '฿' + nf(g.m3 * PRICE.gas)}</b></div>`)}</div>
+          <div style=${{ fontSize: 12, color: '#888' }}>ราคาตัวอย่าง ฿${PRICE.gas}/m³ ถูกกว่า LPG · ร้านจ่ายเงินสดที่สำนักงานตลาด</div>`}</div>
+        ${!modOff(s, 'gas') && html`<${Btns} m=${m} role=${role} items=${[{ label: 'บันทึกรับเงิน', a: 'sale-open', arg: 'gas', cls: 'p', keep: true }]} />`}</div>`;
+    case 'salercpt': return html`<div className="fx"><${Head} bg=${c.kind === 'fert' ? G.soil : G.flame} i="receipt">บันทึกขายแล้ว · เงินสด<//>
+        <div className="bd"><div className="kv"><span>ลูกค้า</span><b>${c.buyer}</b></div><div className="kv"><span>${c.kind === 'fert' ? 'ปุ๋ยจากกาก' : 'ไบโอแก๊ส'}</span><b className="num">${c.kind === 'fert' ? c.kg + ' กก.' : c.m3 + ' m³'}</b></div>
+          <div className="kv"><span>รับเงิน</span><b className="num">฿${nf(c.total)}</b></div>
+          <div className="note">${c.kind === 'fert' ? `ลูกค้าประหยัด ฿${nf(c.kg * (PRICE.fertChem - PRICE.fert))} เทียบปุ๋ยเคมี` : `ร้านประหยัด ฿${nf(c.m3 * (PRICE.lpgEq - PRICE.gas))} เทียบ LPG`} · รายได้เข้า Dashboard</div></div><div style=${{ height: 6 }}></div></div>`;
+    case 'mdaysum': {
+      const kg = sum(s.pickups, p => p.kg); const a = sum(s.pickups.filter(p => p.grade === 'A'), p => p.kg); const cash = sum(s.sales, x => x.total);
+      return html`<div className="fx"><${Head} bg=${G.violet} i="moon">สรุปวันนี้ · โซน B<//>
+        <div className="bd"><div className="kv"><span>เศษที่รับ</span><b className="num">${nf(kg, 1)} กก. · ${s.pickups.length} ถัง</b></div><div className="kv"><span>เกรด A</span><b className="num">${kg ? Math.round(a / kg * 100) : 0}%</b></div>
+          <div className="kv"><span>รหัสแลกที่ยืนยัน</span><b className="num">${s.vouchers.filter(v => v.status === 'used').length}</b></div><div className="kv"><span>รายได้เงินสดวันนี้</span><b className="num">฿${nf(cash)}</b></div>
+          <div className="note">มิเตอร์แก๊สร้านอาหารอัปเดตแล้ว รายละเอียดทั้งหมดอยู่บน Dashboard</div></div>
+        <${Btns} m=${m} role=${role} items=${[{ label: 'ดูบิลแก๊สร้าน', a: 'gasbills', keep: true }]} /></div>`;
+    }
   }
   return null;
 }
@@ -875,19 +930,45 @@ function ScanSheet({ s, jobId }) {
       <button className="cta" disabled=${!grade} onClick=${() => act('porter', 'scan-submit', { ...shop, kg: n, grade })}>${grade ? `บันทึก · แม่ค้าได้ ${Math.round(n * GRADES[grade].pts)} แต้ม` : 'เลือกเกรดก่อน'}</button><//>`}
   <//>`;
 }
-function FertSheet({ s }) {
-  const [bags, setBags] = useState(2); const kg = bags * 25; const total = kg * PRICE.fert;
-  return html`<${Sheet} title="สั่งปุ๋ยจากกาก · LoopLard" onClose=${closeSheet}>
-    <div className="card" style=${{ background: 'linear-gradient(135deg,#c98a3e,#9c5f22)', color: '#fff' }}><div style=${{ fontSize: 12.5, opacity: .9 }}>ปุ๋ยหมักจากกากบ่อไบโอแก๊สของ${BRAND.market}</div>
-      <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="bign">฿${PRICE.fert}</span><span>/กก.</span><s style=${{ opacity: .75, marginLeft: 6 }}>ปุ๋ยเคมี ฿${PRICE.fertChem}</s></div>
-      <div style=${{ fontSize: 12.5, opacity: .9, marginTop: 4 }}>สต็อกพร้อมส่ง ${nf(s.fertStock)} กก.</div></div>
-    <div className="card" style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style=${{ fontWeight: 600 }}>จำนวนกระสอบ (25 กก.)</span>
-      <div className="stepper"><button onClick=${() => setBags(Math.max(1, bags - 1))} aria-label="ลด">−</button><span className="v">${bags}</span><button onClick=${() => setBags(Math.min(12, bags + 1))} aria-label="เพิ่ม">+</button></div></div>
-    <div className="card"><div className="kv" style=${{ display: 'flex', justifyContent: 'space-between' }}><span>รวม ${kg} กก.</span><b className="num">฿${nf(total)}</b></div>
-      <div style=${{ display: 'flex', justifyContent: 'space-between', color: '#0a8a3e', fontSize: 13, marginTop: 4 }}><span>ประหยัดเทียบปุ๋ยเคมี</span><b className="num">฿${nf(kg * (PRICE.fertChem - PRICE.fert))}</b></div></div>
-    <div style=${{ flex: 1 }}></div>
-    <div style=${{ textAlign: 'center', fontSize: 12.5, color: '#6b7280' }}>ชำระเงินสดตอนรับ · ไม่ได้ร่วมแยกเศษจึงซื้อด้วยเงิน</div>
-    <button className="cta" style=${{ background: '#c07a2c' }} disabled=${kg > s.fertStock} onClick=${() => act('farmer', 'fert-order', bags)}>ยืนยันสั่งซื้อ ฿${nf(total)}</button><//>`;
+// จนท. บันทึกขายเงินสดให้คนที่ไม่ได้ร่วมแยกเศษ: ปุ๋ยให้เกษตรกร / ค่าแก๊สร้านอาหาร
+function SaleSheet({ s, tab0 }) {
+  const [tab, setTab] = useState(tab0 === 'gas' ? 'gas' : 'fert'); const [buyer, setBuyer] = useState(FARM_BUYERS[0]); const [bags, setBags] = useState(2);
+  const kg = bags * 25; const total = kg * PRICE.fert; const due = s.gasMeters.filter(g => !g.paid);
+  return html`<${Sheet} title="บันทึกขาย · LoopLard" onClose=${closeSheet}>
+    <div className="pills"><button aria-pressed=${tab === 'fert'} onClick=${() => setTab('fert')}>ปุ๋ยจากกาก · เกษตรกร</button><button aria-pressed=${tab === 'gas'} onClick=${() => setTab('gas')}>ค่าแก๊ส · ร้านอาหาร</button></div>
+    ${tab === 'fert' ? (modOff(s, 'fert') ? html`<div className="card" style=${{ color: '#6b7280' }}>ตลาดยังไม่เปิด Module 2 · ปุ๋ยจากกาก</div>` : html`<${React.Fragment}>
+      <div className="card" style=${{ background: 'linear-gradient(135deg,#c98a3e,#9c5f22)', color: '#fff' }}><div style=${{ fontSize: 12.5, opacity: .9 }}>ปุ๋ยจากกากบ่อหมัก · สต็อก ${nf(s.fertStock)} กก.</div>
+        <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="bign">฿${PRICE.fert}</span><span>/กก.</span><s style=${{ opacity: .75, marginLeft: 6 }}>ปุ๋ยเคมี ฿${PRICE.fertChem}</s></div></div>
+      <div className="card"><div className="lbl" style=${{ marginBottom: 6 }}>ลูกค้า</div><div className="pills">${FARM_BUYERS.map(b => html`<button key=${b} aria-pressed=${buyer === b} onClick=${() => setBuyer(b)}>${b}</button>`)}</div></div>
+      <div className="card" style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style=${{ fontWeight: 600 }}>กระสอบ 25 กก.</span>
+        <div className="stepper"><button onClick=${() => setBags(Math.max(1, bags - 1))} aria-label="ลด">−</button><span className="v">${bags}</span><button onClick=${() => setBags(Math.min(12, bags + 1))} aria-label="เพิ่ม">+</button></div></div>
+      <div style=${{ flex: 1 }}></div>
+      <button className="cta" style=${{ background: '#c07a2c' }} disabled=${kg > s.fertStock} onClick=${() => act('market', 'sale-fert', { buyer, bags })}>รับเงินสด ฿${nf(total)} · บันทึก</button><//>`)
+    : (modOff(s, 'gas') ? html`<div className="card" style=${{ color: '#6b7280' }}>ตลาดยังไม่เปิด Module 3 · แก๊สหุงต้ม</div>` : html`<${React.Fragment}>
+      <div className="lbl">มิเตอร์ไบโอแก๊สรายร้าน · ฿${PRICE.gas}/m³ (LPG เทียบเท่า ฿${PRICE.lpgEq}/m³)</div>
+      ${due.length ? due.map(g => html`<div key=${g.stall} className="ritem"><div className="ri" style=${{ background: '#fbe7df', color: '#b6532f' }}><${Icon} n="flame" s=${26} /></div>
+        <div style=${{ minWidth: 0 }}><b>${g.name} · ${g.stall}</b><div style=${{ fontSize: 12, color: '#6b7280' }}>${g.m3} m³ · ประหยัด ฿${nf(g.m3 * (PRICE.lpgEq - PRICE.gas))} เทียบ LPG</div>
+          <div className="row2"><b className="num">฿${nf(g.m3 * PRICE.gas)}</b><button className="fbtn p" style=${{ height: 34, padding: '0 14px', fontSize: 14 }} onClick=${() => act('market', 'sale-gas', g.stall)}>รับเงินแล้ว</button></div></div></div>`)
+        : html`<div className="card" style=${{ color: '#6b7280' }}>ทุกร้านจ่ายแล้ว · กด "จบวัน" เพื่อให้มิเตอร์เดินต่อ</div>`}<//>`)}<//>`;
+}
+// จนท. สแกนรหัสที่แม่ค้าได้จากการแลกแต้ม ก่อนนำของเข้าห้องเย็น / จ่ายปุ๋ย / เติมแก๊ส
+function VScanSheet({ s, code }) {
+  const pend = s.vouchers.filter(v => v.status === 'pending'); const [pick, setPick] = useState(code || pend[0]?.code); const [scanned, setScanned] = useState(false);
+  useEffect(() => { if (scanned || !pick) return; const t = setTimeout(() => setScanned(true), 1800); return () => clearTimeout(t); }, [scanned, pick]);
+  const v = s.vouchers.find(z => z.code === pick);
+  return html`<${Sheet} title="สแกนรหัสแลกแต้ม · LoopLard" onClose=${closeSheet}>
+    ${!v ? html`<div className="card" style=${{ color: '#6b7280' }}>ไม่มีรหัสรอยืนยัน ลองให้แม่ค้ากด "แลกแต้ม"</div>`
+      : !scanned ? html`<${React.Fragment}><div className="viewfinder" onClick=${() => setScanned(true)} role="button" aria-label="จำลองการสแกน">
+          ${[[0, 0], [1, 0], [0, 1], [1, 1]].map(([x, y], k) => html`<span key=${k} className="corner" style=${{ [x ? 'right' : 'left']: '16%', [y ? 'bottom' : 'top']: '16%', borderWidth: `${y ? 0 : 4}px ${x ? 4 : 0}px ${y ? 4 : 0}px ${x ? 0 : 4}px`, borderRadius: 8 }}></span>`)}
+          <${QR} seed=${v.code} size=${150} /><div className="scanline"></div></div>
+        <div style=${{ textAlign: 'center', color: '#4b5563', fontSize: 13.5 }}>ส่อง QR บนมือถือแม่ค้า (แตะเพื่อข้าม)</div><//>`
+      : html`<${React.Fragment}><div className="card" style=${{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style=${{ display: 'flex', alignItems: 'center', gap: 10 }}><span style=${{ width: 36, height: 36, borderRadius: 10, background: '#e3f8ea', display: 'grid', placeItems: 'center' }}><${Icon} n="check" s=${20} c="#06c755" w=${2.6} /></span><div><b className="num">${v.code}</b><div style=${{ fontSize: 12, color: '#6b7280' }}>รหัสถูกต้อง · ยังไม่ใช้</div></div></div>
+          <div className="kv" style=${{ display: 'flex', justifyContent: 'space-between' }}><span>แม่ค้า</span><b>${v.vendor} · ${v.stall}</b></div>
+          <div className="kv" style=${{ display: 'flex', justifyContent: 'space-between' }}><span>สิทธิ์</span><b>${v.item.t}${v.qty > 1 ? ' × ' + v.qty : ''}</b></div></div>
+        ${pend.length > 1 && html`<div className="card"><div className="lbl" style=${{ marginBottom: 6 }}>รหัสอื่นที่รอ</div><div className="pills">${pend.map(z => html`<button key=${z.code} aria-pressed=${z.code === pick} onClick=${() => setPick(z.code)}>${z.vendor} · ${z.code}</button>`)}</div></div>`}
+        <div style=${{ flex: 1 }}></div>
+        <button className="cta" onClick=${() => act('market', 'vscan-confirm', v.code)}>${v.item.mod === 'cold' ? 'ยืนยัน · นำของเข้าห้องเย็น' : v.item.mod === 'fert' ? 'ยืนยัน · จ่ายปุ๋ยแล้ว' : 'ยืนยัน · เติมแก๊สแล้ว'}</button><//>`}<//>`;
 }
 
 /* ======================= phone ======================= */
@@ -930,7 +1011,8 @@ function Phone({ s }) {
         ${text ? html`<button className="ib send" onClick=${send} aria-label="ส่ง"><${Icon} n="send" s=${23} w=${2} /></button>` : html`<button className="ib" aria-label="ข้อความเสียง"><${Icon} n="mic" s=${23} w=${1.7} /></button>`}</div>`}
     ${sh && sh.type === 'redeem' && html`<${RedeemSheet} s=${s} role=${role} />`}
     ${sh && sh.type === 'scan' && html`<${ScanSheet} s=${s} jobId=${sh.data} />`}
-    ${sh && sh.type === 'fert' && html`<${FertSheet} s=${s} />`}
+    ${sh && sh.type === 'sale' && html`<${SaleSheet} s=${s} tab0=${sh.data} />`}
+    ${sh && sh.type === 'vscan' && html`<${VScanSheet} s=${s} code=${sh.data} />`}
   </div></div>`;
 }
 
@@ -948,15 +1030,12 @@ const GUIDE = {
     ['ใส่น้ำหนัก แล้วให้เกรด A/B/C', 'ลองให้เกรด C จะเห็นว่าแม่ค้าได้ 0 แต้มพร้อมคำแนะนำ', null],
     ['ดูสรุปวันนี้', 'จำนวนถัง กก. และ % เกรด A', 'สรุปวันนี้', () => { me('porter', 'สรุปวันนี้'); act('porter', 'porter-sum'); }],
   ] },
-  farmer: { t: 'เกษตรกร · ซื้อปุ๋ยจากกากด้วยเงินสด', steps: [
-    ['กด "สั่งปุ๋ยจากกาก"', `฿${PRICE.fert}/กก. เทียบปุ๋ยเคมี ฿${PRICE.fertChem}`, 'เปิดหน้าสั่ง', () => act('farmer', 'fert-open')],
-    ['ได้รหัสรับปุ๋ย จ่ายเงินสดตอนรับ', 'ยอดขายเข้าเป็นรายได้ตลาดบน Dashboard', null],
-    ['ลองปิด Module 2 ใน Dashboard', 'ตลาดเลือกเปิด module เองได้ ระบบจะไม่รับสั่ง', 'ไป Dashboard', () => D(x => ({ ...x, view: 'dash' }))],
-  ] },
-  resto: { t: 'ร้านอาหาร · ไบโอแก๊สแทน LPG', steps: [
-    ['กด "มิเตอร์แก๊ส"', 'ใช้ไปกี่ m³ ประหยัดเท่าไรเทียบ LPG', 'ดูมิเตอร์', () => { me('resto', 'มิเตอร์แก๊สวันนี้'); act('resto', 'meter'); }],
-    ['กด "จบวัน"', 'บอทส่งสรุปแก๊สให้ร้าน และสรุปแต้มให้แม่ค้า', 'จบวัน', () => endDay()],
-    ['ดูบิลเดือนนี้', 'ค่าไบโอแก๊สเทียบค่า LPG', 'ดูบิล', () => { me('resto', 'บิลเดือนนี้'); act('resto', 'bill'); }],
+  market: { t: 'จนท.ตลาด · ยืนยันแต้ม ขายเงินสด ดูแลบ่อ', steps: [
+    ['สแกนรหัสที่แม่ค้าแลกแต้ม', 'ยืนยันแล้วแม่ค้าได้แจ้งว่าเข้าห้องเย็นแล้ว', 'สแกนรหัส', () => act('market', 'vscan-open')],
+    ['เกษตรกรมาซื้อปุ๋ย / ร้านอาหารจ่ายค่าแก๊ส', 'คนที่ไม่ได้แยกเศษจ่ายเงินสด เป็นรายได้ตลาดบน Dashboard', 'บันทึกขาย', () => act('market', 'sale-open')],
+    ['รับเรื่องที่บอทตอบไม่ได้', 'จำลองให้แม่ค้าขอคุยกับเจ้าหน้าที่ แล้วกด "รับเรื่อง" ที่นี่', 'ส่งเรื่องจากแม่ค้า', () => { me('vendor', 'คุยกับเจ้าหน้าที่'); handoff('vendor', 'ตาชั่งหน้าแผงเสีย ชั่งไม่ตรงค่ะ'); }],
+    ['ดูสถานะบ่อหมัก', 'pH · อุณหภูมิ · แก๊สในถุงเก็บ', 'บ่อหมัก', () => { me('market', 'สถานะบ่อหมัก'); act('market', 'digester'); }],
+    ['ลองปิด Module ใน Dashboard', 'ตลาดเลือกเปิดเฉพาะ module ที่เหมาะ', 'ไป Dashboard', () => D(x => ({ ...x, view: 'dash' }))],
   ] },
 };
 const LOOP = [
@@ -965,8 +1044,8 @@ const LOOP = [
   { t: 'บ่อหมักไบโอแก๊ส', s: 'ในพื้นที่ตลาด', i: 'tank', c: '#3b7d4f' },
   { t: 'ไบโอแก๊ส', s: 'หุงต้ม + ปั่นไฟ', i: 'bolt', c: '#2e8b3f' },
   { t: 'ห้องเย็นรวม', s: 'Module 1 · แต้มกลับสู่แม่ค้า', i: 'snow', c: '#2a83c9', mod: 'cold' },
-  { t: 'ปุ๋ยจากกาก', s: 'Module 2 · ขายให้เกษตรกร', i: 'leaf', c: '#c07a2c', mod: 'fert' },
-  { t: 'ร้านอาหารในตลาด', s: 'Module 3 · ใช้แทน LPG', i: 'flame', c: '#b6532f', mod: 'gas' },
+  { t: 'ปุ๋ยจากกาก', s: 'Module 2 · แม่ค้าแลกแต้ม / ตลาดขายเกษตรกร', i: 'leaf', c: '#c07a2c', mod: 'fert' },
+  { t: 'ร้านอาหารในตลาด', s: 'Module 3 · ใช้แทน LPG ตลาดเก็บค่าแก๊ส', i: 'flame', c: '#b6532f', mod: 'gas' },
 ];
 function LoopPanel({ s }) {
   const on = s.flash && Date.now() - s.flash.at < 2500 ? s.flash.step : -1;
@@ -1080,8 +1159,8 @@ function Dashboard({ s }) {
 }
 
 /* ======================= app ======================= */
-const ROLES = [['vendor', 'แม่ค้า', 'store'], ['porter', 'คนขน', 'truck'], ['farmer', 'เกษตรกร', 'tractor'], ['resto', 'ร้านอาหาร', 'flame']];
-const SHOT_CAP = { vendor: '01 · แม่ค้าแยกเศษ ได้แต้ม แลกบริการ', porter: '02 · คนขนสแกนถัง ชั่ง ให้เกรด', farmer: '03 · ปุ๋ยจากกากขายให้เกษตรกร', resto: '03 · ไบโอแก๊สแทน LPG ให้ร้านอาหาร' };
+const ROLES = [['vendor', 'แม่ค้า', 'store'], ['porter', 'คนขน', 'truck'], ['market', 'ตลาด', 'headset']];
+const SHOT_CAP = { vendor: '01 · แม่ค้าแยกเศษ ได้แต้ม แลกบริการ', porter: '02 · คนขนสแกนถัง ชั่ง ให้เกรด', market: '03 · ตลาดยืนยันแต้ม ขายปุ๋ย/แก๊ส ดูแลบ่อหมัก' };
 function App() {
   const [s, d] = useReducer((st, f) => f(st), null, initState);
   const ref = useRef(s); ref.current = s; D = d; GET = () => ref.current;
