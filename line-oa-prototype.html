@@ -1579,11 +1579,13 @@ function App() {
   return html`<${React.Fragment}>
     <header className="top"><div className="brand"><${Logo} s=${38} /><div><b>${BRAND.th} · ${BRAND.name}</b><small>ต้นแบบ LINE OA + LIFF + Dashboard · ข้อมูลจำลอง</small></div></div>
       <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'flow'} onClick=${() => view('flow')} aria-label="Workflow"><${Icon} n="route" s=${16} /><span className="lg">Workflow</span></button>
+        <button aria-pressed=${s.view === 'sim'} onClick=${() => view('sim')} aria-label="จำลองตลาด"><${Icon} n="cube" s=${16} /><span className="lg">จำลองตลาด</span></button>
         <button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
         <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')} aria-label="แคปจอใส่สไลด์"><${Icon} n="frame" s=${16} /><span className="lg">แคปจอใส่สไลด์</span></button>
         <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')} aria-label="Dashboard"><${Icon} n="chart" s=${16} /><span className="lg">Dashboard</span></button></div></header>
     ${s.view === 'phone' ? html`<main className="stage"><${Guide} s=${s} /><div className="center">${roleTabs}<${Phone} s=${s} /></div><${Log} s=${s} /></main>`
-      : s.view === 'flow' || s.view === 'sim' ? html`<${Workflow} s=${s} />`
+      : s.view === 'flow' ? html`<${Workflow} s=${s} />`
+      : s.view === 'sim' ? html`<main><${MarketSim} s=${s} /></main>`
       : s.view === 'shot' ? html`<main className="shot">${roleTabs}<${Phone} s=${s} /><div className="cap">${SHOT_CAP[s.role]}<span className="lg"> · ใช้ Win+Shift+S ครอบเฉพาะตัวเครื่อง</span></div></main>`
       : html`<${Dashboard} s=${s} />`}
     ${s.toast && html`<div className="toast" role="status">${s.toast}</div>`}<//>`;
