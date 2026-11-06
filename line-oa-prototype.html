@@ -266,7 +266,18 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
 .co2 .tot{font-weight:600}
 
 /* ---------- workflow story ---------- */
-.flow{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+.flow{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+.flowgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:start}
+.flowgrid .stick{position:sticky;top:calc(10px + env(safe-area-inset-top,0px));min-width:0;scroll-margin-top:8px}
+.flowgrid .simbox canvas{height:min(44vw,560px);min-height:320px}
+.sim.embed{gap:10px}
+.sim.embed .simctl .mod{padding:7px 10px;font-size:12.5px}
+.scene{cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.scene.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.scene .acts{display:flex;flex-wrap:wrap;gap:8px}
+.scene .acts:empty{display:none}
+@media (max-width:980px){ .flowgrid{grid-template-columns:minmax(0,1fr)} .flowgrid .stick{position:static} .flowgrid .simbox canvas{height:min(70vw,520px)} }
+@media (max-width:700px){ .flowgrid .simbox canvas{height:78vw;min-height:280px} }
 .flow h1{font:700 clamp(26px,3.4vw,38px)/1.15 var(--f-display);margin:6px 0 6px;letter-spacing:-.015em;text-wrap:balance}
 .flow .lede{color:var(--muted);margin:0;max-width:62ch}
 .flow h2{font:700 20px/1.3 var(--f-display);margin:0 0 4px}
@@ -1301,17 +1312,23 @@ function Workflow({ s }) {
     { when: 'วันรุ่งขึ้น', who: 'vendor', i: 'snow', t: 'ผักที่ฝากไว้ยังสด ขายต่อได้อีกวัน เศษน้อยลง แล้ววนกลับไปข้อ 1', p: 'เศษผักวันนี้ = ความเย็นที่ยืดอายุผักพรุ่งนี้' },
     { when: 'สิ้นเดือน', who: 'owner', i: 'chart', t: 'เจ้าของตลาดเห็นผลบน Dashboard และส่งรายงานให้ อปท.', p: `ตันที่ไม่ลงฝังกลบ · ${co2PerKg(s.modules).toFixed(2)} kgCO₂e ต่อ kg · รายได้จากปุ๋ยและแก๊ส · ต้นทุนแต้มเทียบมูลค่าที่ได้`, demo: () => demo(s.role, null, 'dash') },
   ];
+  const seekRef = useRef(null), simRef = useRef(null); const [on, setOn] = useState(0);
+  const onPhase = ph => { const k = sceneOf(ph); setOn(o => o === k ? o : k); };
+  const seek = k => { if (SCENE_PH[k] == null) return; seekRef.current?.(SCENE_PH[k]); setOn(k === 7 ? 0 : k);
+    if (window.innerWidth < 980) simRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   return html`<main className="flow">
     <div><div className="eyebrow">Workflow · ${BRAND.th} ${BRAND.name}</div><h1>เศษผักหนึ่งถัง เดินทางรอบตลาดยังไง</h1>
-      <p className="lede">ตามถังเขียวของป้าแดงหนึ่งวัน ตั้งแต่แยกเศษ จนกลายเป็นความเย็น ปุ๋ย และแก๊ส แล้วแต้มวนกลับมาหาป้า กด "ดูในเดโม" เพื่อเห็นขั้นนั้นใน LINE</p></div>
-    <div className="story">${SC.map((c, k) => html`<div key=${k} className="scene">
+      <p className="lede">ตามถังเขียวของป้าแดงหนึ่งวัน ภาพจำลองเล่นตามขั้นด้านขวา กดขั้นไหนก็ได้เพื่อข้ามไปฉากนั้น หรือกด "ดูใน LINE" เพื่อเห็นหน้าจอจริง</p></div>
+    <div className="flowgrid"><div className="stick" ref=${simRef}><${MarketSim} s=${s} embed=${true} seekRef=${seekRef} onPhase=${onPhase} /></div>
+    <div className="story">${SC.map((c, k) => html`<div key=${k} className=${'scene' + (on === k ? ' on' : '')} onClick=${e => { if (!e.target.closest('button')) seek(k); }}>
       <span className="dot" style=${{ background: RC[c.who] }}><${Icon} n=${c.i} s=${20} w=${2} /></span>
       <div className="top2"><span className="when">${String(k + 1).padStart(2, '0')} · ${c.when}</span><span className="who2" style=${{ background: RC[c.who] }}>${RN[c.who]}</span></div>
       <h3>${c.t}</h3>
       ${c.p && html`<p>${c.p}</p>`}
       ${c.pts && html`<span className="pts">+${nf(c.pts)} <span style=${{ font: '500 13px var(--f-body)', color: 'var(--muted)' }}>แต้มเข้าป้าแดง · คนขน +${nf(kg * GRADES.A.porter)}</span></span>`}
       ${c.branch && html`<div className="branch">${Object.entries(MODS).map(([k2, m]) => html`<div key=${k2} style=${{ opacity: s.modules[k2] ? 1 : .5 }}><b><${Icon} n=${m.i} s=${17} c=${m.c} />${m.n.replace('Module ', 'M')}</b>${m.s}${s.modules[k2] ? '' : ' · ตลาดนี้ปิดอยู่'}</div>`)}</div>`}
-      ${c.demo && html`<div><button className="btn" onClick=${c.demo}>ดูในเดโม <${Icon} n="chevR" s=${14} w=${2.4} /></button></div>`}</div>`)}</div>
+      <div className="acts">${SCENE_PH[k] != null && html`<button className="btn" onClick=${() => seek(k)}><${Icon} n=${k === 7 ? 'reset' : 'cube'} s=${14} /> ${k === 7 ? 'เริ่มรอบใหม่ในฉาก' : 'ดูในฉาก'}</button>`}
+        ${c.demo && html`<button className="btn" onClick=${c.demo}>${k === 8 ? 'ดู Dashboard' : 'ดูใน LINE'} <${Icon} n="chevR" s=${14} w=${2.4} /></button>`}</div></div>`)}</div></div>
     <div className="panel"><h2>แต้มเดินทางยังไง</h2><p className="sub">ดูเยอะสำหรับแม่ค้า แต่ตลาดคุมต้นทุนได้</p>
       <div className="pflow">
         <span className="nd"><${Icon} n="bin" s=${18} c="#13a852" />เศษเกรด A 1 กก.</span><span className="ar">→</span>
@@ -1504,24 +1521,30 @@ function drawSim(cv, t, mods) {
   if (mods.cold && ph >= 29) label('✓ จนท.สแกน · เข้าห้องเย็นแล้ว', 11.2, 7.6, 2.0, { size: 11, bg: '#6f5bd0', color: '#fff' });
 }
 
-function MarketSim({ s }) {
+// ช่วงเวลาในรอบ 30 วิ ที่ตรงกับแต่ละขั้นของ Workflow (ขั้น 8–9 ไม่มีฉากเฉพาะ)
+const SCENE_PH = [0, 5, 7, 14, 18, 26, 29, 0, null];
+const sceneOf = ph => ph < 5 ? 0 : ph < 7 ? 1 : ph < 14 ? 2 : ph < 18 ? 3 : ph < 26 ? 4 : ph < 29 ? 5 : 6;
+
+function MarketSim({ s, embed, seekRef, onPhase }) {
   const cv = useRef(null), box = useRef(null);
   const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const [play, setPlay] = useState(!reduce), [speed, setSpeed] = useState(1), [hud, setHud] = useState(0);
   const S = useRef({ t: 0, last: 0, hu: 0 }); const live = useRef({}); live.current = { play, speed, mods: s.modules };
   useEffect(() => { let raf; const loop = now => { const st = S.current; const dt = st.last ? Math.min(.05, (now - st.last) / 1000) : 0; st.last = now;
       if (live.current.play) st.t += dt * live.current.speed; drawSim(cv.current, st.t, live.current.mods);
-      if (now - st.hu > 150) { st.hu = now; setHud(st.t); } raf = requestAnimationFrame(loop); };
+      if (now - st.hu > 150) { st.hu = now; setHud(st.t); live.current.onPhase?.(st.t % LOOP_S); } raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop); return () => cancelAnimationFrame(raf); }, []);
+  live.current.onPhase = onPhase;
+  if (seekRef) seekRef.current = ph => { const st = S.current; st.t = (Math.floor(st.t / LOOP_S) + (ph < st.t % LOOP_S ? 1 : 0)) * LOOP_S + ph + 0.01; setHud(st.t); setPlay(true); };
   const mods = s.modules; const ph = hud % LOOP_S; const hours = hud / LOOP_S; const [step, cap] = simCap(ph, mods);
   const kg = hours * 42, ab = kg * .88, m3 = ab * BIO.yield, kwh = mods.cold ? m3 * (1 - BIO.gasShare) * BIO.kwhPerM3 : 0, co2 = ab * co2PerKg(mods), pts = ab * 92;
   const circ = Math.floor(hours) * 1000 + (ph >= 28.2 ? 1000 : 0);
   const clock = 6 * 60 + Math.floor(hours * 60); const hh = String(Math.floor(clock / 60) % 24).padStart(2, '0'), mm = String(clock % 60).padStart(2, '0');
   const toggle = k => D(x => addLog({ ...x, modules: { ...x.modules, [k]: !x.modules[k] } }, `${x.modules[k] ? 'ปิด' : 'เปิด'} ${MODS[k].n}`, ''));
   const full = () => { const el = box.current; if (!el) return; if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => toast('เบราว์เซอร์นี้เปิดเต็มจอไม่ได้')); };
-  return html`<main className="sim">
-    <div className="head"><div><div className="eyebrow">จำลองตลาด · 1 รอบ = 30 วินาที</div><h1>LoopLard ทำงานในตลาดจริงยังไง</h1>
-      <p>ตามถังของป้าแดง ดูเศษผักกลายเป็นแต้ม ไบโอแก๊ส ความเย็น ปุ๋ย และแก๊สหุงต้ม · ตัวเลขเป็นข้อมูลจำลอง</p></div></div>
+  return html`<div className=${'sim' + (embed ? ' embed' : '')}>
+    ${!embed && html`<div className="head"><div><div className="eyebrow">จำลองตลาด · 1 รอบ = 30 วินาที</div><h1>LoopLard ทำงานในตลาดจริงยังไง</h1>
+      <p>ตามถังของป้าแดง ดูเศษผักกลายเป็นแต้ม ไบโอแก๊ส ความเย็น ปุ๋ย และแก๊สหุงต้ม · ตัวเลขเป็นข้อมูลจำลอง</p></div></div>`}
     <div className="simbox" ref=${box}>
       <canvas ref=${cv} role="img" aria-label=${'ภาพจำลองตลาด ขั้นที่ ' + step + ': ' + cap}></canvas>
       <div className="clk">${hh}:${mm} น. · รอบที่ ${Math.floor(hours) + 1}</div>
@@ -1539,8 +1562,8 @@ function MarketSim({ s }) {
       <span style=${{ flex: 1 }}></span>
       ${Object.entries(MODS).map(([k, m]) => html`<button key=${k} className="mod" aria-pressed=${mods[k]} onClick=${() => toggle(k)}><span className="sw"></span><${Icon} n=${m.i} s=${16} c=${m.c} /><span>${m.n.replace('Module ', 'M')}</span></button>`)}
     </div>
-    <p className="sub" style=${{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>อัดเป็นวิดีโอ: กด "เต็มจอ" แล้วใช้ Win+Alt+R (Xbox Game Bar) หรือ Snipping Tool โหมดวิดีโอ ได้ไฟล์ MP4 ไปวางใน Canva</p>
-  </main>`;
+    <p className="sub" style=${{ color: 'var(--muted)', fontSize: 12.5, margin: 0 }}>อัดเป็นวิดีโอ: กด "เต็มจอ" แล้วใช้ Win+Alt+R หรือ Snipping Tool โหมดวิดีโอ ได้ MP4 ไปวางใน Canva · ตัวเลขเป็นข้อมูลจำลอง</p>
+  </div>`;
 }
 
 /* ======================= app ======================= */
@@ -1556,13 +1579,11 @@ function App() {
   return html`<${React.Fragment}>
     <header className="top"><div className="brand"><${Logo} s=${38} /><div><b>${BRAND.th} · ${BRAND.name}</b><small>ต้นแบบ LINE OA + LIFF + Dashboard · ข้อมูลจำลอง</small></div></div>
       <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'flow'} onClick=${() => view('flow')} aria-label="Workflow"><${Icon} n="route" s=${16} /><span className="lg">Workflow</span></button>
-        <button aria-pressed=${s.view === 'sim'} onClick=${() => view('sim')} aria-label="จำลองตลาด"><${Icon} n="cube" s=${16} /><span className="lg">จำลองตลาด</span></button>
         <button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
         <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')} aria-label="แคปจอใส่สไลด์"><${Icon} n="frame" s=${16} /><span className="lg">แคปจอใส่สไลด์</span></button>
         <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')} aria-label="Dashboard"><${Icon} n="chart" s=${16} /><span className="lg">Dashboard</span></button></div></header>
     ${s.view === 'phone' ? html`<main className="stage"><${Guide} s=${s} /><div className="center">${roleTabs}<${Phone} s=${s} /></div><${Log} s=${s} /></main>`
-      : s.view === 'flow' ? html`<${Workflow} s=${s} />`
-      : s.view === 'sim' ? html`<${MarketSim} s=${s} />`
+      : s.view === 'flow' || s.view === 'sim' ? html`<${Workflow} s=${s} />`
       : s.view === 'shot' ? html`<main className="shot">${roleTabs}<${Phone} s=${s} /><div className="cap">${SHOT_CAP[s.role]}<span className="lg"> · ใช้ Win+Shift+S ครอบเฉพาะตัวเครื่อง</span></div></main>`
       : html`<${Dashboard} s=${s} />`}
     ${s.toast && html`<div className="toast" role="status">${s.toast}</div>`}<//>`;
