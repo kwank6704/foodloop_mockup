@@ -291,6 +291,33 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
 .gets b{color:var(--ink);font:600 15px var(--f-display)}
 @media (max-width:760px){ .branch{grid-template-columns:1fr} .gets{grid-template-columns:repeat(2,minmax(0,1fr))} .story{padding-left:46px} .story::before{left:15px} .scene .dot{left:-46px;width:32px;height:32px;border-radius:10px} }
 
+/* ---------- market simulation (isometric canvas, its own light illustration palette) ---------- */
+.sim{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.sim .head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 24px}
+.sim h1{font:700 clamp(24px,3vw,32px)/1.15 var(--f-display);margin:0;letter-spacing:-.015em}
+.sim .head p{margin:4px 0 0;color:var(--muted)}
+.simbox{position:relative;border-radius:22px;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,#fbfdf8,#e6efe2 70%);border:1px solid var(--line)}
+.simbox canvas{display:block;width:100%;height:min(62vw,640px);min-height:360px}
+.simbox:fullscreen{border-radius:0;border:0}
+.simbox:fullscreen canvas{height:100vh}
+.cap2{position:absolute;left:14px;bottom:18px;max-width:min(620px,calc(100% - 28px));background:rgba(255,255,255,.94);color:#13241a;border-radius:14px;padding:10px 14px;font:600 15px/1.4 var(--f-display);display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px -12px rgba(20,50,30,.4);animation:pop .35s ease}
+.cap2 .k{font:700 12px var(--f-mono);background:#06c755;color:#fff;border-radius:8px;padding:4px 7px;flex:none}
+.ctr{position:absolute;top:12px;right:12px;display:grid;grid-template-columns:repeat(3,auto);gap:6px}
+.ctr div{background:rgba(255,255,255,.92);color:#13241a;border-radius:10px;padding:6px 10px;font-size:11px;line-height:1.3}
+.ctr b{display:block;font:700 15px var(--f-mono);font-variant-numeric:tabular-nums}
+.clk{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.92);color:#13241a;border-radius:10px;padding:6px 10px;font:600 12px var(--f-mono)}
+.prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.06)}
+.prog i{display:block;height:100%;background:#06c755}
+.simctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+@media (max-width:700px){
+  .simbox canvas{height:78vw;min-height:280px}
+  .ctr{position:static;grid-template-columns:repeat(3,minmax(0,1fr));padding:0 8px 8px}
+  .ctr div{padding:5px 7px;background:#fff}
+  .ctr b{font-size:13px}
+  .cap2{position:static;margin:0 8px 12px;max-width:none;font-size:13.5px;animation:none}
+  .clk{font-size:11px}
+}
+
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:14px;z-index:99;animation:pop .3s ease}
 
 @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
@@ -429,7 +456,8 @@ const ICONS = {
   tag: 'M3 12V4h8l10 10-8 8zM7.5 7.5h.01', box: 'M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8', tank: 'M5 9h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM8 9V5h8v4M5 13h14',
   dots: 'M6 12h.01M12 12h.01M18 12h.01', grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z', frame: 'M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4',
   tractor: 'M4 16a3 3 0 1 0 6 0 3 3 0 0 0-6 0M15 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M7 13V7h6l2 6M13 13h7v4M5 7h2',
-  pot: 'M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 10h20M9 7c0-1.2 1-1.3 1-2.6M14 7c0-1.2 1-1.3 1-2.6', route: 'M6 19a2 2 0 1 0 0-.01M18 5a2 2 0 1 0 0-.01M6 17V9a4 4 0 0 1 4-4h6M18 7v8a4 4 0 0 1-4 4H8',
+  pot: 'M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 10h20M9 7c0-1.2 1-1.3 1-2.6M14 7c0-1.2 1-1.3 1-2.6',
+  play: 'M7 5v14l11-7z', pause: 'M8 5v14M16 5v14', expand: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', cube: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9', route: 'M6 19a2 2 0 1 0 0-.01M18 5a2 2 0 1 0 0-.01M6 17V9a4 4 0 0 1 4-4h6M18 7v8a4 4 0 0 1-4 4H8',
 };
 const Icon = ({ n, s = 22, w = 1.8, c = 'currentColor' }) => html`<svg viewBox="0 0 24 24" width=${s} height=${s} fill="none" stroke=${c} strokeWidth=${w} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d=${ICONS[n]} /></svg>`;
 const Logo = ({ s = 34 }) => html`<svg viewBox="0 0 40 40" width=${s} height=${s} aria-hidden="true">
@@ -1300,6 +1328,221 @@ function Workflow({ s }) {
   </main>`;
 }
 
+/* ======================= market simulation ======================= */
+// ฉากตลาดมุมเฉียง (isometric) วาดด้วย Canvas 2D · 1 รอบ = 30 วินาที = 1 ชั่วโมงของตลาด
+const LOOP_S = 30;
+const SIM_STALLS = [
+  { id: 'A07', n: 'ผลไม้เจ๊หมวย', x: 1.0, c: '#f0a000', fruit: ['#f6c343', '#f08c2e'] },
+  { id: 'B04', n: 'ผักพี่นก', x: 3.6, c: '#7a68d4', fruit: ['#5aa845', '#8cc63f'] },
+  { id: 'B12', n: 'ผักป้าแดง B12', x: 6.2, c: '#06c755', me: 1, fruit: ['#3f9a3a', '#e2463a'] },
+  { id: 'C03', n: 'หมูลุงชัย', x: 8.8, c: '#e5484d', fruit: ['#f1a7a0', '#e07a72'] },
+  { id: 'F11', n: 'กาแฟเจ๊นิด', x: 11.4, c: '#9a6233', fruit: ['#6b4423', '#f3e7d3'] },
+];
+const SIM_CAP = [
+  [0, 'แม่ค้าแยกเศษผักผลไม้ใส่ถังเขียวที่มี QR ประจำแผง'],
+  [5, 'ถังเต็ม ป้าแดงกด "ถังเต็ม" ใน LINE งานเด้งไปที่คนขน'],
+  [7, 'คนขนเข็นรถไปรับถังที่แผง B12'],
+  [12, 'สแกน QR ชั่ง 6.5 กก. เกรด A → ป้าแดงได้ +650 แต้มทันที'],
+  [14, 'เศษเข้าบ่อหมักไบโอแก๊สในตลาด ไม่ต้องขนไปฝังกลบ'],
+  [18, 'บ่อหมักผลิตไบโอแก๊ส ถุงเก็บแก๊สพองขึ้น'],
+  [22, 'mods'],
+  [26, 'redeem'],
+];
+const simCap = (ph, mods) => {
+  let c = SIM_CAP[0], k = 0; SIM_CAP.forEach((x, i) => { if (ph >= x[0]) { c = x; k = i; } });
+  let t = c[1];
+  if (t === 'mods') { const a = [mods.cold && 'ไฟเดินห้องเย็น', mods.gas && 'แก๊สหุงต้มให้ร้านอาหาร', mods.fert && 'กากเป็นปุ๋ยให้เกษตรกร'].filter(Boolean); t = a.length ? 'ไบโอแก๊สออก ' + a.length + ' ทาง: ' + a.join(' · ') : 'ตลาดยังไม่เปิด module ใด เศษยังเลี่ยงการฝังกลบ'; }
+  if (t === 'redeem') t = mods.cold ? 'ป้าแดงใช้แต้ม: ฝากผักที่เหลือเข้าห้องเย็นฟรี และลดค่ากาแฟร้านเจ๊นิด (ร้านได้แต้มเข้าบัญชี)' : 'ป้าแดงใช้แต้มลดค่ากาแฟร้านเจ๊นิด ร้านได้แต้มเข้าบัญชี';
+  return [k + 1, t];
+};
+const lerp = (a, b, k) => a + (b - a) * k; const c01 = v => Math.max(0, Math.min(1, v)); const ease = k => (k = c01(k), k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+const mixc = (hex, amt) => { const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255; const t = amt < 0 ? 0 : 255, p = Math.abs(amt);
+  r = Math.round(r + (t - r) * p); g = Math.round(g + (t - g) * p); b = Math.round(b + (t - b) * p); return `rgb(${r},${g},${b})`; };
+function along(path, k) {
+  const seg = []; let L = 0; for (let i = 1; i < path.length; i++) { const d = Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]); seg.push(d); L += d; }
+  let r = c01(k) * L; for (let i = 0; i < seg.length; i++) { if (r <= seg[i] || i === seg.length - 1) { const q = seg[i] ? Math.min(1, r / seg[i]) : 1; return [lerp(path[i][0], path[i + 1][0], q), lerp(path[i][1], path[i + 1][1], q)]; } r -= seg[i]; }
+}
+const P_HOME = [4.7, 6.0], P_GO = [[4.7, 6.0], [4.7, 4.4], [7.1, 4.4], [7.1, 3.6]], P_BACK = [[7.1, 3.6], [7.1, 4.4], [4.2, 4.4], [4.2, 6.2]];
+const V_HOME = [7.9, 3.0], V_GO = [[7.9, 3.0], [7.9, 4.5], [11.1, 4.5], [11.1, 7.3]];
+const GAS_PIPE = [[3.4, 7.0], [3.4, 5.35], [15.9, 5.35], [15.9, 1.4]], POWER = [[6.3, 7.0], [8.2, 7.0]], FERT = [[3.3, 8.9], [6.5, 9.7], [12.2, 9.7], [12.2, 6.8]];
+
+function drawSim(cv, t, mods) {
+  if (!cv) return; const cw = cv.clientWidth, ch = cv.clientHeight; if (!cw) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (cv.width !== Math.round(cw * dpr) || cv.height !== Math.round(ch * dpr)) { cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); }
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cw, ch);
+  const small = cw < 560; // มือถือ: ซูมเข้ากลางตลาด ตัดป้ายรอง
+  const sc = small ? Math.min(cw / 620, ch / 400) : Math.min(cw / 930, ch / 540);
+  const ox = small ? cw / 2 - 2.5 * 32 * sc : cw / 2 - 96 * sc, oy = small ? ch / 2 - 12.5 * 16 * sc + 40 * sc : ch / 2 - 200 * sc;
+  const P = (x, y, z = 0) => [ox + (x - y) * 32 * sc, oy + (x + y) * 16 * sc - z * 30 * sc];
+  const ph = t % LOOP_S;
+  const rr = (x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
+  const poly = (pts, fill, stroke) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); } };
+  const quad = (x, y, w, d, z, fill, stroke) => poly([P(x, y, z), P(x + w, y, z), P(x + w, y + d, z), P(x, y + d, z)], fill, stroke);
+  const box = (x, y, w, d, h, c, z0 = 0, top) => {
+    poly([P(x, y + d, z0), P(x + w, y + d, z0), P(x + w, y + d, z0 + h), P(x, y + d, z0 + h)], mixc(c, -.1));
+    poly([P(x + w, y, z0), P(x + w, y + d, z0), P(x + w, y + d, z0 + h), P(x + w, y, z0 + h)], mixc(c, -.24));
+    poly([P(x, y, z0 + h), P(x + w, y, z0 + h), P(x + w, y + d, z0 + h), P(x, y + d, z0 + h)], top || mixc(c, .08)); };
+  const font = (size, w = 600) => `${w} ${Math.max(small ? 8.5 : 10, size * Math.max(small ? .62 : .78, sc))}px Anuphan, 'Noto Sans Thai', sans-serif`;
+  const label = (s, x, y, z, { size = 12, color = '#13241a', bg = 'rgba(255,255,255,.92)', w = 600, a = 1, dy = 0 } = {}) => {
+    const [px, py0] = P(x, y, z); const py = py0 + dy; ctx.globalAlpha = a; ctx.font = font(size, w); const tw = ctx.measureText(s).width; const h = Math.max(small ? 8.5 : 10, size * Math.max(small ? .62 : .78, sc)) + (small ? 6 : 9);
+    if (bg) { ctx.fillStyle = bg; rr(px - tw / 2 - 8, py - h / 2, tw + 16, h, h / 2); ctx.fill(); }
+    ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, px, py + 1); ctx.globalAlpha = 1; };
+  const line = (path, z, color, width, dash, off) => { ctx.beginPath(); path.forEach((p, i) => { const q = P(p[0], p[1], z); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+    ctx.strokeStyle = color; ctx.lineWidth = width * sc; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash(dash ? dash.map(v => v * sc) : []); ctx.lineDashOffset = off || 0; ctx.stroke(); ctx.setLineDash([]); };
+  const cyl = (x, y, r, h, side, topc, dome, dh = .75) => { const [bx, by] = P(x, y, 0), [tx, ty] = P(x, y, h); const rx = r * 45 * sc, ry = r * 22.6 * sc;
+    ctx.fillStyle = side; ctx.beginPath(); ctx.ellipse(bx, by, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(bx - rx, ty, rx * 2, by - ty);
+    ctx.fillStyle = topc; ctx.beginPath(); ctx.ellipse(tx, ty, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+    if (dome) { ctx.fillStyle = dome; ctx.beginPath(); ctx.ellipse(tx, ty, rx, rx * dh, 0, Math.PI, Math.PI * 2); ctx.ellipse(tx, ty, rx, ry, 0, 0, Math.PI); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.ellipse(tx - rx * .35, ty - rx * dh * .55, rx * .22, rx * dh * .14, -.4, 0, Math.PI * 2); ctx.fill(); } };
+  const person = (x, y, col, walking, carry) => { const [px, py0] = P(x, y, 0); const u = sc; const py = py0 - (walking ? Math.abs(Math.sin(t * 9)) * 2.5 * u : 0);
+    ctx.fillStyle = 'rgba(0,0,0,.16)'; ctx.beginPath(); ctx.ellipse(px, py0, 8 * u, 4 * u, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#3a3f45'; ctx.fillRect(px - 4 * u, py - 9 * u, 3 * u, 9 * u); ctx.fillRect(px + 1 * u, py - 9 * u, 3 * u, 9 * u);
+    ctx.fillStyle = col; rr(px - 6 * u, py - 24 * u, 12 * u, 16 * u, 4 * u); ctx.fill();
+    ctx.fillStyle = '#f1c9a5'; ctx.beginPath(); ctx.arc(px, py - 29 * u, 5.5 * u, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.arc(px, py - 30.5 * u, 5.6 * u, Math.PI, Math.PI * 2); ctx.fill();
+    if (carry) { ctx.fillStyle = carry; rr(px - 8 * u, py - 22 * u, 16 * u, 10 * u, 2 * u); ctx.fill(); ctx.fillStyle = '#5aa845'; ctx.beginPath(); ctx.arc(px - 3 * u, py - 23 * u, 3 * u, 0, 7); ctx.arc(px + 3 * u, py - 23 * u, 3 * u, 0, 7); ctx.fill(); } };
+
+  /* ground */
+  quad(-0.5, -0.5, 17.5, 11.2, 0, '#dfe9d9');
+  for (let i = 0; i <= 17; i++) line([[i, -0.5], [i, 10.7]], 0, 'rgba(255,255,255,.35)', .6);
+  for (let j = 0; j <= 10; j++) line([[-0.5, j], [17, j]], 0, 'rgba(255,255,255,.35)', .6);
+  quad(-0.5, 3.9, 17.5, 1.1, 0.01, '#f4efe2');
+  quad(-0.5, 5.6, 17.5, 5.1, 0.01, '#d3e2cf');
+  if (!small) { label('ทางเดินในตลาด', 14.2, 4.45, 0.02, { size: 10, bg: null, color: '#9a8f72' }); label('โซนลูป · บ่อหมัก ห้องเย็น ปุ๋ย', 0.8, 10.0, 0.02, { size: 10, bg: null, color: '#6b8a6a' }); }
+
+  /* lines under objects */
+  if (mods.gas) { line(GAS_PIPE, 0.04, '#e9b9a3', 5); line(GAS_PIPE, 0.05, '#d9663a', 2.2, [6, 8], -t * 30); line([[15.9, 1.4], [15.5, 1.4]], 0.05, '#d9663a', 2.2); line([[15.9, 3.4], [15.5, 3.4]], 0.05, '#d9663a', 2.2); }
+  if (mods.cold) { line(POWER, 0.05, '#f7e3a1', 5); line(POWER, 0.06, '#e7a600', 2.4, [4, 6], -t * 40); }
+  if (mods.fert) line(FERT, 0.04, 'rgba(160,110,50,.35)', 3, [2, 6]);
+
+  /* depth-sorted objects */
+  const items = []; const add = (d, f) => items.push({ d, f });
+  SIM_STALLS.forEach((st, i) => {
+    add(st.x + 1 + 1.8, () => {
+      box(st.x, 1, 2, 1.6, 0.7, '#d8c3a0', 0, '#e9d8b9');
+      st.fruit.forEach((fc, k) => { for (let n = 0; n < 4; n++) { const [px, py] = P(st.x + 0.35 + n * 0.42, 1.35 + k * 0.6, 0.76); ctx.fillStyle = fc; ctx.beginPath(); ctx.ellipse(px, py, 6 * sc, 3.5 * sc, 0, 0, 7); ctx.fill(); } });
+      [[st.x + 0.05, 1.05], [st.x + 1.95, 1.05], [st.x + 0.05, 2.55], [st.x + 1.95, 2.55]].forEach(([a, b]) => line([[a, b], [a, b]], 0, '#8b7355', 1));
+      [[st.x + .05, 2.55], [st.x + 1.95, 2.55], [st.x + 1.95, 1.05]].forEach(([a, b]) => { const p0 = P(a, b, .7), p1 = P(a, b, 1.55); ctx.strokeStyle = '#8b7355'; ctx.lineWidth = 2 * sc; ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.stroke(); });
+      box(st.x - 0.1, 0.9, 2.2, 1.8, 0.12, st.c, 1.55);
+      for (let k = 0; k < 4; k++) quad(st.x - 0.1 + k * 0.55, 0.9, 0.27, 1.8, 1.671, 'rgba(255,255,255,.45)');
+    });
+    // green bin + fill meter
+    const bx = st.x + 0.75, by = 3.05;
+    const fill = st.me ? (ph < 5 ? ph / 5 : ph < 12.5 ? 1 : 0.06 + (ph - 12.5) / 45) : ((t * 0.035 + i * 0.29) % 1);
+    add(bx + by + 0.6, () => {
+      box(bx, by, 0.5, 0.5, 0.62, '#13b85a', 0, '#0d9549');
+      const [qx, qy] = P(bx + 0.5, by + 0.25, 0.32); ctx.fillStyle = '#fff'; ctx.fillRect(qx - 4 * sc, qy - 4 * sc, 8 * sc, 8 * sc); ctx.fillStyle = '#111'; ctx.fillRect(qx - 2.5 * sc, qy - 2.5 * sc, 2 * sc, 2 * sc); ctx.fillRect(qx + .5 * sc, qy + .5 * sc, 2 * sc, 2 * sc);
+      const [mx, my] = P(bx + 0.25, by + 0.25, 1.15); ctx.fillStyle = 'rgba(255,255,255,.9)'; rr(mx - 13 * sc, my - 3.5 * sc, 26 * sc, 7 * sc, 3.5 * sc); ctx.fill();
+      ctx.fillStyle = fill > .9 ? '#e5484d' : '#13b85a'; rr(mx - 12 * sc, my - 2.5 * sc, 24 * sc * Math.max(.08, fill), 5 * sc, 2.5 * sc); ctx.fill();
+    });
+  });
+  // restaurants (Module 3)
+  [[14.1, 0.8, 'ข้าวแกงป้าศรี'], [14.1, 2.8, 'ก๋วยเตี๋ยวลุงหมาน']].forEach(([x, y, n]) => add(x + y + 1.4, () => {
+    box(x, y, 1.4, 1.3, 0.75, '#e9d8c4', 0, '#f3e6d6'); box(x - 0.08, y - 0.08, 1.56, 1.46, 0.12, '#d9663a', 1.25);
+    const [px, py] = P(x + 0.7, y + 0.65, 0.78);
+    if (mods.gas) { const f = 1 + Math.sin(t * 14 + x) * .15; ctx.fillStyle = '#ff9f0a'; ctx.beginPath(); ctx.ellipse(px, py - 5 * sc * f, 4 * sc, 7 * sc * f, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.ellipse(px, py - 3 * sc, 2 * sc, 4 * sc, 0, 0, 7); ctx.fill(); }
+    else cyl(x + 1.15, y + 1.05, 0.13, 0.5, '#8a8f98', '#a7acb4');
+  }));
+  // digester + gas bag + generator
+  const bag = ph < 18 ? 0.6 : ph < 22 ? 0.6 + 0.4 * (ph - 18) / 4 : 1 - 0.4 * (ph - 22) / 8;
+  add(2.6 + 7.8, () => { cyl(2.6, 7.8, 1.35, 0.55, '#8a7a5c', '#a39373', '#5f8f5a', .55);
+    for (let i = 0; i < 5; i++) { const k = (t * (ph > 14 && ph < 22 ? .9 : .45) + i * .2) % 1; const [px, py] = P(2.6 + Math.sin(i * 2.1) * .5, 7.8 + Math.cos(i * 1.7) * .3, 1.0 + k * 1.1); ctx.globalAlpha = 1 - k; ctx.fillStyle = '#b8e0b0'; ctx.beginPath(); ctx.arc(px, py, (2 + k * 3) * sc, 0, 7); ctx.fill(); ctx.globalAlpha = 1; } });
+  add(4.9 + 8.9, () => cyl(4.9, 8.9, 0.75 * bag, 0.15, '#6b7a70', '#7d8c82', '#9fd27a', .7));
+  add(5.9 + 6.9, () => { box(5.6, 6.6, 0.75, 0.6, 0.55, '#7c8a96'); if (mods.cold) { const [px, py] = P(5.97, 6.9, 0.85); ctx.fillStyle = Math.sin(t * 8) > 0 ? '#ffd34d' : '#e7a600'; ctx.font = font(13, 700); ctx.textAlign = 'center'; ctx.fillText('⚡', px, py); } });
+  // cold room (Module 1)
+  add(9.5 + 7.4, () => { const on = mods.cold; box(8.2, 6.4, 2.6, 2.0, 1.5, on ? '#d9ecfa' : '#c9ccd1', 0, on ? '#eef7fe' : '#dadde1');
+    poly([P(10.8, 7.05, 0), P(10.8, 7.75, 0), P(10.8, 7.75, 1.05), P(10.8, 7.05, 1.05)], on ? '#2a83c9' : '#9aa0a6');
+    const [px, py] = P(9.5, 8.4, 0.9); ctx.fillStyle = on ? '#2a83c9' : '#9aa0a6'; ctx.font = font(18, 700); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('❄', px, py);
+    if (on) { const crates = 3 + Math.floor((ph >= 29 ? 1 : 0)); for (let k = 0; k < crates; k++) box(8.4 + (k % 3) * 0.55, 6.5 + Math.floor(k / 3) * 0.45, 0.4, 0.35, 0.22, '#a7d3a0', 1.5); } });
+  // fertilizer (Module 2)
+  if (mods.fert) {
+    const n = 3 + (ph > 22 ? Math.min(3, Math.floor((ph - 22) / 1.3)) : 0);
+    add(13.1 + 6.6, () => { for (let k = 0; k < n; k++) box(12.6 + (k % 3) * 0.4, 6.2 + Math.floor(k / 3) * 0.4, 0.34, 0.3, 0.26, '#b9874a'); });
+    const tk = ph < 24 ? 0 : ease((ph - 24) / 5); const tx = lerp(13.3, 16.6, tk), ty = lerp(8.4, 9.9, tk);
+    add(tx + ty + 1, () => { box(tx, ty, 1.2, 0.7, 0.45, '#3b7d4f', 0.12); box(tx + 1.2, ty, 0.45, 0.7, 0.62, '#2e8b3f', 0.12, '#bfe3c8'); if (tk < .2) for (let k = 0; k < 2; k++) box(tx + 0.2 + k * .45, ty + 0.15, 0.36, 0.38, 0.22, '#b9874a', 0.57); });
+  }
+  // market office + staff at cold room door
+  add(15.4 + 7.4, () => { box(15.0, 7.0, 1.0, 0.8, 0.8, '#efeaff', 0, '#f7f4ff'); box(14.92, 6.92, 1.16, 0.96, 0.1, '#6f5bd0', 0.8); });
+  add(11.4 + 8.1, () => person(11.4, 8.1, '#6f5bd0', false));
+  // porter
+  const walkGo = ph >= 7 && ph < 12, walkBack = ph >= 14 && ph < 18;
+  const pp = walkGo ? along(P_GO, ease((ph - 7) / 5)) : ph >= 12 && ph < 14 ? P_GO[P_GO.length - 1] : walkBack ? along(P_BACK, ease((ph - 14) / 4)) : ph >= 18 && ph < 19.5 ? P_BACK[P_BACK.length - 1] : P_HOME;
+  const loaded = ph >= 12.6 && ph < 19;
+  add(pp[0] + pp[1] + 0.3, () => { box(pp[0] + 0.2, pp[1] - 0.1, 0.5, 0.36, 0.3, '#7c8a96', 0.06, loaded ? '#5aa845' : '#9aa6b2'); person(pp[0], pp[1], '#0f8f84', walkGo || walkBack); });
+  // vendor
+  const vMove = mods.cold && ph >= 26 && ph < 29, vAt = mods.cold && ph >= 29;
+  const vp = vMove ? along(V_GO, ease((ph - 26) / 3)) : vAt ? V_GO[V_GO.length - 1] : V_HOME;
+  add(vp[0] + vp[1] + 0.2, () => person(vp[0], vp[1], '#13a852', vMove, vMove ? '#c98a3e' : null));
+
+  items.sort((a, b) => a.d - b.d).forEach(it => it.f());
+
+  /* particles & overlays */
+  if (ph >= 18 && ph < 19.6) for (let i = 0; i < 7; i++) { const k = c01((ph - 18 - i * .12) / 1.1); if (k <= 0 || k >= 1) continue;
+    const a = P(4.4, 6.0, 0.5), b = P(2.6, 7.8, 1.2); const x = lerp(a[0], b[0], k), y = lerp(a[1], b[1], k) - Math.sin(k * Math.PI) * 30 * sc; ctx.fillStyle = i % 2 ? '#5aa845' : '#8cc63f'; ctx.beginPath(); ctx.arc(x, y, 3.2 * sc, 0, 7); ctx.fill(); }
+  if (mods.fert && ph >= 22 && ph < 26) for (let i = 0; i < 4; i++) { const k = ((ph - 22) / 1.6 + i * .25) % 1; const [x, y] = P(...along(FERT, k), 0.15); ctx.fillStyle = '#9c6a2e'; rr(x - 4 * sc, y - 3 * sc, 8 * sc, 6 * sc, 1.5 * sc); ctx.fill(); }
+  if (mods.cold && ph >= 22 && ph < 26) { const k = ((ph - 22) * .7) % 1; const [x, y] = P(...along(POWER, k), 0.3); ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.arc(x, y, 5 * sc, 0, 7); ctx.fill(); }
+
+  SIM_STALLS.forEach(st => label(st.n, st.x + 1, 1.8, 2.25, { size: 11, bg: st.me ? '#06c755' : 'rgba(255,255,255,.92)', color: st.me ? '#fff' : '#13241a' }));
+  label('บ่อหมักไบโอแก๊ส', 2.6, 7.8, 2.4, { size: 11 });
+  if (!small) label('ถุงเก็บแก๊ส', 4.9, 8.9, 1.5, { size: 10 });
+  label(mods.cold ? 'ห้องเย็นรวม 4°C' : 'ห้องเย็น · ปิด', 9.5, 7.4, 2.5, { size: 11, bg: mods.cold ? '#2a83c9' : '#9aa0a6', color: '#fff' });
+  label(mods.fert ? 'ปุ๋ยจากกาก → เกษตรกร' : 'ปุ๋ย · ปิด', 13.1, 6.4, 1.3, { size: 10, bg: mods.fert ? '#b9874a' : '#9aa0a6', color: '#fff' });
+  label(mods.gas ? 'ร้านอาหาร · ไบโอแก๊สแทน LPG' : 'ร้านอาหาร · ใช้ LPG', 14.8, 2.2, 2.3, { size: 10, bg: mods.gas ? '#d9663a' : '#9aa0a6', color: '#fff' });
+  if (!small) label('สำนักงาน จนท.ตลาด', 15.5, 7.4, 1.6, { size: 10, bg: '#6f5bd0', color: '#fff' });
+
+  if (ph >= 5 && ph < 8.5) label('LINE · ถังเต็ม เรียกคนขน', 7.0, 3.3, 2.0, { size: 11, bg: '#06c755', color: '#fff', a: Math.min(1, (ph - 5) * 3), dy: -Math.sin(t * 5) * 2 });
+  if (ph >= 12 && ph < 14.5) label('สแกน QR · 6.5 กก. · เกรด A', 7.1, 3.6, 1.6, { size: 11, bg: '#111', color: '#fff' });
+  if (ph >= 12.5 && ph < 16) { const k = (ph - 12.5) / 3.5; label('+650 แต้ม', 7.2, 1.8, 3.0, { size: 17, w: 700, bg: '#f2b705', color: '#fff', a: 1 - k * k, dy: -k * 40 * sc }); }
+  if (ph >= 18 && ph < 22) label('+0.65 m³ แก๊ส', 4.9, 8.9, 2.0, { size: 11, bg: '#3b7d4f', color: '#fff', a: Math.min(1, (ph - 18) * 2) });
+  if (ph >= 26 && ph < 29.5) { // coin circulates to another stall
+    const k = ease((ph - 26) / 2.2); const a = P(7.2, 1.8, 2.6), b = P(12.4, 1.8, 2.6); const x = lerp(a[0], b[0], k), y = lerp(a[1], b[1], k) - Math.sin(k * Math.PI) * 60 * sc;
+    if (k < 1) { ctx.fillStyle = '#f2b705'; ctx.beginPath(); ctx.arc(x, y, 8 * sc, 0, 7); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = font(10, 700); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('฿', x, y + 1); }
+    if (ph >= 28.2) label('+1,000 แต้มเข้าร้านเจ๊นิด', 12.4, 1.8, 3.0, { size: 11, bg: '#f2b705', color: '#fff' });
+    if (mods.cold && ph < 27.6) label('ใช้ 1,500 แต้ม · ฝากฟรี 1 ลัง', 7.9, 3.0, 2.1, { size: 11, bg: '#2a83c9', color: '#fff' });
+  }
+  if (mods.cold && ph >= 29) label('✓ จนท.สแกน · เข้าห้องเย็นแล้ว', 11.2, 7.6, 2.0, { size: 11, bg: '#6f5bd0', color: '#fff' });
+}
+
+function MarketSim({ s }) {
+  const cv = useRef(null), box = useRef(null);
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [play, setPlay] = useState(!reduce), [speed, setSpeed] = useState(1), [hud, setHud] = useState(0);
+  const S = useRef({ t: 0, last: 0, hu: 0 }); const live = useRef({}); live.current = { play, speed, mods: s.modules };
+  useEffect(() => { let raf; const loop = now => { const st = S.current; const dt = st.last ? Math.min(.05, (now - st.last) / 1000) : 0; st.last = now;
+      if (live.current.play) st.t += dt * live.current.speed; drawSim(cv.current, st.t, live.current.mods);
+      if (now - st.hu > 150) { st.hu = now; setHud(st.t); } raf = requestAnimationFrame(loop); };
+    raf = requestAnimationFrame(loop); return () => cancelAnimationFrame(raf); }, []);
+  const mods = s.modules; const ph = hud % LOOP_S; const hours = hud / LOOP_S; const [step, cap] = simCap(ph, mods);
+  const kg = hours * 42, ab = kg * .88, m3 = ab * BIO.yield, kwh = mods.cold ? m3 * (1 - BIO.gasShare) * BIO.kwhPerM3 : 0, co2 = ab * co2PerKg(mods), pts = ab * 92;
+  const circ = Math.floor(hours) * 1000 + (ph >= 28.2 ? 1000 : 0);
+  const clock = 6 * 60 + Math.floor(hours * 60); const hh = String(Math.floor(clock / 60) % 24).padStart(2, '0'), mm = String(clock % 60).padStart(2, '0');
+  const toggle = k => D(x => addLog({ ...x, modules: { ...x.modules, [k]: !x.modules[k] } }, `${x.modules[k] ? 'ปิด' : 'เปิด'} ${MODS[k].n}`, ''));
+  const full = () => { const el = box.current; if (!el) return; if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => toast('เบราว์เซอร์นี้เปิดเต็มจอไม่ได้')); };
+  return html`<main className="sim">
+    <div className="head"><div><div className="eyebrow">จำลองตลาด · 1 รอบ = 30 วินาที</div><h1>LoopLard ทำงานในตลาดจริงยังไง</h1>
+      <p>ตามถังของป้าแดง ดูเศษผักกลายเป็นแต้ม ไบโอแก๊ส ความเย็น ปุ๋ย และแก๊สหุงต้ม · ตัวเลขเป็นข้อมูลจำลอง</p></div></div>
+    <div className="simbox" ref=${box}>
+      <canvas ref=${cv} role="img" aria-label=${'ภาพจำลองตลาด ขั้นที่ ' + step + ': ' + cap}></canvas>
+      <div className="clk">${hh}:${mm} น. · รอบที่ ${Math.floor(hours) + 1}</div>
+      <div className="ctr">
+        <div>เศษเข้าลูป<b>${nf(kg, 1)} กก.</b></div><div>ไบโอแก๊ส<b>${nf(m3, 2)} m³</b></div><div>ไฟเดินห้องเย็น<b>${nf(kwh, 1)} kWh</b></div>
+        <div>ลดคาร์บอน<b>${nf(co2, 1)} kg</b></div><div>แต้มที่แจก<b>${nf(pts)}</b></div><div>แต้มหมุนข้ามร้าน<b>${nf(circ)}</b></div></div>
+      <div className="cap2" key=${step}><span className="k">${String(step).padStart(2, '0')}/08</span><span>${cap}</span></div>
+      <div className="prog"><i style=${{ width: ph / LOOP_S * 100 + '%' }}></i></div>
+    </div>
+    <div className="simctl">
+      <button className="btn primary" onClick=${() => setPlay(!play)}><${Icon} n=${play ? 'pause' : 'play'} s=${15} w=${2.2} />${play ? 'หยุด' : 'เล่น'}</button>
+      <button className="btn" onClick=${() => setSpeed(speed === 1 ? 2 : speed === 2 ? 0.5 : 1)}>ความเร็ว ${speed}×</button>
+      <button className="btn" onClick=${() => { S.current.t = 0; setHud(0); setPlay(true); }}><${Icon} n="reset" s=${15} /> เริ่มรอบใหม่</button>
+      <button className="btn" onClick=${full}><${Icon} n="expand" s=${15} /> เต็มจอ (สำหรับอัดวิดีโอ)</button>
+      <span style=${{ flex: 1 }}></span>
+      ${Object.entries(MODS).map(([k, m]) => html`<button key=${k} className="mod" aria-pressed=${mods[k]} onClick=${() => toggle(k)}><span className="sw"></span><${Icon} n=${m.i} s=${16} c=${m.c} /><span>${m.n.replace('Module ', 'M')}</span></button>`)}
+    </div>
+    <p className="sub" style=${{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>อัดเป็นวิดีโอ: กด "เต็มจอ" แล้วใช้ Win+Alt+R (Xbox Game Bar) หรือ Snipping Tool โหมดวิดีโอ ได้ไฟล์ MP4 ไปวางใน Canva</p>
+  </main>`;
+}
+
 /* ======================= app ======================= */
 const ROLES = [['vendor', 'แม่ค้า', 'store'], ['porter', 'คนขน', 'truck'], ['market', 'ตลาด', 'headset']];
 const SHOT_CAP = { vendor: '01 · แม่ค้าแยกเศษ ได้แต้ม แลกบริการ', porter: '02 · คนขนสแกนถัง ชั่ง ให้เกรด', market: '03 · ตลาดยืนยันแต้ม ขายปุ๋ย/แก๊ส ดูแลบ่อหมัก' };
@@ -1313,11 +1556,13 @@ function App() {
   return html`<${React.Fragment}>
     <header className="top"><div className="brand"><${Logo} s=${38} /><div><b>${BRAND.th} · ${BRAND.name}</b><small>ต้นแบบ LINE OA + LIFF + Dashboard · ข้อมูลจำลอง</small></div></div>
       <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'flow'} onClick=${() => view('flow')} aria-label="Workflow"><${Icon} n="route" s=${16} /><span className="lg">Workflow</span></button>
+        <button aria-pressed=${s.view === 'sim'} onClick=${() => view('sim')} aria-label="จำลองตลาด"><${Icon} n="cube" s=${16} /><span className="lg">จำลองตลาด</span></button>
         <button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
         <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')} aria-label="แคปจอใส่สไลด์"><${Icon} n="frame" s=${16} /><span className="lg">แคปจอใส่สไลด์</span></button>
         <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')} aria-label="Dashboard"><${Icon} n="chart" s=${16} /><span className="lg">Dashboard</span></button></div></header>
     ${s.view === 'phone' ? html`<main className="stage"><${Guide} s=${s} /><div className="center">${roleTabs}<${Phone} s=${s} /></div><${Log} s=${s} /></main>`
       : s.view === 'flow' ? html`<${Workflow} s=${s} />`
+      : s.view === 'sim' ? html`<${MarketSim} s=${s} />`
       : s.view === 'shot' ? html`<main className="shot">${roleTabs}<${Phone} s=${s} /><div className="cap">${SHOT_CAP[s.role]}<span className="lg"> · ใช้ Win+Shift+S ครอบเฉพาะตัวเครื่อง</span></div></main>`
       : html`<${Dashboard} s=${s} />`}
     ${s.toast && html`<div className="toast" role="status">${s.toast}</div>`}<//>`;
