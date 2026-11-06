@@ -265,6 +265,32 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
 .co2 .track i{position:absolute;top:0;height:100%;border-radius:3px}
 .co2 .tot{font-weight:600}
 
+/* ---------- workflow story ---------- */
+.flow{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+.flow h1{font:700 clamp(26px,3.4vw,38px)/1.15 var(--f-display);margin:6px 0 6px;letter-spacing:-.015em;text-wrap:balance}
+.flow .lede{color:var(--muted);margin:0;max-width:62ch}
+.flow h2{font:700 20px/1.3 var(--f-display);margin:0 0 4px}
+.story{position:relative;padding-left:58px;display:flex;flex-direction:column;gap:14px}
+.story::before{content:"";position:absolute;left:19px;top:10px;bottom:10px;width:2px;background:repeating-linear-gradient(var(--line) 0 6px,transparent 6px 11px)}
+.scene{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.scene .dot{position:absolute;left:-58px;top:14px;width:40px;height:40px;border-radius:13px;color:#fff;display:grid;place-items:center;box-shadow:0 0 0 5px var(--bg)}
+.scene .top2{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.scene .when{font:600 12px var(--f-mono);color:var(--muted)}
+.scene .who2{font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;color:#fff}
+.scene h3{margin:0;font:600 16.5px/1.35 var(--f-display)}
+.scene p{margin:0;color:var(--muted);font-size:14px;max-width:70ch}
+.scene .pts{display:inline-flex;align-items:baseline;gap:4px;font:700 22px var(--f-mono);color:var(--accent-ink)}
+.branch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:4px}
+.branch>div{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface-2);display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.branch b{color:var(--ink);font-size:14px;display:flex;align-items:center;gap:6px}
+.pflow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.pflow .nd{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;font-size:13.5px;display:flex;align-items:center;gap:8px}
+.pflow .ar{color:var(--muted)}
+.gets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.gets>div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--muted)}
+.gets b{color:var(--ink);font:600 15px var(--f-display)}
+@media (max-width:760px){ .branch{grid-template-columns:1fr} .gets{grid-template-columns:repeat(2,minmax(0,1fr))} .story{padding-left:46px} .story::before{left:15px} .scene .dot{left:-46px;width:32px;height:32px;border-radius:10px} }
+
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:14px;z-index:99;animation:pop .3s ease}
 
 @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
@@ -338,8 +364,8 @@ const FARM_BUYERS = ['ไร่ลุงมี', 'สวนพี่ต้อม
 const MIN = 60000;
 // แต้มต่อ กก. ตามเกรด · เกรด C ไม่ได้แต้ม ทั้งแม่ค้าและคนขน
 const GRADES = {
-  A: { name: 'สะอาด คัดแล้ว', desc: 'เศษผักผลไม้ล้วน ไม่มีถุง เข้าบ่อหมักได้ทันที', pts: 10, porter: 1, col: '#06c755' },
-  B: { name: 'ปนเล็กน้อย', desc: 'มีก้านแข็ง เศษดิน ต้องคัดซ้ำก่อนเข้าเครื่องสับ', pts: 5, porter: 1, col: '#ff9f0a' },
+  A: { name: 'สะอาด คัดแล้ว', desc: 'เศษผักผลไม้ล้วน ไม่มีถุง เข้าบ่อหมักได้ทันที', pts: 100, porter: 10, col: '#06c755' },
+  B: { name: 'ปนเล็กน้อย', desc: 'มีก้านแข็ง เศษดิน ต้องคัดซ้ำก่อนเข้าเครื่องสับ', pts: 50, porter: 10, col: '#ff9f0a' },
   C: { name: 'ปนขยะอื่น', desc: 'มีถุงพลาสติกหรือโฟม ไม่ได้แต้ม', pts: 0, porter: 0, col: '#8a8f98' },
 };
 const BIO = { yield: 0.1, gasShare: 0.5, kwhPerM3: 1.7, fertPerKg: 0.15, coldNeed: 34 }; // m³/กก, ส่วนแบ่งไปหุงต้ม, kWh/m³, กก.ปุ๋ย/กก.เศษ, kWh/วัน ห้องเย็น
@@ -354,13 +380,26 @@ const CO2 = [ // kgCO₂e ต่อ kg เศษ จากสไลด์ Low Ca
 const co2PerKg = mods => 2.53 - 0.26 + (mods.gas ? 0.28 : 0) + (mods.cold ? 0.22 : 0) + (mods.fert ? 0.08 : 0);
 const MODS = { cold: { n: 'Module 1 · ห้องเย็นรวม', s: 'ไฟจากไบโอแก๊สเดินห้องเย็น', i: 'snow', c: '#2a83c9' }, fert: { n: 'Module 2 · ปุ๋ยจากกาก', s: 'แม่ค้าแลกด้วยแต้ม / เกษตรกรซื้อ', i: 'leaf', c: '#c07a2c' }, gas: { n: 'Module 3 · แก๊สหุงต้ม', s: 'ต่อแก๊สให้ร้านอาหารแทน LPG', i: 'flame', c: '#b6532f' } };
 // แต้มแลกเป็นเงินไม่ได้ ใช้แลกบริการของลูปเท่านั้น (ผ่านเว็บ/LIFF)
+// มูลค่าภายในที่ตลาดใช้คุมต้นทุน (ไม่แสดงให้แม่ค้า และแลกเป็นเงินไม่ได้): 1 แต้ม ≈ ฿0.005
+// ตั้งราคาให้ของที่ตลาดต้นทุนต่ำ (ห้องเย็นใช้ไฟจากไบโอแก๊ส) ดูคุ้มที่สุด
+const PT_BAHT = 0.005;
 const REDEEM = [
-  { id: 'free', mod: 'cold', t: 'ฝากของสดฟรี 1 ลัง/คืน', d: 'ห้องเย็นรวม 4°C · ปกติ ฿20/ลัง/คืน', cost: 50, unit: 'ลัง-คืน', i: 'snow', step: true },
-  { id: 'disc', mod: 'cold', t: 'ส่วนลดค่าฝากของสด 50%', d: 'ใช้กับการฝากครั้งถัดไป สูงสุด 5 ลัง', cost: 20, unit: 'ครั้ง', i: 'tag' },
-  { id: 'space', mod: 'cold', t: 'เพิ่มพื้นที่ห้องเย็น +1 ลัง', d: 'ขยายโควตาประจำแผงจาก 2 → 3 ลัง นาน 7 วัน', cost: 200, unit: 'สิทธิ์', i: 'box' },
-  { id: 'fert', mod: 'fert', t: 'ปุ๋ยจากกาก 5 กก.', d: 'รับที่จุดปุ๋ยหลังตลาด', cost: 25, unit: 'ถุง', i: 'leaf', step: true },
-  { id: 'gas', mod: 'gas', t: 'แก๊สหุงต้ม ถังเล็ก', d: 'เติมจากบ่อไบโอแก๊สของตลาด', cost: 150, unit: 'ถัง', i: 'flame' },
+  { id: 'free', mod: 'cold', t: 'ฝากของสดฟรี 1 ลัง/คืน', d: 'ห้องเย็นรวม 4°C · ปกติ ฿20/ลัง/คืน', cost: 1500, i: 'snow', step: true },
+  { id: 'disc', mod: 'cold', t: 'ส่วนลดค่าฝากของสด 50%', d: 'ใช้กับการฝากครั้งถัดไป สูงสุด 5 ลัง', cost: 1000, i: 'tag' },
+  { id: 'space', mod: 'cold', t: 'เพิ่มพื้นที่ห้องเย็น +1 ลัง', d: 'ขยายโควตาประจำแผงจาก 2 → 3 ลัง นาน 7 วัน', cost: 8000, i: 'box' },
+  { id: 'fert', mod: 'fert', t: 'ปุ๋ยจากกาก 5 กก.', d: 'รับที่จุดปุ๋ยหลังตลาด', cost: 4000, i: 'leaf', step: true },
+  { id: 'gas', mod: 'gas', t: 'แก๊สหุงต้ม ถังเล็ก', d: 'เติมจากบ่อไบโอแก๊สของตลาด', cost: 15000, i: 'flame' },
 ];
+// ร้านในตลาดที่รับแต้มเป็นส่วนลด · ใช้ที่ร้านตัวเองไม่ได้ · ลดได้ไม่เกิน 20% ของบิล
+// ร้านที่รับแต้มได้แต้มนั้นเข้าบัญชีร้านเต็มจำนวน ตลาดไม่ต้องจ่ายเงิน แต้มหมุนอยู่ในตลาด
+const SHOP_DEALS = [
+  { id: 'f11', shop: 'กาแฟเจ๊นิด', stall: 'F11', t: 'ส่วนลด ฿5 กาแฟเจ๊นิด', d: 'ซื้อขั้นต่ำ ฿25', cost: 1000, i: 'bag' },
+  { id: 'f03', shop: 'ข้าวแกงป้าศรี', stall: 'F03', t: 'ส่วนลด ฿10 ข้าวแกงป้าศรี', d: 'ซื้อขั้นต่ำ ฿50', cost: 2000, i: 'pot' },
+  { id: 'a07', shop: 'ผลไม้เจ๊หมวย', stall: 'A07', t: 'ส่วนลด ฿10 ผลไม้เจ๊หมวย', d: 'ซื้อขั้นต่ำ ฿50', cost: 2000, i: 'leaf' },
+  { id: 'c03', shop: 'หมูเขียงลุงชัย', stall: 'C03', t: 'ส่วนลด ฿20 หมูเขียงลุงชัย', d: 'ซื้อขั้นต่ำ ฿100', cost: 4000, i: 'store' },
+  { id: 'b12', shop: 'ผักป้าแดง', stall: 'B12', t: 'ส่วนลด ฿10 ผักป้าแดง', d: 'ซื้อขั้นต่ำ ฿50', cost: 2000, i: 'leaf' },
+];
+const nextGoal = bal => [...REDEEM, ...SHOP_DEALS].map(x => x.cost).sort((a, b) => a - b).find(c => c > bal);
 
 let _id = 0; const uid = () => 'm' + (++_id) + Math.random().toString(36).slice(2, 6);
 const code4 = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
@@ -390,6 +429,7 @@ const ICONS = {
   tag: 'M3 12V4h8l10 10-8 8zM7.5 7.5h.01', box: 'M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8', tank: 'M5 9h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM8 9V5h8v4M5 13h14',
   dots: 'M6 12h.01M12 12h.01M18 12h.01', grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z', frame: 'M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4',
   tractor: 'M4 16a3 3 0 1 0 6 0 3 3 0 0 0-6 0M15 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M7 13V7h6l2 6M13 13h7v4M5 7h2',
+  pot: 'M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 10h20M9 7c0-1.2 1-1.3 1-2.6M14 7c0-1.2 1-1.3 1-2.6', route: 'M6 19a2 2 0 1 0 0-.01M18 5a2 2 0 1 0 0-.01M6 17V9a4 4 0 0 1 4-4h6M18 7v8a4 4 0 0 1-4 4H8',
 };
 const Icon = ({ n, s = 22, w = 1.8, c = 'currentColor' }) => html`<svg viewBox="0 0 24 24" width=${s} height=${s} fill="none" stroke=${c} strokeWidth=${w} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d=${ICONS[n]} /></svg>`;
 const Logo = ({ s = 34 }) => html`<svg viewBox="0 0 40 40" width=${s} height=${s} aria-hidden="true">
@@ -430,10 +470,10 @@ function initState() {
   return {
     offset, role: 'vendor', view: 'phone', sheet: null, toast: null, misses: 0, flash: null,
     modules: { cold: true, fert: true, gas: true },
-    points: { vendor: 420, porter: 186 },
-    pointLog: [{ t: at(320), text: 'ส่งเศษเกรด A 6.5 กก.', v: 65 }, { t: at(1500), text: 'แลกฝากของสดฟรี 1 ลัง', v: -50 }, { t: at(1700), text: 'ส่งเศษเกรด B 4 กก.', v: 20 }],
+    points: { vendor: 4200, porter: 1860 },
+    pointLog: [{ t: at(320), text: 'ส่งเศษเกรด A 6.5 กก.', v: 650 }, { t: at(900), text: 'ลูกค้าใช้แต้มซื้อผักที่แผงป้า', v: 1000 }, { t: at(1500), text: 'แลกฝากของสดฟรี 1 ลัง', v: -1500 }, { t: at(1700), text: 'ส่งเศษเกรด B 4 กก.', v: 200 }],
     jobs: [{ id: 'J1', shop: 'ลุงชัย', stall: 'C03', est: 9, status: 'open', note: 'ถังเขียวเต็ม · แจ้งเมื่อ 15:28' }],
-    pickups: [{ t: at(320), shop: 'ป้าแดง', stall: 'B12', kg: 6.5, grade: 'A', pts: 65 }, { t: at(200), shop: 'เจ๊หมวย', stall: 'A07', kg: 8, grade: 'A', pts: 80 }, { t: at(150), shop: 'พี่นก', stall: 'B04', kg: 5, grade: 'B', pts: 25 }],
+    pickups: [{ t: at(320), shop: 'ป้าแดง', stall: 'B12', kg: 6.5, grade: 'A', pts: 650 }, { t: at(200), shop: 'เจ๊หมวย', stall: 'A07', kg: 8, grade: 'A', pts: 800 }, { t: at(150), shop: 'พี่นก', stall: 'B04', kg: 5, grade: 'B', pts: 250 }],
     cold: { cap: 24, used: 15, temp: 4, quota: 2 }, fertStock: 340, sales: [],
     vouchers: [{ code: 'LL-7KQ2', vendor: 'เจ๊หมวย', stall: 'A07', item: REDEEM[0], qty: 2, status: 'pending', t: at(25) }],
     gasMeters: [{ name: 'ข้าวแกงป้าศรี', stall: 'F03', m3: 61, paid: false }, { name: 'ก๋วยเตี๋ยวลุงหมาน', stall: 'F07', m3: 48, paid: false }],
@@ -443,7 +483,7 @@ function initState() {
       vendor: [
         { id: uid(), from: 'date', text: 'วันนี้' },
         { id: uid(), from: 'bot', kind: 'flex', card: { type: 'welcome', role: 'vendor' }, t: at(400) },
-        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'pickup', kg: 6.5, grade: 'A', pts: 65 }, t: at(320) },
+        { id: uid(), from: 'bot', kind: 'flex', card: { type: 'pickup', kg: 6.5, grade: 'A', pts: 650 }, t: at(320) },
         { id: uid(), from: 'bot', kind: 'text', t: at(320), text: 'ถังของป้ารับไปแล้วค่ะ ถ้าถังเต็มอีก กดเรียกคนขนได้เลยนะคะ', quick: [{ label: 'ถังเต็ม เรียกคนขน', act: 'call-porter', icon: 'truck' }, { label: 'แต้มของฉัน', act: 'points', icon: 'star' }, { label: 'แลกแต้ม', act: 'redeem-open', icon: 'tag' }] },
       ],
       porter: [
@@ -483,7 +523,7 @@ const toast = text => { D(s => ({ ...s, toast: text })); setTimeout(() => D(s =>
 const openSheet = (role, type, data) => D(s => ({ ...s, sheet: { role, type, data } }));
 const closeSheet = () => D(s => ({ ...s, sheet: null }));
 const setRole = r => D(x => ({ ...x, role: r, view: x.view === 'dash' ? 'phone' : x.view, unread: { ...x.unread, [r]: 0 } }));
-const modOff = (s, m) => !s.modules[m];
+const modOff = (s, m) => !!m && !s.modules[m];
 
 const QV = [{ label: 'ถังเต็ม เรียกคนขน', act: 'call-porter', icon: 'truck' }, { label: 'แต้มของฉัน', act: 'points', icon: 'star' }, { label: 'คุยกับเจ้าหน้าที่', act: 'contact', icon: 'headset' }];
 
@@ -535,7 +575,7 @@ function act(role, a, arg, msg) {
       const job = { id: uid(), shop: ME.vendor.name, stall: ME.vendor.stall, est: 7, status: 'open', note: 'ถังเขียวเต็ม · แจ้งผ่าน LINE' };
       D(x => { let y = { ...x, jobs: [job, ...x.jobs] }; y = flash(y, 0); y = addLog(y, `${ME.vendor.name} (${ME.vendor.stall}) แจ้งถังเต็ม → push งานให้คนขน`, 'ok');
         return addMsg(y, 'porter', { from: 'bot', kind: 'flex', card: { type: 'job', jid: job.id } }); });
-      return say('vendor', [{ kind: 'text', text: `แจ้งคนขนแล้วค่ะ พี่เอกจะมาภายใน 15 นาที\nคัดถุงพลาสติกออกก่อน จะได้เกรด A (10 แต้ม/กก.) นะคะ`, quick: [{ label: 'ดูวิธีแยกเศษ', act: 'howto', icon: 'help' }] }], 600);
+      return say('vendor', [{ kind: 'text', text: `แจ้งคนขนแล้วค่ะ พี่เอกจะมาภายใน 15 นาที\nคัดถุงพลาสติกออกก่อน จะได้เกรด A (${GRADES.A.pts} แต้ม/กก.) นะคะ`, quick: [{ label: 'ดูวิธีแยกเศษ', act: 'howto', icon: 'help' }] }], 600);
     }
     case 'points': return say(role, [{ kind: 'flex', card: { type: 'points' } }], 500);
     case 'history': return say('vendor', [{ kind: 'flex', card: { type: 'history' } }], 500);
@@ -546,7 +586,15 @@ function act(role, a, arg, msg) {
       const { item, qty } = arg; const cost = item.cost * qty;
       if (modOff(s, item.mod)) { toast('ตลาดนี้ยังไม่เปิด module นี้'); return; }
       if (s.points[role] < cost) { toast('แต้มไม่พอ'); return; }
+      if (item.stall && role === 'vendor' && item.stall === ME.vendor.stall) { toast('ใช้แต้มที่ร้านตัวเองไม่ได้'); return; }
       const c = 'LL-' + code4(); closeSheet();
+      if (item.stall) { // ส่วนลดที่ร้านอื่น: ร้านนั้นสแกนเอง ได้แต้มเข้าบัญชีร้าน ตลาดไม่ต้องจ่าย
+        D(x => { let y = { ...x, points: { ...x.points, [role]: x.points[role] - cost }, demo: { ...x.demo, ptsShop: (x.demo.ptsShop || 0) + cost } };
+          if (role === 'vendor') y = { ...y, pointLog: [{ t: simNow(y), text: `ใช้ที่${item.shop}`, v: -cost }, ...y.pointLog] };
+          y = addLog(y, `แต้มหมุนในตลาด: ${ME[role].name} ใช้ ${nf(cost)} แต้มที่${item.shop} (${item.stall}) → ร้านได้ ${nf(cost)} แต้มเข้าบัญชี · ตลาดไม่ต้องจ่ายเงิน`, 'ok');
+          return addMsg(y, role, { from: 'me', kind: 'text', text: `ใช้แต้ม ${item.t}` }); });
+        return say(role, [{ kind: 'flex', card: { type: 'voucher', item, qty: 1, code: c, cost } }], 700);
+      }
       D(x => { let y = { ...x, points: { ...x.points, [role]: x.points[role] - cost }, demo: { ...x.demo, ptsRedeemed: x.demo.ptsRedeemed + cost } };
         if (role === 'vendor') y = { ...y, pointLog: [{ t: simNow(y), text: `แลก ${item.t}${qty > 1 ? ' × ' + qty : ''}`, v: -cost }, ...y.pointLog] };
         if (item.id === 'free') y = { ...y, cold: { ...y.cold, used: y.cold.used + qty } };
@@ -729,13 +777,23 @@ function Btns({ m, role, items }) {
 const Head = ({ bg, i, children }) => html`<div className="hd" style=${{ background: bg }}><${Icon} n=${i} s=${20} w=${2.2} />${children}</div>`;
 const G = { green: 'linear-gradient(135deg,#06c755,#049a42)', blue: 'linear-gradient(135deg,#2a83c9,#1d5f99)', amber: 'linear-gradient(135deg,#f2b705,#d68f00)', violet: 'linear-gradient(135deg,#7a68d4,#5a46c4)', soil: 'linear-gradient(135deg,#c98a3e,#9c5f22)', flame: 'linear-gradient(135deg,#d9663a,#a8401f)', teal: 'linear-gradient(135deg,#2c8fb0,#1f6f8b)', grey: 'linear-gradient(135deg,#8a8f98,#5f646c)', dark: '#1f2933' };
 const sum = (arr, f) => arr.reduce((a, x) => a + f(x), 0);
+// แถบความคืบหน้าไปยังของรางวัลชิ้นถัดไป: ทำให้แต้มก้อนเล็กยังรู้สึกว่าใกล้ได้อะไร
+function Goal({ bal }) {
+  const all = [...REDEEM, ...SHOP_DEALS.filter(d => d.stall !== ME.vendor.stall)].sort((a, b) => a.cost - b.cost);
+  const next = all.find(x => x.cost > bal); const can = all.filter(x => x.cost <= bal).length;
+  if (!next) return null;
+  const kgA = Math.ceil((next.cost - bal) / GRADES.A.pts);
+  return html`<div style=${{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 2 }}>
+    <div style=${{ fontSize: 12, color: '#555' }}>${can ? `แลกได้แล้ว ${can} อย่าง · ` : ''}อีก <b className="num">${nf(next.cost - bal)}</b> แต้ม (เกรด A ~${kgA} กก.) ได้ "${next.t}"</div>
+    <div className="meter"><i style=${{ width: Math.min(100, bal / next.cost * 100) + '%', background: '#f0a000' }}></i></div></div>`;
+}
 
 function FlexCard({ m, role, s }) {
   const c = m.card;
   switch (c.type) {
     case 'welcome': {
-      const txt = { vendor: [`สวัสดีค่ะ ${ME.vendor.name} แผง ${ME.vendor.stall}`, 'แยกเศษผักผลไม้ใส่ถังเขียว ถังเต็มกดเรียกคนขน ได้แต้มตาม กก. ทำมากได้มาก แล้วใช้แต้มแลกฝากของสดในห้องเย็น ปุ๋ย หรือแก๊ส'],
-        porter: [`สวัสดีค่ะ ${ME.porter.name}`, 'มีถังเต็มบอทจะส่งงานมาที่นี่ สแกน QR ถัง ชั่ง ให้เกรด แต้มเข้าแม่ค้าทันที เกรด A/B คนขนได้ 1 แต้ม/กก.'],
+      const txt = { vendor: [`สวัสดีค่ะ ${ME.vendor.name} แผง ${ME.vendor.stall}`, 'แยกเศษผักผลไม้ใส่ถังเขียว ถังเต็มกดเรียกคนขน ได้แต้มตาม กก. ทำมากได้มาก แล้วใช้แต้มแลกฝากของสดในห้องเย็น ปุ๋ย แก๊ส หรือลดราคาที่ร้านอื่นในตลาด'],
+        porter: [`สวัสดีค่ะ ${ME.porter.name}`, `มีถังเต็มบอทจะส่งงานมาที่นี่ สแกน QR ถัง ชั่ง ให้เกรด แต้มเข้าแม่ค้าทันที เกรด A/B คนขนได้ ${GRADES.A.porter} แต้ม/กก. ใช้ลดราคาที่ร้านในตลาดได้`],
         market: [`สวัสดีครับ ${ME.market.name} · ${ME.market.title}`, 'สแกนรหัสที่แม่ค้าแลกแต้ม บันทึกขายปุ๋ยให้เกษตรกรและเก็บค่าแก๊สร้านอาหารด้วยเงินสด ดูสถานะบ่อหมัก และรับเรื่องที่บอทตอบไม่ได้'] }[c.role];
       return html`<div className="fx"><div className="hero" style=${{ height: 96, background: 'linear-gradient(135deg,#06c755,#0aa04a)' }}>
         <div style=${{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 85% 0%, rgba(255,255,255,.3), transparent 45%)' }}></div>
@@ -750,8 +808,9 @@ function FlexCard({ m, role, s }) {
           <div className="kv"><span>เกรด</span><b style=${{ color: g.col }}>${c.grade} · ${g.name}</b></div>
           <div className="kv"><span>คนขน</span><b>${ME.porter.name}</b></div>
           <div className="kv"><span>แต้มคงเหลือ</span><b className="num">${nf(s.points.vendor)}</b></div>
-          ${zero ? html`<div className="note warn">พบถุงพลาสติกปน ครั้งหน้าคัดออกก่อน จะได้เกรด A = ${nf(c.kg * 10)} แต้ม</div>`
-            : html`<div className="note">เศษนี้เข้าบ่อหมักของตลาด ผลิตไฟเดินห้องเย็นได้ราว ${nf(c.kg * BIO.yield * (1 - BIO.gasShare) * BIO.kwhPerM3, 1)} kWh</div>`}</div>
+          ${zero ? html`<div className="note warn">พบถุงพลาสติกปน ครั้งหน้าคัดออกก่อน จะได้เกรด A = ${nf(c.kg * GRADES.A.pts)} แต้ม</div>`
+            : html`<div className="note">เศษนี้เข้าบ่อหมักของตลาด ผลิตไฟเดินห้องเย็นได้ราว ${nf(c.kg * BIO.yield * (1 - BIO.gasShare) * BIO.kwhPerM3, 1)} kWh</div>`}
+          <${Goal} bal=${s.points.vendor} /></div>
         <${Btns} m=${m} role=${role} items=${zero ? [{ label: 'ดูวิธีแยกเศษ', a: 'howto', keep: true }] : [{ label: 'แลกแต้ม', a: 'redeem-open', cls: 'p', keep: true }]} /></div>`;
     }
     case 'points': {
@@ -759,17 +818,19 @@ function FlexCard({ m, role, s }) {
       return html`<div className="fx"><div className="hd" style=${{ background: G.amber, paddingBlock: 16 }}><div><div style=${{ fontSize: 12, opacity: .9, fontWeight: 500 }}>แต้มของ${ME[r].name}</div><div style=${{ fontSize: 32, lineHeight: 1.1 }}><span className="num">${nf(s.points[r])}</span> <span style=${{ fontSize: 15 }}>แต้ม</span></div></div></div>
         <div className="bd"><div className="mini">${Object.entries(GRADES).map(([k, g]) => html`<div key=${k} className="it"><span className="gchip" style=${{ background: g.col }}>${k}</span><span style=${{ flex: 1 }}>${g.name}</span><b className="num">${r === 'porter' ? g.porter : g.pts} แต้ม/กก.</b></div>`)}</div>
           ${r === 'vendor' && html`<div className="mini" style=${{ borderTop: '1px solid #eef0f2', marginTop: 4 }}>${s.pointLog.slice(0, 3).map((h, k) => html`<div key=${k} className="it"><span style=${{ flex: 1 }}>${h.text}</span><b className="num" style=${{ color: h.v > 0 ? '#0a8a3e' : '#b91c1c' }}>${h.v > 0 ? '+' : ''}${nf(h.v)}</b></div>`)}</div>`}
-          <div style=${{ fontSize: 12, color: '#888' }}>แต้มแลกเป็นเงินไม่ได้ · ใช้แลกบริการของตลาดผ่านเว็บ · หมดอายุใน 30 วัน</div></div>
+          ${r === 'vendor' && html`<div className="note">ใช้แต้มลดราคาได้ที่ ${SHOP_DEALS.length - 1} ร้านในตลาด และเมื่อลูกค้าใช้แต้มซื้อผักที่แผงป้า แต้มนั้นเข้าบัญชีป้าด้วย</div>`}
+          <${Goal} bal=${s.points[r]} />
+          <div style=${{ fontSize: 12, color: '#888' }}>แต้มแลกเป็นเงินไม่ได้ · หมดอายุใน 30 วัน</div></div>
         <${Btns} m=${m} role=${role} items=${[{ label: 'แลกแต้ม', a: 'redeem-open', cls: 'p', keep: true }]} /></div>`;
     }
     case 'voucher': {
-      const it = c.item; const md = MODS[it.mod];
-      return html`<div className="fx"><${Head} bg=${it.mod === 'cold' ? G.blue : it.mod === 'fert' ? G.soil : G.flame} i=${it.i}>แลกแต้มสำเร็จ<//>
-        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><div className="ttl">${it.t}${c.qty > 1 ? ' × ' + c.qty : ''}</div><div style=${{ fontSize: 12.5, color: '#888' }}>${md.n}</div>
+      const it = c.item; const shopDeal = !!it.stall;
+      return html`<div className="fx"><${Head} bg=${shopDeal ? G.green : it.mod === 'cold' ? G.blue : it.mod === 'fert' ? G.soil : G.flame} i=${it.i}>${shopDeal ? 'ใช้แต้มที่ร้านในตลาด' : 'แลกแต้มสำเร็จ'}<//>
+        <div className="bd" style=${{ alignItems: 'center', textAlign: 'center' }}><div className="ttl">${it.t}${c.qty > 1 ? ' × ' + c.qty : ''}</div><div style=${{ fontSize: 12.5, color: '#888' }}>${shopDeal ? `แผง ${it.stall} · ${it.d} · ลดไม่เกิน 20% ของบิล` : MODS[it.mod].n}</div>
           <${QR} seed=${c.code} size=${104} /><div className="code">${c.code}</div>
           <div style=${{ width: '100%' }}><div className="kv"><span>ใช้แต้ม</span><b className="num">${nf(c.cost)}</b></div><div className="kv"><span>คงเหลือ</span><b className="num">${nf(s.points[role])} แต้ม</b></div>
           ${it.id === 'space' && html`<div className="kv"><span>โควตาห้องเย็นของแผง</span><b>${s.cold.quota} ลัง · 7 วัน</b></div>`}</div>
-          <div style=${{ fontSize: 12, color: '#888' }}>${it.mod === 'cold' ? 'แสดง QR ที่หน้าห้องเย็นโซน B' : it.mod === 'fert' ? 'แสดง QR ที่จุดปุ๋ยหลังตลาด' : 'แสดง QR ที่จุดเติมแก๊ส'}</div></div><div style=${{ height: 8 }}></div></div>`;
+          <div style=${{ fontSize: 12, color: '#888' }}>${shopDeal ? `แสดง QR ให้${it.shop}สแกน · ร้านได้แต้มนี้เข้าบัญชีร้าน` : it.mod === 'cold' ? 'แสดง QR ที่หน้าห้องเย็นโซน B' : it.mod === 'fert' ? 'แสดง QR ที่จุดปุ๋ยหลังตลาด' : 'แสดง QR ที่จุดเติมแก๊ส'}</div></div><div style=${{ height: 8 }}></div></div>`;
     }
     case 'history': {
       const mine = s.pickups.filter(p => p.stall === ME.vendor.stall); const kg = sum(mine, p => p.kg); const a = sum(mine.filter(p => p.grade === 'A'), p => p.kg);
@@ -893,7 +954,8 @@ function RedeemSheet({ s, role }) {
     <div className="card" style=${{ background: 'linear-gradient(135deg,#f2b705,#d68f00)', color: '#fff' }}>
       <div style=${{ fontSize: 12.5, opacity: .9 }}>แต้มของ${ME[role].name}</div>
       <div style=${{ display: 'flex', alignItems: 'baseline', gap: 6 }}><span className="bign num">${nf(bal)}</span><span>แต้ม</span></div>
-      <div style=${{ fontSize: 12.5, opacity: .95, marginTop: 4 }}>แลกเป็นเงินไม่ได้ · ใช้แลกบริการของตลาด · หมดอายุใน 30 วัน</div></div>
+      <div style=${{ fontSize: 12.5, opacity: .95, marginTop: 4 }}>แลกเป็นเงินไม่ได้ · ใช้กับบริการของตลาดหรือร้านอื่นในตลาด · หมดอายุใน 30 วัน</div></div>
+    <div className="card" style=${{ padding: '10px 14px' }}><${Goal} bal=${bal} /></div>
     ${s.modules.cold && html`<div className="card" style=${{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12.5, color: '#4b5563' }}><${Icon} n="snow" s=${22} c="#2a83c9" />ห้องเย็นโซน B ว่าง ${free} ลัง · ${s.cold.temp}°C · โควตาแผงละ ${s.cold.quota} ลัง</div>`}
     ${REDEEM.map(it => { const off = modOff(s, it.mod); const q = qty[it.id] || 1; const cost = it.cost * q; const ok = !off && bal >= cost;
       return html`<div key=${it.id} className=${'ritem' + (off ? ' off' : '')}>
@@ -901,7 +963,15 @@ function RedeemSheet({ s, role }) {
         <div style=${{ minWidth: 0 }}><b style=${{ fontSize: 14.5 }}>${it.t}</b><div style=${{ fontSize: 12, color: '#6b7280' }}>${off ? 'ตลาดนี้ยังไม่เปิด ' + MODS[it.mod].n : it.d}</div>
           <div className="row2"><b className="num" style=${{ color: '#b07700' }}>${nf(cost)} แต้ม</b>
             ${it.step && !off ? html`<div className="stepper"><button onClick=${() => setQty({ ...qty, [it.id]: Math.max(1, q - 1) })} aria-label="ลด">−</button><span className="v">${q}</span><button onClick=${() => setQty({ ...qty, [it.id]: Math.min(5, q + 1) })} aria-label="เพิ่ม">+</button></div>` : ''}
-            <button className="fbtn p" disabled=${!ok} style=${{ height: 34, padding: '0 14px', fontSize: 14 }} onClick=${() => act(role, 'redeem', { item: it, qty: q })}>แลก</button></div></div></div>`; })}<//>`;
+            <button className="fbtn p" disabled=${!ok} style=${{ height: 34, padding: '0 14px', fontSize: 14 }} onClick=${() => act(role, 'redeem', { item: it, qty: q })}>แลก</button></div></div></div>`; })}
+    <div style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 6 }}><b style=${{ fontSize: 15 }}>ร้านค้าในตลาด</b><span className="lbl">ลดได้ไม่เกิน 20% ของบิล</span></div>
+    ${SHOP_DEALS.map(it => { const own = role === 'vendor' && it.stall === ME.vendor.stall; const ok = !own && bal >= it.cost;
+      return html`<div key=${it.id} className=${'ritem' + (own ? ' off' : '')}>
+        <div className="ri" style=${{ background: '#e9f8ef', color: '#06a94d' }}><${Icon} n=${it.i} s=${26} w=${1.9} /></div>
+        <div style=${{ minWidth: 0 }}><b style=${{ fontSize: 14.5 }}>${it.t}</b><div style=${{ fontSize: 12, color: '#6b7280' }}>${own ? 'ร้านของคุณ · ใช้แต้มที่ร้านตัวเองไม่ได้' : `แผง ${it.stall} · ${it.d}`}</div>
+          <div className="row2"><b className="num" style=${{ color: '#b07700' }}>${nf(it.cost)} แต้ม</b>
+            <button className="fbtn p" disabled=${!ok} style=${{ height: 34, padding: '0 14px', fontSize: 14 }} onClick=${() => act(role, 'redeem', { item: it, qty: 1 })}>ใช้</button></div></div></div>`; })}
+    <div className="card" style=${{ fontSize: 12.5, color: '#4b5563' }}>ร้านที่รับแต้มได้แต้มนั้นเข้าบัญชีร้านเต็มจำนวน แต้มจึงหมุนอยู่ในตลาด และร้านได้ลูกค้าใหม่</div><//>`;
 }
 function ScanSheet({ s, jobId }) {
   const job = s.jobs.find(j => j.id === jobId && j.status === 'open') || s.jobs.find(j => j.status === 'open');
@@ -1021,8 +1091,8 @@ const GUIDE = {
   vendor: { t: 'แม่ค้า · แยกเศษ ได้แต้ม แลกบริการ', steps: [
     ['ถังเต็ม กด "ถังเต็ม เรียกคนขน"', 'งานเด้งไปที่ LINE ของคนขนทันที', 'เรียกคนขน', () => { me('vendor', 'ถังเต็ม เรียกคนขน'); act('vendor', 'call-porter'); }],
     ['ไปแท็บคนขน สแกน ชั่ง ให้เกรด', 'แต้มเด้งกลับมาที่แชทแม่ค้า', 'ไปแท็บคนขน', () => setRole('porter')],
-    ['แลกแต้มผ่านเว็บ', 'ฝากของสดฟรี / ส่วนลดค่าฝาก / เพิ่มพื้นที่ห้องเย็น / ปุ๋ย / แก๊ส', 'เปิดหน้าแลกแต้ม', () => act('vendor', 'redeem-open')],
-    ['ดูวิธีแยกเศษ', 'เกรด A 10 แต้ม/กก. · เกรด C ไม่ได้แต้ม', 'เปิดการ์ด', () => { me('vendor', 'วิธีแยกเศษ'); act('vendor', 'howto'); }],
+    ['แลกแต้มผ่านเว็บ', 'บริการตลาด (ห้องเย็น ปุ๋ย แก๊ส) หรือลดราคาที่ร้านอื่นในตลาด', 'เปิดหน้าแลกแต้ม', () => act('vendor', 'redeem-open')],
+    ['ดูวิธีแยกเศษ', `เกรด A ${GRADES.A.pts} แต้ม/กก. · เกรด C ไม่ได้แต้ม`, 'เปิดการ์ด', () => { me('vendor', 'วิธีแยกเศษ'); act('vendor', 'howto'); }],
     ['พิมพ์สิ่งที่บอทไม่เข้าใจ 2 ครั้ง', 'ระบบส่งต่อให้เจ้าหน้าที่ตลาด', 'ส่ง "ตาชั่งพัง"', () => onText('vendor', 'ตาชั่งพัง')],
   ] },
   porter: { t: 'คนขน · สแกน ชั่ง ให้เกรด', steps: [
@@ -1113,6 +1183,33 @@ function Co2Bars({ mods }) {
     <div className="r tot"><span>ลดได้ต่อ kg เศษที่เข้าลูป (ตาม module ที่เปิด)</span><span></span><b className="num" style=${{ textAlign: 'right', color: 'var(--accent-ink)' }}>${co2PerKg(mods).toFixed(2)}</b></div></div>`;
 }
 
+// เศรษฐศาสตร์แต้ม (เห็นเฉพาะเจ้าของตลาด): แต้มดูเยอะสำหรับแม่ค้า แต่ต้นทุนจริงต่อ กก. ต่ำกว่ามูลค่าที่ตลาดได้
+function PointEcon({ days, rate, revenue, kgLoop, s }) {
+  const kgA = days.reduce((a, d) => a + d.A, 0), kgB = days.reduce((a, d) => a + d.B, 0);
+  const issued = kgA * GRADES.A.pts + kgB * GRADES.B.pts + (kgA + kgB) * GRADES.A.porter;
+  const shopShare = 0.35, expire = 0.15; // สมมติฐาน pilot: ใช้ที่ร้านอื่น 35% · หมดอายุ 15%
+  const value = kgLoop / 1000 * rate + revenue; const worst = issued * PT_BAHT; const expect = issued * (1 - shopShare - expire) * PT_BAHT;
+  const perKgV = value / kgLoop, perKgC = worst / kgLoop;
+  const rows = [
+    ['มูลค่าที่ตลาดได้ (ค่าฝังกลบที่ไม่ต้องจ่าย + ขายปุ๋ย/แก๊ส)', '฿' + nf(value), 'var(--accent)', 100],
+    ['ต้นทุนแต้ม ถ้าทุกแต้มมาแลกบริการตลาด (กรณีแย่สุด)', '฿' + nf(worst), 'var(--warn)', worst / value * 100],
+    [`ต้นทุนที่คาด (ใช้ที่ร้านอื่น ${shopShare * 100}% · หมดอายุ ${expire * 100}%)`, '฿' + nf(expect), 'var(--cold)', expect / value * 100],
+  ];
+  return html`<div className="grid2">
+    <div className="panel"><h3>แต้มไม่ทำให้ตลาดขาดทุน</h3><p className="sub">14 วัน · แจกไป ${nf(issued)} แต้ม · เห็นเฉพาะเจ้าของตลาด</p>
+      <div className="co2">${rows.map(([t, v, c, w]) => html`<div key=${t} className="r"><span>${t}</span><span className="track"><i style=${{ left: 0, width: Math.min(100, w) + '%', background: c }}></i></span><b className="num" style=${{ textAlign: 'right', fontSize: 12 }}>${v}</b></div>`)}</div>
+      <div className="mods" style=${{ marginTop: 12 }}><span className="pill good" style=${{ font: '600 12px/1 var(--f-mono)', padding: '6px 9px', borderRadius: 8 }}>ต่อ กก. ตลาดได้ ฿${perKgV.toFixed(2)} · จ่ายแต้มไม่เกิน ฿${perKgC.toFixed(2)}</span>
+        <span className=${'pill ' + (worst <= value * 0.4 ? 'good' : 'meh')} style=${{ font: '600 12px/1 var(--f-mono)', padding: '6px 9px', borderRadius: 8 }}>เพดานแต้ม ≤ 40% ของมูลค่า</span></div></div>
+    <div className="panel"><h3>ทำไมแต้มดูเยอะแต่ไม่เฟ้อ</h3>
+      <div className="mini" style=${{ fontSize: 13.5 }}>${[
+        ['แต้มก้อนใหญ่', `เกรด A ${GRADES.A.pts} แต้ม/กก. ถังเดียวได้หลักร้อย ส่งทุกวันเห็นหลักพัน`],
+        ['ของถูกต้นทุนให้คุ้มที่สุด', 'ฝากห้องเย็นใช้ไฟจากไบโอแก๊ส ต้นทุนตลาดต่ำ แต่แม่ค้ารู้สึกคุ้มเพราะปกติ ฿20/ลัง'],
+        ['แต้มหมุนในตลาด', 'ใช้ลดราคาที่ร้านอื่นได้ ร้านที่รับได้แต้มเข้าบัญชี ตลาดไม่ต้องจ่ายเงิน'],
+        ['มีเพดาน', 'ลดได้ไม่เกิน 20% ของบิล · หมดอายุ 30 วัน · ใช้ที่ร้านตัวเองไม่ได้'],
+        ['ปรับได้ไม่เสียความรู้สึก', 'ถ้าต้นทุนเกินเพดาน ปรับราคาของรางวัล ไม่ลดแต้มต่อ กก. ที่แม่ค้าเห็น'],
+      ].map(([a, b]) => html`<div key=${a} className="it" style=${{ borderColor: 'var(--line)', alignItems: 'flex-start' }}><${Icon} n="check" s=${16} c="var(--accent)" w=${2.4} /><span><b>${a}</b> <span style=${{ color: 'var(--muted)' }}>· ${b}</span></span></div>`)}</div></div></div>`;
+}
+
 function Dashboard({ s }) {
   const [rate, setRate] = useState(1200);
   const dm = s.demo; const mods = s.modules;
@@ -1155,7 +1252,52 @@ function Dashboard({ s }) {
         <div className="assume" style=${{ marginTop: 12, display: 'flex', gap: 10, alignItems: 'center', fontSize: 12.5, color: 'var(--muted)' }}><label htmlFor="rate" style=${{ display: 'flex', gap: 8, alignItems: 'center' }}>ค่าฝังกลบ (บาท/ตัน)
           <input id="rate" type="number" value=${rate} min="0" step="50" onChange=${e => setRate(+e.target.value || 0)} style=${{ width: 100, border: '1px solid var(--line)', background: 'var(--surface-2)', color: 'var(--ink)', borderRadius: 8, padding: '6px 8px', font: '500 14px var(--f-mono)' }} /></label></div>
         <p className="sub" style=${{ marginTop: 10, marginBottom: 0 }}>EF จาก อบก. และการวิเคราะห์ของทีม · อัตราไบโอแก๊สรอผล BMP test</p></div>
-    </div></div>`;
+    </div>
+    <${PointEcon} days=${days} rate=${rate} revenue=${revenue} kgLoop=${kgLoop} s=${s} /></div>`;
+}
+
+/* ======================= workflow story ======================= */
+const RC = { vendor: '#13a852', porter: '#0f8f84', market: '#6f5bd0', system: '#3b7d4f', owner: '#1f2933' };
+const RN = { vendor: 'แม่ค้า', porter: 'คนขน', market: 'จนท.ตลาด', system: 'ระบบในตลาด', owner: 'เจ้าของตลาด' };
+const demo = (role, fn, view = 'phone') => { D(x => ({ ...x, view, role, sheet: null, unread: { ...x.unread, [role]: 0 } })); if (fn) setTimeout(fn, 380); };
+function Workflow({ s }) {
+  const kg = 6.5, pts = kg * GRADES.A.pts, m3 = kg * BIO.yield;
+  const SC = [
+    { when: '06:00–15:00', who: 'vendor', i: 'bin', t: 'ป้าแดงขายผัก แล้วแยกเศษใส่ถังเขียวหน้าแผง B12', p: 'ถังมีสติกเกอร์ QR ประจำร้าน ใส่ได้แค่เปลือก ก้าน ใบผัก ผลไม้เน่า ถ้าไม่มีถุงปนจะได้เกรด A' },
+    { when: '15:28', who: 'vendor', i: 'truck', t: 'ถังเต็ม ป้ากด "ถังเต็ม" ใน LINE ครั้งเดียว', p: 'ไม่ต้องเข็นไปทิ้งเอง งานเด้งไปที่ LINE ของคนขนทันที', demo: () => demo('vendor', () => { me('vendor', 'ถังเต็ม เรียกคนขน'); act('vendor', 'call-porter'); }) },
+    { when: '15:40', who: 'porter', i: 'scale', t: `พี่เอกสแกน QR ถัง ชั่งได้ ${kg} กก. ให้เกรด A`, p: 'ระบบรู้ว่าเป็นถังของแผงไหน แต้มเด้งเข้า LINE ป้าแดงทันที เกรด C ไม่ได้แต้มและได้คำแนะนำแทน', pts, demo: () => demo('porter', () => act('porter', 'scan-open')) },
+    { when: '16:00', who: 'system', i: 'tank', t: 'เศษเกรด A/B เข้าบ่อหมักไบโอแก๊สในตลาด', p: `เศษ ${kg} กก. ให้แก๊สราว ${nf(m3, 2)} m³ ไม่ต้องขนออกไปฝังกลบ จบในพื้นที่ตลาด` },
+    { when: 'ทุกวัน', who: 'system', i: 'bolt', t: 'ไบโอแก๊สและกาก ออกไปได้ 3 ทาง ตลาดเลือกเปิดเฉพาะ module ที่เหมาะ', branch: true },
+    { when: '17:30', who: 'vendor', i: 'tag', t: 'ป้าแดงใช้แต้ม: ฝากผักที่ขายไม่หมดในห้องเย็นฟรี หรือลดค่ากาแฟร้านเจ๊นิด', p: 'แต้มแลกเป็นเงินไม่ได้ ใช้กับบริการของตลาดหรือลดราคาที่ร้านอื่นในตลาด ร้านที่รับได้แต้มเข้าบัญชีร้าน', demo: () => demo('vendor', () => act('vendor', 'redeem-open')) },
+    { when: '18:00', who: 'market', i: 'qr', t: 'จนท.ตลาดสแกนรหัส ยืนยันนำผักเข้าห้องเย็น และรับเงินสดค่าปุ๋ย/ค่าแก๊ส', p: 'เกษตรกรและร้านอาหารไม่ได้แยกเศษ จึงจ่ายเงินสด เป็นรายได้ใหม่ของตลาด', demo: () => demo('market', () => act('market', 'vscan-open')) },
+    { when: 'วันรุ่งขึ้น', who: 'vendor', i: 'snow', t: 'ผักที่ฝากไว้ยังสด ขายต่อได้อีกวัน เศษน้อยลง แล้ววนกลับไปข้อ 1', p: 'เศษผักวันนี้ = ความเย็นที่ยืดอายุผักพรุ่งนี้' },
+    { when: 'สิ้นเดือน', who: 'owner', i: 'chart', t: 'เจ้าของตลาดเห็นผลบน Dashboard และส่งรายงานให้ อปท.', p: `ตันที่ไม่ลงฝังกลบ · ${co2PerKg(s.modules).toFixed(2)} kgCO₂e ต่อ kg · รายได้จากปุ๋ยและแก๊ส · ต้นทุนแต้มเทียบมูลค่าที่ได้`, demo: () => demo(s.role, null, 'dash') },
+  ];
+  return html`<main className="flow">
+    <div><div className="eyebrow">Workflow · ${BRAND.th} ${BRAND.name}</div><h1>เศษผักหนึ่งถัง เดินทางรอบตลาดยังไง</h1>
+      <p className="lede">ตามถังเขียวของป้าแดงหนึ่งวัน ตั้งแต่แยกเศษ จนกลายเป็นความเย็น ปุ๋ย และแก๊ส แล้วแต้มวนกลับมาหาป้า กด "ดูในเดโม" เพื่อเห็นขั้นนั้นใน LINE</p></div>
+    <div className="story">${SC.map((c, k) => html`<div key=${k} className="scene">
+      <span className="dot" style=${{ background: RC[c.who] }}><${Icon} n=${c.i} s=${20} w=${2} /></span>
+      <div className="top2"><span className="when">${String(k + 1).padStart(2, '0')} · ${c.when}</span><span className="who2" style=${{ background: RC[c.who] }}>${RN[c.who]}</span></div>
+      <h3>${c.t}</h3>
+      ${c.p && html`<p>${c.p}</p>`}
+      ${c.pts && html`<span className="pts">+${nf(c.pts)} <span style=${{ font: '500 13px var(--f-body)', color: 'var(--muted)' }}>แต้มเข้าป้าแดง · คนขน +${nf(kg * GRADES.A.porter)}</span></span>`}
+      ${c.branch && html`<div className="branch">${Object.entries(MODS).map(([k2, m]) => html`<div key=${k2} style=${{ opacity: s.modules[k2] ? 1 : .5 }}><b><${Icon} n=${m.i} s=${17} c=${m.c} />${m.n.replace('Module ', 'M')}</b>${m.s}${s.modules[k2] ? '' : ' · ตลาดนี้ปิดอยู่'}</div>`)}</div>`}
+      ${c.demo && html`<div><button className="btn" onClick=${c.demo}>ดูในเดโม <${Icon} n="chevR" s=${14} w=${2.4} /></button></div>`}</div>`)}</div>
+    <div className="panel"><h2>แต้มเดินทางยังไง</h2><p className="sub">ดูเยอะสำหรับแม่ค้า แต่ตลาดคุมต้นทุนได้</p>
+      <div className="pflow">
+        <span className="nd"><${Icon} n="bin" s=${18} c="#13a852" />เศษเกรด A 1 กก.</span><span className="ar">→</span>
+        <span className="nd"><b className="num">${GRADES.A.pts}</b> แต้ม</span><span className="ar">→</span>
+        <span className="nd"><${Icon} n="snow" s=${18} c="#2a83c9" />บริการตลาด (ห้องเย็น ปุ๋ย แก๊ส) · ต้นทุนต่ำ</span>
+        <span className="ar">หรือ</span>
+        <span className="nd"><${Icon} n="store" s=${18} c="#13a852" />ลดราคาร้านอื่น → ร้านได้แต้มเข้าบัญชี → วนต่อ</span>
+        <span className="ar">·</span><span className="nd"><${Icon} n="clock" s=${18} />หมดอายุ 30 วัน</span></div></div>
+    <div><h2 style=${{ marginBottom: 10 }}>ใครได้อะไร</h2><div className="gets">
+      <div><b>แม่ค้า</b>ไม่ต้องเข็นขยะ ได้แต้มตามที่ทำ ฝากผักข้ามคืน ใช้แต้มที่ร้านอื่นได้</div>
+      <div><b>คนขน</b>งานเป็นระบบ รู้ว่าถังไหนเต็ม ได้แต้มตาม กก. ที่รับ</div>
+      <div><b>เจ้าของตลาด</b>ค่าฝังกลบลด มีรายได้ใหม่จากปุ๋ยและแก๊ส วัดผลคาร์บอนได้</div>
+      <div><b>ชุมชน</b>เกษตรกรได้ปุ๋ยถูก ร้านอาหารได้แก๊สถูกกว่า LPG</div></div></div>
+  </main>`;
 }
 
 /* ======================= app ======================= */
@@ -1170,10 +1312,12 @@ function App() {
   const view = v => d(x => ({ ...x, view: v }));
   return html`<${React.Fragment}>
     <header className="top"><div className="brand"><${Logo} s=${38} /><div><b>${BRAND.th} · ${BRAND.name}</b><small>ต้นแบบ LINE OA + LIFF + Dashboard · ข้อมูลจำลอง</small></div></div>
-      <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
+      <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'flow'} onClick=${() => view('flow')} aria-label="Workflow"><${Icon} n="route" s=${16} /><span className="lg">Workflow</span></button>
+        <button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
         <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')} aria-label="แคปจอใส่สไลด์"><${Icon} n="frame" s=${16} /><span className="lg">แคปจอใส่สไลด์</span></button>
         <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')} aria-label="Dashboard"><${Icon} n="chart" s=${16} /><span className="lg">Dashboard</span></button></div></header>
     ${s.view === 'phone' ? html`<main className="stage"><${Guide} s=${s} /><div className="center">${roleTabs}<${Phone} s=${s} /></div><${Log} s=${s} /></main>`
+      : s.view === 'flow' ? html`<${Workflow} s=${s} />`
       : s.view === 'shot' ? html`<main className="shot">${roleTabs}<${Phone} s=${s} /><div className="cap">${SHOT_CAP[s.role]}<span className="lg"> · ใช้ Win+Shift+S ครอบเฉพาะตัวเครื่อง</span></div></main>`
       : html`<${Dashboard} s=${s} />`}
     ${s.toast && html`<div className="toast" role="status">${s.toast}</div>`}<//>`;
