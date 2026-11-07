@@ -240,12 +240,14 @@ html,body{margin:0;height:100%;background:var(--bg2);color:var(--ink);font-famil
   Object.entries(PAL).forEach(([k, p]) => { const b = document.createElement('button'); b.dataset.k = k; b.innerHTML = `<i style="background:linear-gradient(135deg,${p.G} 50%,${p.dark ? '#121d18' : p.card} 50%)"></i>${p.n}`; b.onclick = () => applyPal(k); document.getElementById('pal').appendChild(b); });
 
   /* ---------- camera (fixed angle) ---------- */
-  const target = new THREE.Vector3(1.1, 0, 0.9);
+  const target = new THREE.Vector3(1.1, 0, 0.6);
   const EL = 0.86;
   function resize() {
     const w = app.clientWidth, h = app.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
     document.documentElement.style.setProperty('--k', Math.max(0.62, Math.min(1.15, w / 1400)).toFixed(3));
-    const dist = Math.max(20, 11.4 / (Math.tan(THREE.MathUtils.degToRad(16)) * camera.aspect));
+    // fit both width and height so wide, short windows don't push the diagram into the header
+    const tanH = Math.tan(THREE.MathUtils.degToRad(16));
+    const dist = Math.max(20, 11.4 / (tanH * camera.aspect), 6.6 / tanH);
     camera.position.set(target.x, target.y + dist * Math.sin(EL), target.z + dist * Math.cos(EL)); camera.lookAt(target);
   }
   window.addEventListener('resize', resize); resize();
