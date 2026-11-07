@@ -100,6 +100,22 @@ details.panel pre{font:11.5px/1.5 var(--f-mono);max-height:300px;overflow:auto;b
 .center{display:flex;flex-direction:column;align-items:center;gap:14px}
 .shot{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px;padding-block:8px 20px}
 .shot .cap{font:600 14px var(--f-display);color:var(--muted)}
+/* 4 เครื่องวางติดกัน ลิงก์กันสด */
+.quad{display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 16px 28px}
+.runbar{width:100%;max-width:1240px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.runbar .k{font:600 12.5px var(--f-mono);color:var(--muted);white-space:nowrap}
+.runbar .who{color:#fff;font:600 12.5px var(--f-display);padding:3px 10px;border-radius:99px;white-space:nowrap}
+.runbar .txt{flex:1;min-width:220px;font:600 15px var(--f-display);color:var(--ink)}
+.runbar .dots{display:flex;gap:4px}.runbar .dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}.runbar .dots i.on{background:var(--accent)}
+.quadgrid{display:flex;gap:18px;justify-content:center;align-items:flex-start;width:100%}
+.qcol{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.qcol .phone{zoom:var(--z,1);transition:box-shadow .3s}
+.qcol.ping .phone{box-shadow:0 0 0 5px var(--accent),0 30px 60px -20px rgba(10,30,20,.45)}
+.qlbl{display:flex;align-items:center;gap:7px;font:600 14px var(--f-display);color:var(--ink);padding:5px 12px;border-radius:99px;background:var(--surface);border:1px solid var(--line);transition:background .3s,color .3s}
+.qlbl small{font:500 12px var(--f-body);color:var(--muted)}
+.qcol.ping .qlbl,.qcol.go .qlbl{background:var(--accent);color:#fff;border-color:transparent}.qcol.ping .qlbl small,.qcol.go .qlbl small{color:#e8fff0}
+.qlast{max-width:300px;font:500 12px var(--f-body);color:var(--muted);text-align:center;min-height:2.6em;line-height:1.3}
+@media (max-width:820px){ .quadgrid{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px} .qcol{flex:0 0 100%;scroll-snap-align:center} .qcol .phone{zoom:1} .runbar .txt{min-width:100%;order:-1} }
 
 /* ---------- phone (LINE, reverse-engineered) ---------- */
 .phone{width:384px;max-width:100%;height:800px;border-radius:52px;background:#0f1411;padding:11px;box-shadow:0 30px 60px -20px rgba(10,30,20,.45),0 0 0 1px rgba(0,0,0,.08);position:relative}
@@ -1070,8 +1086,8 @@ function VScanSheet({ s, code }) {
         <button className="cta" onClick=${() => act('shop', 'vscan-confirm', v.code)}>หักแต้ม · ลดราคาให้ลูกค้า</button><//>`}<//>`;
 }
 /* ======================= phone ======================= */
-function Phone({ s }) {
-  const role = s.role; const msgs = s.chats[role]; const rm = RM[role];
+function Phone({ s, role: r0 }) {
+  const role = r0 || s.role; const msgs = s.chats[role]; const rm = RM[role];
   const [menuOpen, setMenuOpen] = useState(true); const [mode, setMode] = useState('menu'); const [text, setText] = useState('');
   const ref = useRef(null);
   useEffect(() => { const el = ref.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs.length, s.typing[role], role, mode, menuOpen]);
@@ -1511,6 +1527,56 @@ function MarketSim({ s, embed, seekRef, onPhase }) {
     <p className="sub" style=${{ color: 'var(--muted)', fontSize: 12.5, margin: 0 }}>อัดเป็นวิดีโอ: กด "เต็มจอ" แล้วใช้ Win+Alt+R หรือ Snipping Tool โหมดวิดีโอ ได้ MP4 ไปวางใน Canva · ตัวเลขเป็นข้อมูลจำลอง</p>
   </div>`;
 }
+/* ======================= 4 เครื่องวางติดกัน ======================= */
+// เดินเรื่องทีละขั้น: กดที่เครื่องไหนก็ได้ หรือกด "ขั้นถัดไป" ให้ระบบเล่นให้ · ทุกเครื่องใช้ state เดียวกัน จึงเด้งหากันจริง
+const RUN = [
+  { who: 'vendor', t: 'ป้าแดงกด "ถังเต็ม" → งานเด้งไปเครื่องคนขน', f: () => { me('vendor', 'ถังเต็ม เรียกคนขน'); act('vendor', 'call-porter'); } },
+  { who: 'porter', t: 'พี่เอกสแกนถัง B12 ชั่ง 6.5 กก. เกรด A → แต้มเด้งไปเครื่องป้าแดง', f: () => { const s = GET(); const j = s.jobs.find(z => z.stall === ME.vendor.stall && z.status === 'open');
+      act('porter', 'scan-submit', { shop: ME.vendor.name, stall: ME.vendor.stall, jobId: j && j.id, kg: 6.5, grade: 'A' }); } },
+  { who: 'market', t: 'ผู้ดูแลบ่อดูสถานะบ่อหมัก pH · H₂S · ถุงแก๊ส', f: () => { me('market', 'สถานะบ่อหมัก'); act('market', 'digester'); } },
+  { who: 'market', t: 'ร้านข้าวแกงป้าศรีจ่ายค่าแก๊สตามมิเตอร์ → เงินเข้ากองกลาง', f: () => act('market', 'sale-gas', 'F03') },
+  { who: 'vendor', t: 'ป้าแดงใช้ 1,000 แต้มลดค่ากาแฟร้านเจ๊นิด → แจ้งเตือนเด้งไปเครื่องร้าน', f: () => act('vendor', 'redeem', { item: PARTNER }) },
+  { who: 'shop', t: 'เจ๊นิดสแกน QR หักแต้ม ลดราคาให้ → ป้าแดงได้ยืนยัน', f: () => { const vs = GET().vouchers.filter(z => z.status === 'pending' && z.item.stall === PARTNER.stall); const v = vs.find(z => z.stall === ME.vendor.stall) || vs[0]; if (v) act('shop', 'vscan-confirm', v.code); } },
+  { who: 'market', t: 'วันศุกร์ กองกลางโอนเงินให้ร้าน 97% → เด้งไปเครื่องร้าน', f: () => { me('market', 'ชำระเงินร้านรอบสัปดาห์'); act('market', 'settle'); } },
+  { who: 'market', t: 'จบวัน: ระบบส่งสรุปให้แม่ค้าและตลาด', f: () => endDay() },
+];
+const QWHO = { vendor: `${ME.vendor.name} · แผง ${ME.vendor.stall}`, porter: ME.porter.name, shop: `${ME.shop.name} · ${ME.shop.stall}`, market: ME.market.name };
+function lastText(m) { if (!m) return ''; if (m.kind === 'text') return m.text.split('\n')[0]; const c = m.card || {};
+  return { pickup: `รับเศษแล้ว +${nf(c.pts || 0)} แต้ม`, job: 'งานใหม่: ถังเต็ม ไปรับ', vnew: 'ลูกค้ากดใช้แต้มที่ร้าน', checkin: 'ใช้แต้มสำเร็จ', paid: 'กองกลางโอนเงินแล้ว', voucher: 'QR แลกแต้ม', receipt: 'บันทึกแล้ว', ticket: 'เรื่องที่บอทตอบไม่ได้', daysum: 'สรุปวันนี้', mdaysum: 'สรุปวันนี้', digester: 'สถานะบ่อหมัก', salercpt: 'รับค่าแก๊สแล้ว', settled: 'ชำระเงินร้านแล้ว', welcome: 'ยินดีต้อนรับ' }[c.type] || 'การ์ด'; }
+function QCol({ s, role, go }) {
+  const msgs = s.chats[role]; const n = msgs.length; const prev = useRef(n); const [ping, setPing] = useState(false);
+  useEffect(() => { const grew = n > prev.current && msgs[n - 1].from !== 'me'; prev.current = n; if (!grew) return; setPing(true); const t = setTimeout(() => setPing(false), 1800); return () => clearTimeout(t); }, [n]);
+  const R = ROLES.find(r => r[0] === role); const last = [...msgs].reverse().find(m => m.from !== 'date');
+  return html`<div className=${'qcol' + (ping ? ' ping' : '') + (go ? ' go' : '')}>
+    <div className="qlbl"><${Icon} n=${R[2]} s=${16} />${R[1]} <small>${QWHO[role]}</small></div>
+    <${Phone} s=${s} role=${role} />
+    <div className="qlast">${last && (last.from === 'me' ? 'ส่ง: ' : 'ล่าสุด: ') + lastText(last)}</div></div>`;
+}
+function QuadView({ s }) {
+  const [k, setK] = useState(0); const [auto, setAuto] = useState(false);
+  const fit = () => Math.max(0.5, Math.min(1, (window.innerWidth - 32 - 54) / (4 * 384), (window.innerHeight - 250) / 800));
+  const [z, setZ] = useState(fit);
+  useEffect(() => { const on = () => setZ(fit()); window.addEventListener('resize', on); return () => window.removeEventListener('resize', on); }, []);
+  const kRef = useRef(0); kRef.current = k;
+  const next = () => { const i = kRef.current; if (i >= RUN.length) return; D(x => ({ ...x, sheet: null })); RUN[i].f(); setK(i + 1); };
+  useEffect(() => { if (!auto) return; if (k >= RUN.length) { setAuto(false); return; } const t = setTimeout(next, k ? 2800 : 300); return () => clearTimeout(t); }, [auto, k]);
+  const reset = () => { setAuto(false); setK(0); D(() => ({ ...initState(), view: 'quad' })); };
+  const done = k >= RUN.length; const show = done ? null : RUN[k];
+  return html`<main className="quad">
+    <div className="runbar">
+      <span className="k">${done ? 'ครบ ' + RUN.length + ' ขั้น' : `ขั้น ${k + 1}/${RUN.length}`}</span>
+      ${show && html`<span className="who" style=${{ background: RC[show.who] }}>${ROLES.find(r => r[0] === show.who)[1]}</span>`}
+      <span className="txt">${done ? 'ครบวงแล้ว: เศษ → แก๊ส → กองกลาง → ร้านในตลาด · กด "เริ่มใหม่" เพื่อเล่นอีกรอบ' : show.t}</span>
+      <span className="dots">${RUN.map((_, i) => html`<i key=${i} className=${i < k ? 'on' : ''}></i>`)}</span>
+      <button className="btn primary" disabled=${done} onClick=${next}><${Icon} n="chevR" s=${15} w=${2.4} /> ขั้นถัดไป</button>
+      <button className="btn" disabled=${done} onClick=${() => setAuto(!auto)}><${Icon} n=${auto ? 'pause' : 'play'} s=${15} w=${2.2} /> ${auto ? 'หยุด' : 'เล่นอัตโนมัติ'}</button>
+      <button className="btn" onClick=${reset}><${Icon} n="reset" s=${15} /> เริ่มใหม่</button>
+    </div>
+    <div className="quadgrid" style=${{ '--z': z }}>${ROLES.map(([r]) => html`<${QCol} key=${r} s=${s} role=${r} go=${!!show && show.who === r} />`)}</div>
+    <p className="sub" style=${{ color: 'var(--muted)', fontSize: 12.5, margin: 0, textAlign: 'center' }}>กดเล่นเองในแต่ละเครื่องได้ด้วย · กรอบเขียว = เครื่องที่เพิ่งได้ข้อความจากระบบ · ข้อมูลจำลอง</p>
+  </main>`;
+}
+
 /* ======================= app ======================= */
 const ROLES = [['vendor', 'แม่ค้า', 'store'], ['porter', 'คนขน', 'truck'], ['shop', 'ร้านรับแต้ม', 'bag'], ['market', 'ตลาด', 'headset']];
 const SHOT_CAP = { vendor: '01 · แม่ค้าแยกเศษ ได้แต้ม', porter: '02 · คนขนสแกนถัง ชั่ง ให้เกรด', shop: '03 · แลกแต้มที่ร้านในตลาด', market: '04 · ตลาดดูแลบ่อ ขายแก๊ส จ่ายร้าน' };
@@ -1526,9 +1592,11 @@ function App() {
       <div className="seg" role="group" aria-label="มุมมอง"><button aria-pressed=${s.view === 'flow'} onClick=${() => view('flow')} aria-label="Workflow"><${Icon} n="route" s=${16} /><span className="lg">Workflow</span></button>
         <button aria-pressed=${s.view === 'sim'} onClick=${() => view('sim')} aria-label="จำลองตลาด"><${Icon} n="cube" s=${16} /><span className="lg">จำลองตลาด</span></button>
         <button aria-pressed=${s.view === 'phone'} onClick=${() => view('phone')}><${Icon} n="phone" s=${16} /><span className="lg">หน้างาน (LINE)</span><span className="sm">LINE</span></button>
+        <button aria-pressed=${s.view === 'quad'} onClick=${() => view('quad')} aria-label="LINE 4 เครื่อง"><${Icon} n="grid" s=${16} /><span className="lg">LINE 4 เครื่อง</span></button>
         <button aria-pressed=${s.view === 'shot'} onClick=${() => view('shot')} aria-label="แคปจอใส่สไลด์"><${Icon} n="frame" s=${16} /><span className="lg">แคปจอใส่สไลด์</span></button>
         <button aria-pressed=${s.view === 'dash'} onClick=${() => view('dash')} aria-label="Dashboard"><${Icon} n="chart" s=${16} /><span className="lg">Dashboard</span></button></div></header>
     ${s.view === 'phone' ? html`<main className="stage"><${Guide} s=${s} /><div className="center">${roleTabs}<${Phone} s=${s} /></div><${Log} s=${s} /></main>`
+      : s.view === 'quad' ? html`<${QuadView} s=${s} />`
       : s.view === 'flow' ? html`<${Workflow} s=${s} />`
       : s.view === 'sim' ? html`<main><${MarketSim} s=${s} /></main>`
       : s.view === 'shot' ? html`<main className="shot">${roleTabs}<${Phone} s=${s} /><div className="cap">${SHOT_CAP[s.role]}<span className="lg"> · ใช้ Win+Shift+S ครอบเฉพาะตัวเครื่อง</span></div></main>`
