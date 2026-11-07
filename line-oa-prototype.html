@@ -1318,7 +1318,8 @@ function Workflow({ s }) {
     if (window.innerWidth < 980) simRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   return html`<main className="flow">
     <div><div className="eyebrow">Workflow · ${BRAND.th} ${BRAND.name}</div><h1>เศษผักหนึ่งถัง เดินทางรอบตลาดยังไง</h1>
-      <p className="lede">ตามถังเขียวของป้าแดงหนึ่งวัน ภาพจำลองเล่นตามขั้นด้านขวา กดขั้นไหนก็ได้เพื่อข้ามไปฉากนั้น หรือกด "ดูใน LINE" เพื่อเห็นหน้าจอจริง</p></div>
+      <p className="lede">ตามถังเขียวของป้าแดงหนึ่งวัน ภาพจำลองเล่นตามขั้นด้านขวา กดขั้นไหนก็ได้เพื่อข้ามไปฉากนั้น หรือกด "ดูใน LINE" เพื่อเห็นหน้าจอจริง</p>
+      <a className="btn" href="loop-3d.html" target="_blank" rel="noopener" style=${{ marginTop: 12, textDecoration: 'none' }}><${Icon} n="cube" s=${15} /> ดูแผนภาพ Loop lard แบบ 3D</a></div>
     <div className="flowgrid"><div className="stick" ref=${simRef}><${MarketSim} s=${s} embed=${true} seekRef=${seekRef} onPhase=${onPhase} /></div>
     <div className="story">${SC.map((c, k) => html`<div key=${k} className=${'scene' + (on === k ? ' on' : '')} onClick=${e => { if (!e.target.closest('button')) seek(k); }}>
       <span className="dot" style=${{ background: RC[c.who] }}><${Icon} n=${c.i} s=${20} w=${2} /></span>
