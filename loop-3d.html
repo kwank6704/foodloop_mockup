@@ -77,7 +77,7 @@ html,body{margin:0;height:100%;background:var(--bg2);color:var(--ink);font-famil
   <div class="cap" role="status" aria-live="polite"><span class="k" id="capk">01/09</span><span class="t" id="capt"></span></div>
   <div class="dots" id="dots"></div>
   <div class="rot" aria-hidden="true">หมุนโทรศัพท์เป็นแนวนอนเพื่อดูชัดขึ้น ⟳</div>
-  <div class="rule">กติกา: เศษเกรด A [X] กก. = ฝาก 1 ลัง/คืน (ตั้งจากผล pilot) · เกรด C ไม่ได้เครดิต · เครดิตหมดอายุใน 30 วัน</div>
+  <div class="rule">กติกาแต้ม: ออกแต้มไม่เกินเงินในกองกลาง · ร้านตั้งเรทเอง · ห้ามแลกเงินสด/โอน · หมดอายุ 30 วัน · ใช้ลุ้นรางวัลรายเดือนได้</div>
   <div class="hint">Space เล่น/หยุด · ← → เปลี่ยนขั้น</div>
 </div>
 
@@ -94,9 +94,9 @@ html,body{margin:0;height:100%;background:var(--bg2);color:var(--ink);font-famil
 
   /* ---------- palettes: G green, B blue, O fertilizer, R restaurant ---------- */
   const PAL = {
-    forest: { n: 'Forest', G: '#2e7d4f', B: '#3a6fd8', O: '#c9822f', R: '#b4492b', fill: '#2e7d4f', card: '#fffdf8', tB: '#f3f7ff', tO: '#fff8ee', tR: '#fff3ee', dot: '70,85,70', shadow: 0.11, hemi: 0.62, key: 0.62 },
-    slide: { n: 'ตามสไลด์', G: '#4a9440', B: '#4a7fd4', O: '#d08a3c', R: '#b5532f', fill: '#4a9440', card: '#ffffff', tB: '#eef4fd', tO: '#fdf5ea', tR: '#fbefe9', dot: '90,105,85', shadow: 0.12, hemi: 0.58, key: 0.6 },
-    night: { n: 'กลางคืน', G: '#45c47a', B: '#5c9cff', O: '#f0a24f', R: '#ff7a52', fill: '#2f8f58', card: '#22322a', tB: '#1f2d3d', tO: '#33291c', tR: '#352520', dot: '170,210,185', shadow: 0.35, hemi: 0.5, key: 0.55, dark: true },
+    forest: { n: 'Forest', G: '#2e7d4f', B: '#3a6fd8', O: '#c9822f', R: '#b4492b', P: '#7553c9', fill: '#2e7d4f', card: '#fffdf8', tB: '#f3f7ff', tO: '#fff8ee', tR: '#fff3ee', tP: '#f7f3ff', dot: '70,85,70', shadow: 0.11, hemi: 0.62, key: 0.62 },
+    slide: { n: 'ตามสไลด์', G: '#4a9440', B: '#4a7fd4', O: '#d08a3c', R: '#b5532f', P: '#7a5ccf', fill: '#4a9440', card: '#ffffff', tB: '#eef4fd', tO: '#fdf5ea', tR: '#fbefe9', tP: '#f5f1ff', dot: '90,105,85', shadow: 0.12, hemi: 0.58, key: 0.6 },
+    night: { n: 'กลางคืน', G: '#45c47a', B: '#5c9cff', O: '#f0a24f', R: '#ff7a52', P: '#b08cff', fill: '#2f8f58', card: '#22322a', tB: '#1f2d3d', tO: '#33291c', tR: '#352520', tP: '#2b2540', dot: '170,210,185', shadow: 0.35, hemi: 0.5, key: 0.55, dark: true },
   };
   let pal = PAL.forest; try { pal = PAL[localStorage.getItem('looplard-pal')] || PAL.forest; } catch (e) {}
 
@@ -125,34 +125,37 @@ html,body{margin:0;height:100%;background:var(--bg2);color:var(--ink);font-famil
 
   /* ---------- data: same layout as the Loop lard slide ---------- */
   const W = 3.3, DP = 1.5, H = 0.3, R = 0.3;
+  // v2 (7 พ.ย.): ตัดไฟฟ้า ห้องเย็น และปุ๋ยออก · เศษ → ไบโอแก๊ส → แก๊สหุงต้มขายร้านในตลาด · แต้มแลกของในตลาด
   const NODES = [
-    { id: 'v', no: 1, x: -6.3, z: -2, t: 'แม่ค้าแยกเศษ', s: 'ถังเขียว + QR ประจำร้าน', c: 'G', bg: 'card', icon: 'bin' },
-    { id: 'p', no: 2, x: -2.1, z: -2, t: 'คนขนชั่งน้ำหนัก', s: 'ให้เกรด A–C · เครดิตเข้า LINE', c: 'G', bg: 'card', icon: 'scale' },
-    { id: 'd', no: 3, x: 2.1, z: -2, t: 'บ่อหมักไบโอแก๊ส', s: 'ในพื้นที่ตลาด', c: 'G', bg: 'card', icon: 'dome' },
-    { id: 'b', no: 4, x: 6.3, z: -2, t: 'ไบโอแก๊ส', s: 'หุงต้ม + ปั่นไฟ', c: 'G', bg: 'fill', fill: true, icon: 'flame' },
-    { id: 'f', no: 5, x: 2.1, z: 2.2, t: 'ปุ๋ยจากกาก', s: 'ขายให้เกษตรกร', c: 'O', bg: 'tO', icon: 'sack', mod: 'MODULE 2' },
-    { id: 'r', no: 6, x: 6.3, z: 2.2, t: 'ร้านอาหารในตลาด', s: 'ใช้แทน LPG', c: 'R', bg: 'tR', icon: 'pot', mod: 'MODULE 3' },
-    { id: 'c', no: 7, x: -2.1, z: 2.2, t: 'ห้องเย็นรวม', s: 'ฝากผักที่เหลือข้ามคืน', c: 'B', bg: 'tB', icon: 'cold', mod: 'MODULE 1' },
+    { id: 'v', no: 1, x: -6.3, z: -2, t: 'แม่ค้าแยกเศษ', s: 'ถังเขียว + QR ประจำแผง', c: 'G', bg: 'card', icon: 'bin' },
+    { id: 'p', no: 2, x: -2.1, z: -2, t: 'คนขนชั่งน้ำหนัก', s: 'สแกน QR · ให้เกรด A/B/C', c: 'G', bg: 'card', icon: 'scale' },
+    { id: 'd', no: 3, x: 2.1, z: -2, t: 'บ่อหมักไบโอแก๊ส', s: 'เซนเซอร์เตือนก่อนบ่อพัง', c: 'G', bg: 'card', icon: 'dome' },
+    { id: 'b', no: 4, x: 6.3, z: -2, t: 'ไบโอแก๊ส', s: 'เก็บในถุงแก๊ส', c: 'G', bg: 'fill', fill: true, icon: 'flame' },
+    { id: 'r', no: 5, x: 6.3, z: 2.2, t: 'ร้านอาหารในตลาด', s: 'ถูกกว่า LPG 20%', c: 'R', bg: 'tR', icon: 'pot' },
+    { id: 'k', no: 6, x: 2.1, z: 2.2, t: 'กองกลาง', s: 'ค่าแก๊ส ค่าขยะ ผู้สนับสนุน', c: 'B', bg: 'tB', icon: 'coins' },
+    { id: 's', no: 7, x: -2.1, z: 2.2, t: 'ร้านที่รับแลกแต้ม', s: 'ได้เงิน 95–97%/สัปดาห์', c: 'P', bg: 'tP', icon: 'shop' },
   ];
   const EDGES = [
     { id: 'e1', pts: [[-4.6, -2], [-3.8, -2]], c: 'G' },
     { id: 'e2', pts: [[-0.4, -2], [0.4, -2]], c: 'G' },
     { id: 'e3', pts: [[3.8, -2], [4.6, -2]], c: 'G' },
-    { id: 'e4', pts: [[2.1, -1.2], [2.1, 1.4]], c: 'O', label: 'กาก', lp: [2.75, 0.1] },
-    { id: 'e5', pts: [[6.3, -1.2], [6.3, 1.4]], c: 'R', label: 'แก๊สหุงต้ม', lp: [7.3, 0.1] },
-    { id: 'e6', pts: [[7.95, -2], [8.9, -2], [8.9, 4.1], [-2.1, 4.1], [-2.1, 3.0]], c: 'B', label: '⚡ ไฟจากไบโอแก๊ส → เดินห้องเย็น', lp: [3.4, 4.7] },
-    { id: 'e7', pts: [[-3.75, 2.2], [-6.3, 2.2], [-6.3, -1.2]], c: 'B', label: '↻ เครดิตฝากฟรี กลับสู่แม่ค้า', lp: [-4.7, 0.55] },
+    { id: 'ep', pts: [[-2.1, -2.8], [-2.1, -3.55], [-6.3, -3.55], [-6.3, -2.8]], c: 'P', label: 'แต้มเข้า LINE', lp: [-4.2, -4.0] },
+    { id: 'e4', pts: [[6.3, -1.2], [6.3, 1.4]], c: 'R', label: 'แก๊สหุงต้มตามท่อ', lp: [7.55, 0.1] },
+    { id: 'e5', pts: [[4.6, 2.2], [3.8, 2.2]], c: 'B', label: 'ค่าแก๊ส', lp: [4.2, 3.05] },
+    { id: 'e6', pts: [[0.4, 2.2], [-0.4, 2.2]], c: 'B', label: 'ชำระเงินร้าน', lp: [0, 3.05] },
+    { id: 'e7', pts: [[-6.3, -1.2], [-6.3, 2.2], [-3.8, 2.2]], c: 'P', label: '↻ แลกแต้มเป็นของในตลาด', lp: [-5.05, 0.5] },
   ];
   const STEPS = [
-    { n: ['v'], e: [], t: 'แม่ค้าแยกเศษผักผลไม้ใส่ถังเขียวที่มี QR ประจำร้าน' },
-    { n: ['p'], e: ['e1'], t: 'ถังเต็ม คนขนสแกน QR ชั่งน้ำหนัก ให้เกรด A–C แต้มเข้า LINE ของแม่ค้าทันที' },
-    { n: ['d'], e: ['e2'], t: 'เศษเกรด A/B เข้าบ่อหมักไบโอแก๊สในพื้นที่ตลาด ไม่ต้องขนออกไปฝังกลบ' },
-    { n: ['b'], e: ['e3'], t: 'บ่อหมักผลิตไบโอแก๊ส ใช้ได้ทั้งหุงต้มและปั่นไฟ' },
-    { n: ['f'], e: ['e4'], t: 'Module 2 · กากจากบ่อหมักทำเป็นปุ๋ย ขายให้เกษตรกร' },
-    { n: ['r'], e: ['e5'], t: 'Module 3 · ต่อแก๊สหุงต้มให้ร้านอาหารในตลาด ใช้แทน LPG' },
-    { n: ['c'], e: ['e6'], t: 'Module 1 · ไฟจากไบโอแก๊สเดินห้องเย็นรวม แม่ค้าฝากผักที่เหลือข้ามคืน' },
-    { n: ['v'], e: ['e7'], t: 'เครดิตฝากฟรีกลับสู่แม่ค้า ผักยังสด ขายต่อได้อีกวัน' },
-    { all: true, t: 'ครบวงจร ทุกอย่างจบในตลาด ไม่ต้องขนเศษออกไปจัดการที่อื่น' },
+    { n: ['v'], e: [], t: 'แม่ค้าทิ้งเศษผักผลไม้ลงถังเขียวที่มี QR ประจำแผง ไม่ต้องกรอกอะไร' },
+    { n: ['p'], e: ['e1'], t: 'คนขนเก็บถัง 3 รอบ/วัน สแกน QR ชั่ง ถ่ายรูป ให้เกรด A/B/C' },
+    { n: ['v'], e: ['ep'], t: 'แต้มเข้า LINE แม่ค้าทันที เห็นน้ำหนัก เกรด รูป · แต้มหมดอายุ 30 วัน' },
+    { n: ['d'], e: ['e2'], t: 'เศษเกรด A/B เข้าบ่อหมักใน 24 ชม. เซนเซอร์เฝ้า pH อุณหภูมิ แรงดัน H₂S เตือนก่อนบ่อพัง' },
+    { n: ['b'], e: ['e3'], t: 'ได้ไบโอแก๊ส กรองน้ำและ H₂S แล้วเก็บในถุงแก๊ส' },
+    { n: ['r'], e: ['e4'], t: 'ส่งแก๊สตามท่อแรงดันต่ำถึงร้านอาหารในรัศมี 100–200 ม. ใช้แทน LPG ถูกกว่า 20%' },
+    { n: ['k'], e: ['e5'], t: 'ร้านอาหารจ่ายค่าแก๊สตามมิเตอร์เข้ากองกลาง รวมกับค่าจัดการขยะจากตลาดและเงินผู้สนับสนุน ESG' },
+    { n: ['s'], e: ['e7'], t: 'แม่ค้าโชว์ QR แต้มใน LINE แลกของที่ร้านในตลาด ร้านตั้งเรทเอง · ห้ามแลกเป็นเงินสด' },
+    { n: ['s'], e: ['e6'], t: 'กองกลางชำระเงินให้ร้านที่รับแต้ม 95–97% ทุกสัปดาห์ผ่าน PromptPay' },
+    { all: true, t: 'ครบวงจร เงินและแต้มหมุนอยู่ในตลาด · ออกแต้มไม่เกินเงินที่มีในกองกลาง' },
   ];
   const STEP_S = 2.8, ALL_S = 4.5;
 
@@ -196,10 +199,10 @@ html,body{margin:0;height:100%;background:var(--bg2);color:var(--ink);font-famil
       m(new THREE.CylinderGeometry(0.035, 0.035, 0.36, 10), '#7b8590', 0.6, 0.12, 0); [0, 1, 2].forEach(i => { const b = m(new THREE.SphereGeometry(0.045, 10, 8), '#cfe9c8', 0.6 + i * 0.12, -0.12 + i * 0.06, 0.1); g.userData.spin.push([b, i]); }); }
     else if (kind === 'flame') { m(new THREE.CylinderGeometry(0.22, 0.25, 0.08, 24), '#245f3a', 0.04); const a = m(new THREE.ConeGeometry(0.2, 0.55, 24), '#ff8a1f', 0.36); const b = m(new THREE.ConeGeometry(0.11, 0.32, 20), '#ffd34d', 0.27, 0, 0.05);
       const s = glowSprite('#ffb347', 1.2, 0.5); s.position.y = 0.4; g.add(s); g.userData.flame = [a, b, s]; }
-    else if (kind === 'cold') { m(new THREE.BoxGeometry(0.52, 0.44, 0.44), '#e3effc', 0.22); m(new THREE.BoxGeometry(0.56, 0.05, 0.48), '#3a6fd8', 0.465);
-      m(new THREE.BoxGeometry(0.18, 0.32, 0.012), '#3a6fd8', 0.19, 0.09, 0.226); const s = glowSprite('#9cc6ff', 0.9, 0.4); s.position.y = 0.3; g.add(s); }
-    else if (kind === 'sack') { [[-0.14, 0.11, 0], [0.15, 0.11, 0.03], [0.0, 0.3, 0.01]].forEach(([x, y, z]) => { const o = m(new THREE.SphereGeometry(0.17, 20, 14), '#c08e52', y, x, z); o.scale.set(1, 0.72, 0.85);
-      m(new THREE.CylinderGeometry(0.04, 0.06, 0.06, 10), '#a3743c', y + 0.13, x, z); }); }
+    else if (kind === 'coins') { [0, 1, 2, 3].forEach(i => m(new THREE.CylinderGeometry(0.2, 0.2, 0.07, 28), '#e3b23c', 0.04 + i * 0.075, i % 2 ? 0.02 : -0.02, 0));
+      [0, 1].forEach(i => m(new THREE.CylinderGeometry(0.2, 0.2, 0.07, 28), '#d6a12c', 0.04 + i * 0.075, 0.28, 0.12)); const s = glowSprite('#ffe08a', 0.9, 0.35); s.position.y = 0.3; g.add(s); }
+    else if (kind === 'shop') { m(new THREE.BoxGeometry(0.5, 0.3, 0.36), '#efe6d6', 0.15); m(new THREE.BoxGeometry(0.6, 0.06, 0.46), '#7553c9', 0.5);
+      [-0.22, 0.22].forEach(x => m(new THREE.CylinderGeometry(0.02, 0.02, 0.22, 8), '#8b7355', 0.38, x, 0.16)); m(new THREE.SphereGeometry(0.06, 12, 8), '#e3b23c', 0.34, 0, 0.12); }
     else if (kind === 'pot') { m(new THREE.CylinderGeometry(0.27, 0.22, 0.26, 28), '#3d4148', 0.13); m(new THREE.TorusGeometry(0.27, 0.025, 8, 28), '#2b2e33', 0.26).rotation.x = Math.PI / 2;
       const s = glowSprite('#ff9a3c', 0.8, 0.5); s.position.y = -0.02; g.add(s); [0, 1, 2].forEach(i => { const b = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 })); b.position.set(-0.08 + i * 0.08, 0.35, 0); g.add(b); g.userData.spin.push([b, i]); }); }
     return g;
